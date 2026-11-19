@@ -52,7 +52,7 @@ const chainCache = new WeakMap(), labelCache = new WeakMap();
 export function renderPlan(ctx, st) {
   const { doc, levelId, view: v, W, H } = st, S = p => toScreen(v, W, H, p), k = v.scale;
   const flags = { grid: true, dims: true, areas: true, fixtures: true, underlay: true, autoDims: true, axes: true, sheet: false, ...(st.flags || {}) };
-  const sheet = !!flags.sheet, T = sheet ? SHEET_THEME : THEME, pen = pens(k);
+  const sheet = !!flags.sheet, T = sheet ? SHEET_THEME : { ...THEME, ...(st.theme || {}) }, pen = pens(k);
   const sel = st.selection || new Set();
   ctx.save();
   ctx.fillStyle = T.paper; ctx.fillRect(0, 0, W, H);

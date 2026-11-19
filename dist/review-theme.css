@@ -1,0 +1,124 @@
+/* Visual integration candidate. Load after existing page styles. */
+body.mizan-review,body.mizan-review #home{
+ --lx-deep:#156f63;--lx-acc:#156f63;--lx-accL:#e6f2ed;--lx-on:#fff;--lx-tint:#eef5f1;
+ --lx-ivory:#f5f7f6;--lx-paper:#fff;--lx-line:#e4eae7;--lx-ink:#213b3a;--lx-soft:#526864;
+ --mz-green-deep:#156f63;--mz-green:#156f63;--mz-green-night:#10574f;--mz-green-mark:#156f63;
+ --mz-gold:#156f63;--mz-gold-light:#d4e9e0;--mz-brass:#156f63;--mz-ivory:#f5f7f6;--mz-paper:#fff;--mz-line:#e4eae7;--mz-ink:#213b3a;
+ --deep:#156f63;--green:#156f63;--gold:#156f63;--ink:#213b3a;--line:#e4eae7;--bg:#f5f7f6;--soft:#526864;
+ --lx-depth:none;--lx-depth-hover:0 4px 16px #213b3a0a;--lx-metal:#156f63;--lx-bar:#fff;--lx-iso:none;
+}
+body.mizan-review{padding-inline-start:250px;background:#f5f7f6!important;background-image:none!important;color:#213b3a;font-size:16px;line-height:1.7}
+body.mizan-review :focus-visible{outline:3px solid #47a08b;outline-offset:3px}
+.mz-review-sidebar{position:fixed;inset:0 0 0 auto;width:250px;z-index:21;background:#fff;border-inline-end:1px solid #e4eae7;display:flex;flex-direction:column;padding:28px 18px;color:#213b3a}
+.mz-review-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;padding:0 8px 28px}
+.mz-review-brand img{width:38px;height:38px}.mz-review-brand strong{display:block;font-size:20px}.mz-review-brand small{font-size:14px;color:#526864}
+.mz-review-nav{display:grid;gap:8px}.mz-review-nav a{display:flex;align-items:center;gap:12px;border-radius:7px;padding:13px 12px;color:#526864;text-decoration:none;font-size:16px;min-height:48px}
+.mz-review-nav a:hover{background:#f1f6f3}.mz-review-nav a[aria-current=page]{background:#e9f3ee;color:#10574f;font-weight:700}
+.mz-review-nav svg{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+.mz-review-sidebar-note{margin-top:auto;background:#f4f7f5;border:1px solid #e4eae7;border-radius:8px;padding:16px;font-size:14px;color:#526864}
+body.mizan-review .ph,body.mizan-review .fh,body.mizan-review .bar{background:#fff!important;color:#213b3a!important;border-bottom:1px solid #e4eae7!important;box-shadow:none!important}
+body.mizan-review .ph .mz-logo small,body.mizan-review .fh .brand small{color:#526864}
+body.mizan-review .steps li,body.mizan-review .steps li.done,body.mizan-review .fnav a{color:#526864}
+body.mizan-review .steps li.on{background:#e9f3ee;color:#10574f!important;box-shadow:none}
+body.mizan-review .card,body.mizan-review .sec,body.mizan-review .spec,body.mizan-review .stat{background:#fff!important;border:1px solid #e4eae7!important;border-radius:9px;box-shadow:none}
+body.mizan-review .spec:hover,body.mizan-review .stat:hover{transform:none}
+body.mizan-review .btn,body.mizan-review .cta{border-radius:7px;min-height:44px;font-size:16px;text-shadow:none!important;box-shadow:none!important}
+body.mizan-review .btn.primary,body.mizan-review .btn.gold,body.mizan-review .cta:not(.ghost){background:#156f63!important;color:#fff!important;border-color:#156f63!important}
+body.mizan-review .btn.primary:hover,body.mizan-review .btn.gold:hover,body.mizan-review .cta:not(.ghost):hover{background:#10574f!important;transform:none;filter:none}
+body.mizan-review .btn.ghost{color:#156f63;border-color:#d6e4dc;background:transparent!important}
+body.mizan-review .sub,body.mizan-review .muted,body.mizan-review .spec span{color:#526864}
+body.mizan-review .planbar{background:#fff;border-color:#e4eae7;padding:12px 16px}
+body.mizan-review .planwrap{background-color:#f8fbf9;background-image:linear-gradient(#e9f0ed80 1px,transparent 1px),linear-gradient(90deg,#e9f0ed80 1px,transparent 1px);background-size:24px 24px}
+body.mizan-review .history button.on,body.mizan-review .planbar .seg button.on,body.mizan-review .v3 .seg button.on{background:#156f63!important;color:#fff;border-color:#156f63!important;box-shadow:none!important}
+body.mizan-review .cmp-panel{background:#f5f7f6;color:#213b3a}
+body.mizan-review .cmp-plans figure{background:#fff;border:1px solid #e4eae7;border-radius:8px;overflow:hidden;margin:0}
+body.mizan-review .cmp-plans figcaption{padding:12px;color:#213b3a;background:#fff}
+body.mizan-review .cmp-plans canvas{background:#f8fbf9}
+body.mizan-review #home{width:100%;max-width:100%}
+body.mizan-review .v3 aside{background:#fff}
+body.mizan-review h1,body.mizan-review .card>h2,body.mizan-review .sec>h2{color:#213b3a!important;-webkit-text-fill-color:currentColor!important;background:none!important;font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif}
+body.mizan-review .plancard{outline:0;margin:0;overflow:hidden!important;border-color:#e4eae7!important}
+body.mizan-review .plancard::after{display:none}
+body.mizan-review .planbar,body.mizan-review .legend{background:#fff!important;border-color:#e4eae7!important}
+body.mizan-review table.rooms th,body.mizan-review .sec table th,body.mizan-review table.rooms tfoot td,body.mizan-review .sec table tfoot td{background:#eef5f1!important}
+body.mizan-review #stageWelcome,body.mizan-review #home .panel-stage{background:#f5f7f6!important;background-image:none!important}
+body.mizan-review #stageWelcome .scene{display:block;background:linear-gradient(110deg,#eee6d9,#f5f7f6)!important}
+body.mizan-review #stageWelcome .scene canvas{opacity:1;animation:none}
+body.mizan-review #stageWelcome .veil{background:linear-gradient(270deg,#f5f7f6 0%,#f5f7f6f5 30%,#f5f7f6c0 43%,#f5f7f600 67%)!important}
+body.mizan-review #stageWelcome .brand::before{background:none!important}
+body.mizan-review .scale-intro{display:none}
+body.mizan-review #home{--panel:#fff;--panel-2:#f7faf8;--ink-soft:#526864;--muted:#526864;color-scheme:light}
+body.mizan-review #stageWelcome .brand{animation:none;max-width:500px;width:48%;margin-inline-start:clamp(24px,4vw,64px);margin-inline-end:auto;padding-inline:12px}
+body.mizan-review #stageWelcome .rule{height:2px;width:100px;background:linear-gradient(90deg,transparent,#a17b4c)!important}
+body.mizan-review #stageWelcome .journey-list li .n{background:#9b754a;box-shadow:none}
+body.mizan-review .mz-review-brand small{color:#80623e}
+body.mizan-review #stageWelcome .mark{filter:drop-shadow(0 6px 16px #9b754a2b)}
+body.mizan-review .journey-list li{animation:none!important;opacity:1!important}
+body.mizan-review #stageWelcome .brand>*:not([hidden]){opacity:1!important;visibility:visible;animation:none!important;transform:none!important}
+body.mizan-review .lx-skip{display:none}
+body.mizan-review .shara .panel{background:#10574f!important;color:#fff}
+body.mizan-review .hero-showcase{position:absolute;left:2%;top:50%;transform:translateY(-50%);width:48%;height:540px;max-height:76vh;border:1px solid #d7c8b1;border-radius:20px;overflow:hidden;background:#efe6da;box-shadow:0 18px 48px -30px #594a36}
+body.mizan-review #stageWelcome .hero-showcase .scene{inset:0;width:100%;height:100%}
+body.mizan-review #stageWelcome .veil{display:none}
+.hero-caption{position:absolute;top:18px;right:18px;z-index:2;color:#594a36;background:#fffdf5ed;border:1px solid #ddd1bd;border-radius:99px;padding:6px 12px;font-size:14px;pointer-events:none}
+.hero-controls{position:absolute;bottom:14px;inset-inline:12px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;z-index:2}
+.hero-controls>div{display:flex;padding:3px;gap:3px;background:#ffffffed;border:1px solid #e4eae7;border-radius:10px}
+.hero-controls button{min-height:44px;min-width:48px;padding:6px 10px;border:0;background:none;color:#526864;border-radius:7px;font:inherit;font-size:14px;cursor:pointer}
+.hero-controls button[aria-pressed=true]{background:#156f63;color:#fff}.hero-controls button:disabled{opacity:.45;cursor:wait}
+@media(max-width:1100px){body.mizan-review .grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:780px){
+ body.mizan-review .hero-showcase{position:relative;inset:auto;transform:none;width:calc(100% - 24px);height:370px;max-height:none;margin:14px 12px 0;grid-row:1}
+ body.mizan-review #stageWelcome .brand{padding-top:22px!important}
+ body.mizan-review #stageWelcome .scene{inset:0 0 auto;height:300px}
+ body.mizan-review #stageWelcome .brand{width:100%;max-width:620px;margin-inline:auto;padding:310px 20px 80px}
+ body.mizan-review #stageWelcome .veil{background:linear-gradient(0deg,#f5f7f6 0%,#f5f7f6f0 48%,#f5f7f600 78%)!important}
+ body.mizan-review{padding-inline-start:0;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+ .mz-review-sidebar{inset:auto 0 0;width:100%;height:auto;padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #e4eae7;border-inline-end:0}
+ .mz-review-brand,.mz-review-sidebar-note{display:none}.mz-review-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .mz-review-nav a{flex-direction:column;gap:3px;min-height:56px;padding:5px 2px;font-size:14px;text-align:center}
+ body.mizan-review .ph,body.mizan-review .fh{position:relative;padding:12px;gap:10px}
+ body.mizan-review .steps{gap:3px}.mizan-review .steps li{font-size:14px;padding:4px 8px}
+ body.mizan-review .wrap,body.mizan-review .fmain{padding-inline:12px;max-width:100%}
+ body.mizan-review .cmp-plans{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px}
+ body.mizan-review .cmp-plans figure{flex:0 0 94%;min-width:0;scroll-snap-align:start}
+ body.mizan-review .planwrap{min-height:390px}
+}
+@media print{body.mizan-review{padding:0}.mz-review-sidebar{display:none!important}}
+
+/* One continuous atmosphere: the architecture, sky and interface share a clock. */
+body.mizan-review[data-ambient]{background:var(--ambient-sky)!important;color:var(--ambient-ink);--lx-ink:var(--ambient-ink);--lx-soft:var(--ambient-muted);--lx-paper:var(--ambient-surface);--lx-line:var(--ambient-line)}
+body.mizan-review[data-ambient] #stageWelcome,body.mizan-review[data-ambient] #home .panel-stage{background:var(--ambient-sky)!important}
+body.mizan-review[data-ambient] #home{--ink:var(--ambient-ink);--muted:var(--ambient-muted);--ink-soft:var(--ambient-muted);--panel:var(--ambient-surface);--panel-2:var(--ambient-surface);--line:var(--ambient-line)}
+body.mizan-review[data-ambient] #home input,body.mizan-review[data-ambient] #home textarea,body.mizan-review[data-ambient] #home select{background:var(--ambient-surface);color:var(--ambient-ink);border-color:var(--ambient-line)}
+body.mizan-review[data-ambient] .v3 .kv,body.mizan-review[data-ambient] .steps li,body.mizan-review[data-ambient] .fnav a{color:var(--ambient-muted)}
+body.mizan-review[data-ambient] .mz-review-sidebar,body.mizan-review[data-ambient] .ph,body.mizan-review[data-ambient] .fh,body.mizan-review[data-ambient] .bar,body.mizan-review[data-ambient] .card,body.mizan-review[data-ambient] .sec,body.mizan-review[data-ambient] .spec,body.mizan-review[data-ambient] .stat{background:var(--ambient-surface)!important;color:var(--ambient-ink)!important;border-color:var(--ambient-line)!important}
+body.mizan-review[data-ambient] h1,body.mizan-review[data-ambient] .card>h2,body.mizan-review[data-ambient] .sec>h2,body.mizan-review[data-ambient] .spec b,body.mizan-review[data-ambient] .mz-review-brand{color:var(--ambient-ink)!important}
+body.mizan-review[data-ambient] .mz-review-nav a,body.mizan-review[data-ambient] .sub,body.mizan-review[data-ambient] .muted,body.mizan-review[data-ambient] .spec span,body.mizan-review[data-ambient] .mz-review-brand small{color:var(--ambient-muted)}
+body.mizan-review[data-ambient] .mz-review-nav a[aria-current=page]{background:#156f63;color:#fff}
+body.mizan-review[data-ambient] .mz-review-sidebar-note{background:transparent;color:var(--ambient-muted);border-color:var(--ambient-line)}
+body.mizan-review[data-ambient] .journey-list li,body.mizan-review[data-ambient] .fresh-note{background:var(--ambient-surface);color:var(--ambient-ink);border-color:var(--ambient-line)}
+body.mizan-review[data-ambient] #stageWelcome .tagline{color:var(--ambient-ink)!important}
+body.mizan-review[data-ambient] #stageWelcome h1,body.mizan-review[data-ambient] #stageWelcome .tagline{color:var(--ambient-skyInk)!important}
+body.mizan-review[data-ambient] .quiet,body.mizan-review[data-ambient] .past-box{color:var(--ambient-muted)}
+body.mizan-review .hero-showcase{left:0;top:0;transform:none;width:51%;height:100%;max-height:none;border:0;border-radius:0;background:transparent;box-shadow:none}
+body.mizan-review .hero-caption{top:24px;background:var(--ambient-surface);color:var(--ambient-ink);border-color:var(--ambient-line)}
+.hero-time{position:absolute;bottom:32px;inset-inline:0;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ambient-ink);font-size:15px;pointer-events:none}
+.hero-time-dot{width:9px;height:9px;background:#b78b55;border-radius:50%;box-shadow:0 0 20px #d8ac72}
+.ambient-motion{font:inherit;font-size:14px;color:inherit;border:1px solid var(--ambient-line);background:transparent;border-radius:6px;min-height:44px;padding:5px 10px;margin-top:12px;cursor:pointer}
+.ambient-motion{position:fixed;left:16px;bottom:16px;z-index:24;background:var(--ambient-surface);color:var(--ambient-ink)}
+.hero-sun{position:absolute;left:var(--ambient-sun-x);top:var(--ambient-sun-y);width:38px;height:38px;border-radius:50%;background:#ffdda0;box-shadow:0 0 32px 12px #ffd49b44;opacity:var(--ambient-sun-opacity);pointer-events:none}
+body.mizan-review .hero-showcase::after{content:'';position:absolute;inset:0 0 55%;pointer-events:none;opacity:var(--ambient-night);background:radial-gradient(circle at 15% 25%,#edf2ff 0 1px,transparent 2px),radial-gradient(circle at 68% 37%,#edf2ff 0 1px,transparent 2px),radial-gradient(circle at 38% 13%,#edf2ff 0 1px,transparent 2px),radial-gradient(circle at 85% 18%,#edf2ff 0 1px,transparent 2px)}
+body.mizan-review[data-ambient-paused=true] #stageWelcome::before{animation-play-state:paused}
+body.mizan-review #stageWelcome::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 62% 42%,#d8ab6822,transparent 55%);animation:ambient-wave 28s ease-in-out infinite alternate}
+@keyframes ambient-wave{from{transform:translate3d(-1%,0,0)}to{transform:translate3d(1%,1%,0)}}
+@media(max-width:780px){body.mizan-review .hero-showcase{position:relative;width:100%;height:370px;margin:0;inset:auto;transform:none;border-radius:0}.hero-caption{top:12px}.hero-time{bottom:14px}.ambient-motion{bottom:calc(84px + env(safe-area-inset-bottom));left:10px}}
+@media(prefers-reduced-motion:reduce){body.mizan-review #stageWelcome::before{animation:none}}
+@media print{.ambient-motion{display:none}}
+
+body.mizan-review .hero-showcase .scene canvas{-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+body.mizan-review[data-ambient] #stageWelcome .hero-showcase .scene{background:var(--ambient-sky)!important}
+body.mizan-review[data-ambient] #home .quiet{color:var(--ambient-ink)!important}
+body.mizan-review[data-ambient] .quiet{color:var(--ambient-ink);background:var(--ambient-surface);padding:5px 10px;border-radius:6px}
+@media(max-width:780px){body.mizan-review .hero-showcase .scene canvas{-webkit-mask-image:linear-gradient(#000 82%,transparent);mask-image:linear-gradient(#000 82%,transparent)}}
+@media(max-width:780px){body.mizan-review:has(#home) .ambient-motion{top:12px;bottom:auto}}
+@media print{body.mizan-review[data-ambient]{--ambient-sky:#fff;--ambient-surface:#fff;--ambient-ink:#000;--ambient-skyInk:#000;--ambient-muted:#333;--ambient-line:#999}.ambient-motion{display:none}}

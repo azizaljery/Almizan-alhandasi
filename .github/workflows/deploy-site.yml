@@ -59,6 +59,8 @@ jobs:
       - name: Live version matches this commit
         run: node scripts/verify-live-version.mjs ${{ github.sha }}
       - name: Client journey on the live site (desktop and mobile)
-        run: node scripts/home-journey-smoke.mjs
+        run: |
+          node scripts/home-journey-smoke.mjs
+          node scripts/ambient-browser-smoke.mjs
         env:
           EXPECTED_COMMIT: ${{ github.sha }}

@@ -1,3 +1,4 @@
+import { REVIEW_PLAN_THEME } from './review-plan-theme.mjs';
 // صفحة عرض التصميم على العميل: المخطط بأبعاده ومناطقه، المواصفات، جدول الغرف، ما طُبّق من طلبه،
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
@@ -378,7 +379,7 @@ function drawMini(canvas, d, highlight) {
   const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
   const lid = $('cmpLevel').value && d.levels.some(l => l.id === $('cmpLevel').value) ? $('cmpLevel').value : compareLevelOf(d);
   const m = analyzeDoc(d), lv = m.levelById.get(lid), b = docBounds(d, lid);
-  renderPlan(ctx, { doc: d, levelId: lid, view: fitView({ x0: b.x0 - 1.5, y0: b.y0 - 1.5, x1: b.x1 + 1.5, y1: b.y1 + 1 }, W, H, 14), W, H,
+  renderPlan(ctx, { theme: REVIEW_PLAN_THEME, doc: d, levelId: lid, view: fitView({ x0: b.x0 - 1.5, y0: b.y0 - 1.5, x1: b.x1 + 1.5, y1: b.y1 + 1 }, W, H, 14), W, H,
     analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
     flags: { grid: false, dims: false, areas: true, fixtures: false, underlay: false, roomDims: false, compass: false, scaleBar: false, floors: false },
     roomFill: rm => (highlight.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') });
@@ -526,7 +527,7 @@ function paint() {
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (!drewIn) { drewIn = true; drawIn(W, H); }
-  renderPlan(ctx, {
+  renderPlan(ctx, { theme: REVIEW_PLAN_THEME,
     doc: northDoc(), levelId, view, W, H, analysis: lv ? { rooms: lv.rooms, gaps: [], exteriorWallIds: exteriorWallIds(lv.analysis) } : null,
     flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true, scaleBarRight: W < 560 },
     roomFill: focus ? rm => (focus.names.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') : zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
