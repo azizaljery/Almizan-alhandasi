@@ -1,4 +1,5 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
+import { ambientCycle } from './ambient-cycle.mjs';
 import { visit } from './fresh-visit.mjs'; // أولًا: الدخول الجديد يبدأ مشروعًا نظيفًا قبل أن تقرأ أي وحدة حالة المشروع
 import { startNewProject, hasProject, listPast, restorePast, deletePast, takeNotice } from './project-lifecycle.mjs';
 import { coverOfSnapshot } from './photo-keep.mjs';
@@ -50,7 +51,7 @@ const setError = (el, text) => { el.textContent = text || ''; el.hidden = !text;
 let scene = null, frame = 0;
 async function startScene() {
   const host = $('scene');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; // الخلفية المتدرجة تكفي
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches && host.dataset.presentation !== 'hybrid') return; // الواجهة المدمجة تعرض المجسم ثابتًا
   try {
     // المشهد زينة: يُحمَّل بعد أن تُرسم الصفحة وتصير أزرارها جاهزة، لا قبلها
     await new Promise(r => (globalThis.requestIdleCallback ? requestIdleCallback(r, { timeout: 1200 }) : setTimeout(r, 300)));
@@ -58,6 +59,14 @@ async function startScene() {
     const T = await loadThreeRuntime();
     if (home.dataset.stage !== 'welcome' || sceneOff) return;
     scene = createArchitecturalScene(T, host);
+    if(host.dataset.presentation==='hybrid'){
+      const engine=ambientCycle();
+      const release=engine.subscribe((state,still)=>{if(scene&&home.dataset.stage==='welcome')scene.setAmbient(state,still)});
+      const resize=()=>{if(scene&&home.dataset.stage==='welcome')scene.setAmbient(engine.state,engine.reduced)};
+      addEventListener('resize',resize);
+      const oldDispose=scene.dispose;scene.dispose=()=>{release();removeEventListener('resize',resize);oldDispose()};
+      return;
+    }
     const t0 = performance.now(); let slow = 0;
     const tick = now => {
       if (!scene) return;

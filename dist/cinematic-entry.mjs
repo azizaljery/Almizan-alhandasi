@@ -1,5 +1,6 @@
 // Cinematic entrance: a short architectural establishing shot, then a camera approach
 // that resolves into the Mizan identity. This scene is decorative, not a floor plan.
+import { buildNajdiHero, fitHeroCamera } from './najdi-hero.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
 
 export const CINEMATIC_TIMING = Object.freeze({ holdMs: 2700, approachMs: 1550, revealMs: 550, totalMs: 4800 });
@@ -74,6 +75,10 @@ export function createArchitecturalScene(T, host) {
     object.castShadow = shadow; object.receiveShadow = true; scene.add(object); return object;
   };
   mesh(170, .1, 170, 0, -.22, 0, grass, false);
+  const hybrid = host.dataset?.presentation === 'hybrid';
+  let hybridModel = null;
+  if(hybrid) hybridModel=buildNajdiHero(T,{scene,mesh,material,geometries,sandstone,ivory,darkStone,metal,glass});
+  else {
   mesh(18, .35, 14, 0, 0, 0, darkStone, false);
   // A contemporary Najdi-inspired villa: two masses, central portal and deep openings.
   // Distinct massing and recesses, not a single flat rectangular block.
@@ -142,6 +147,7 @@ export function createArchitecturalScene(T, host) {
   };
   tree(-11.4, 4.6); tree(11.6, 5.1);
   tree(-13.6, -2.8); tree(13.5, -3.7);
+  }
   // بيئة انعكاس من سماء عاجية متدرجة (PMREM): تعطي الزجاج والبرونز انعكاسًا ناعمًا؛ ونصف الكرة يُخفَّض بقدر ما تضيفه البيئة
   let envTarget = null;
   try {
@@ -170,6 +176,7 @@ export function createArchitecturalScene(T, host) {
     width = w; height = h; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
   };
   host.append(renderer.domElement);
+  let ambientState=null,stillScene=false;
   const update = elapsed => {
     resize();
     const state = cinematicFrame(elapsed);
@@ -184,9 +191,19 @@ export function createArchitecturalScene(T, host) {
       const dir = new T.Vector3().subVectors(target, camera.position).normalize(), right = new T.Vector3().crossVectors(dir, camera.up).normalize();
       camera.position.addScaledVector(right, side); camera.lookAt(target.clone().addScaledVector(right, side));
     } else {
+      if (host.dataset?.presentation === 'hybrid') {
+        // Compact mobile hero: frame the whole house within its own visual area.
+        camera.position.copy(near).sub(target).multiplyScalar(1.2).add(target);
+        camera.lookAt(target);
+      } else {
       // الجوال: المبنى كاملًا في أعلى الشاشة فوق النص
       camera.position.sub(target).multiplyScalar(2.7).add(target);
       camera.lookAt(target.x, target.y - 17, target.z);
+      }
+    }
+    if(hybridModel){
+      const p=ambientState?.phase||0,orbit=stillScene?0:Math.sin(p*Math.PI*2)*.32;
+      fitHeroCamera(T,camera,hybridModel.bounds,[1+orbit,.59+(stillScene?0:Math.cos(p*Math.PI*2)*.035),1.6-orbit*.2],width/height);
     }
     renderer.render(scene, camera);
     return state;
@@ -199,7 +216,17 @@ export function createArchitecturalScene(T, host) {
     for (const t of textures) t.dispose();
     envTarget?.dispose();
   };
-  return { update, dispose };
+  const setAmbient=(value,still=false)=>{
+    ambientState=value;stillScene=still;
+    hemi.intensity=value.hemi;sun.intensity=value.sun;
+    sun.position.set(value.sunX,value.sunY,24);sun.color.set(value.sun<2?0xffba81:0xffe7bf);
+    fill.intensity=value.fill;fill.color.set(value.night>.7?0xb8cff6:0xffe6cc);
+    renderer.toneMappingExposure=1.05;
+    scene.background.set(value.sky);scene.fog.color.copy(scene.background);
+    hybridModel?.lighting(value.night);
+    update(6000);
+  };
+  return {update,dispose,setAmbient};
 }
 
 export function startCinematic({ doc = document, win = window, playIntro = false } = {}) {

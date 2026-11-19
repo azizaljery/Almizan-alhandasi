@@ -12,12 +12,18 @@
 <link rel="stylesheet" href="./brand.css">
 <link rel="stylesheet" href="./home.css">
 <link rel="stylesheet" href="./lux-theme.css">
+<link rel="stylesheet" href="./review-theme.css">
 </head>
-<body>
+<body class="mizan-review">
 <main id="home" data-stage="welcome">
 
   <section id="stageWelcome" class="stage" aria-labelledby="brandName">
-    <div id="scene" class="scene" aria-hidden="true"></div>
+    <div class="hero-showcase" role="region" aria-label="مجسم عمارة نجدية معاصرة">
+      <div id="scene" class="scene" data-presentation="hybrid" aria-hidden="true"></div>
+      <span class="hero-caption">عمارة نجدية بروح معاصرة</span>
+      <span class="hero-sun" aria-hidden="true"></span>
+      <span class="hero-time"><span class="hero-time-dot" aria-hidden="true"></span><span data-ambient-label>الفجر</span></span>
+    </div>
     <div class="veil" aria-hidden="true"></div>
     <div class="scale-intro" aria-hidden="true"><svg viewBox="0 0 200 150"><line x1="100" y1="18" x2="100" y2="128"/><line x1="70" y1="128" x2="130" y2="128"/><circle cx="100" cy="18" r="4"/><line x1="30" y1="36" x2="170" y2="36"/><path class="pan" d="M30 36 L14 86 M30 36 L46 86 M8 86 Q30 104 52 86"/><path class="pan" d="M170 36 L154 86 M170 36 L186 86 M148 86 Q170 104 192 86"/></svg></div>
     <button class="lx-skip" id="lxSkip" type="button">تخطٍّ</button>
@@ -97,5 +103,6 @@
 </main>
 <script type="module" src="./home.mjs"></script>
 <script type="module" src="./site-notice.mjs"></script>
+<script type="module" src="./review-shell.mjs"></script>
 </body>
 </html>

@@ -41,7 +41,9 @@ jobs:
           done
           exit 1
       - name: Verify real 3D, exclusive delivery, file match and private recovery
-        run: node scripts/client-quality-browser.mjs
+        run: |
+          node scripts/client-quality-browser.mjs
+          node scripts/ambient-browser-smoke.mjs
         env:
           SITE_URL: http://127.0.0.1:4317
           AFTER_ONLY: '1'
