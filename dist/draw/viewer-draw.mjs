@@ -30,8 +30,11 @@ export const STYLES = Object.freeze({
 });
 
 export class DrawViewer {
-  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true } = {}) {
+  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorStyle = null, interiorTaste = null } = {}) {
     this.THREE = THREE || globalThis.THREE;
+    // interior finish system (themes, per-room materials, dressing): on by default in the viewer; small textures on touch / small screens
+    this.interior = { on: !!interior, theme: interiorTheme, style: interiorStyle, taste: interiorTaste };
+    this.lowPower = !!(globalThis.matchMedia?.('(pointer: coarse)')?.matches) || (globalThis.innerWidth || 1200) < 760;
     if (!this.THREE) throw new Error('THREE is required');
     const T = this.THREE;
     this.container = container; this.onState = onState; this.autoSelect = autoSelect; this.maxPixelRatio = maxPixelRatio;
@@ -117,7 +120,7 @@ export class DrawViewer {
     this.applyWalkLighting();
     if (this.built) {
       const m = this.built.lib.m;
-      for (const mat of Object.values({ ...m, ...this.built.lib.fixtures })) if (mat.isMeshStandardMaterial) { mat.envMapIntensity = (mat.userData.baseEnv ??= mat.envMapIntensity) * S.env; }
+      for (const mat of (this.built.lib.allMaterials?.() || Object.values({ ...m, ...this.built.lib.fixtures }))) if (mat.isMeshStandardMaterial) { mat.envMapIntensity = (mat.userData.baseEnv ??= mat.envMapIntensity) * S.env; }
       m.glass.emissive.set(S.glassGlow ? '#ffd08a' : '#000000'); m.glass.emissiveIntensity = S.glassGlow;
       if (m.asphalt?.emissive) m.asphalt.emissive.set(S.glassGlow ? '#3b3034' : '#000000'); // the street would otherwise sink to pure black in the evening light
       const ls = this.built.lib.fixtures.lampShade; if (ls) ls.emissiveIntensity = S.lamp;
@@ -172,7 +175,8 @@ export class DrawViewer {
     if (this.built) { this.scene.remove(this.built.group); this.built.dispose(); this.built = null; }
     this.clearHighlight(); this.clearSection();
     this.doc = doc;
-    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(8, this.renderer.capabilities.getMaxAnisotropy()), ...options });
+    const iv = this.interior;
+    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
     this.scene.add(this.built.group);
     this.pickables = [];
     this.built.group.traverse(o => { if (o.isMesh) { const p = o.parent?.name; if (['walls', 'floors', 'fixtures', 'openings', 'stairs'].includes(p)) this.pickables.push(o); } });
@@ -188,6 +192,15 @@ export class DrawViewer {
   }
 
   getBuilt() { return this.built; }
+  /** The interior theme of the current building ({ theme, source, reason }) or null when the finish system is off. */
+  interiorInfo() { const i = this.built?.interior; return i ? { theme: i.theme, source: i.source, reason: i.reason } : null; }
+  /** Switch the interior theme (id from interior-themes, or null = let the design choose) and rebuild in place; keeps camera, walk position and style. */
+  setInteriorTheme(id, { style, taste } = {}) {
+    Object.assign(this.interior, { on: true, theme: id || null }); if (style !== undefined) this.interior.style = style; if (taste !== undefined) this.interior.taste = taste;
+    if (!this.doc) return null;
+    const lv = this.visibleLevels; this.setDoc(this.doc, { keepCamera: true }); if (lv) { this.visibleLevels = lv; this.applyVisibility(); }
+    this.emit('interior'); return this.interiorInfo();
+  }
   center() { const b = this.built.bounds; return new this.THREE.Vector3((b.x0 + b.x1) / 2, (b.minY + b.maxY) / 2 + 1, -(b.y0 + b.y1) / 2); }
   radius() { const b = this.built.bounds, p = this.built.plotBounds; return Math.max(Math.hypot(b.w, b.h) / 2, p ? Math.max(p.w, p.h) * .38 : 0, 5); }
 
@@ -384,6 +397,7 @@ export class DrawViewer {
     this.renderer.toneMappingExposure = on ? S.walkExposure : S.exposure;
     const ceil = this.built?.lib?.m?.ceiling;
     if (ceil) { ceil.emissive.set(on ? '#fff6e8' : '#000000'); ceil.emissiveIntensity = on ? S.walkCeilGlow : 0; }
+    this.built?.lib?.setCeilingGlow?.(on, S.walkCeilGlow);
     this.requestRender?.();
   }
 

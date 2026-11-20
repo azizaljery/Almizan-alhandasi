@@ -5,6 +5,7 @@ import { parseDoc } from './draw/doc.mjs';
 import { STUDIO_KEY } from './draw/handoff.mjs';
 import { sunPosition, CITIES } from './sun.mjs';
 import { planSheetSvg } from './draw/plan-sheet.mjs';
+import { INTERIOR_THEMES, INTERIOR_THEME_IDS, INTERIOR_STORAGE_KEY, isInteriorTheme } from './draw/interior-themes.mjs';
 
 const $ = id => document.getElementById(id);
 const SNAP_KEY = 'mizan.studio.snap3d.v1';
@@ -24,7 +25,7 @@ function fallbackWithoutWebGL(message) {
     // كل قسم أدوات يحوي عنصر التحكم: نخفي القسم كاملًا (عنوانه ومحتواه)
     // القسم = الابن المباشر للوحة الجانبية الذي يحوي عنصر التحكم (closest('div') كان يعيد العنصر نفسه فيبقى العنوان ظاهرًا)
     const section = el => { while (el && el.parentElement && el.parentElement.id !== 'threePane') el = el.parentElement; return el?.parentElement?.id === 'threePane' ? el : null; };
-    for (const sel of ['#modeSeg', '#styleSeg', '#city']) hide(section(document.querySelector(sel)));
+    for (const sel of ['#modeSeg', '#styleSeg', '#city', '#interiorSeg']) hide(section(document.querySelector(sel)));
     document.querySelectorAll('.tourbox, #autoTourStatus, #levelBox, #facadeBox, #shot, #shotHQ, .shots, #threeHost, #facadeFrame').forEach(hide);
     const stage = document.querySelector('.stage');
     if (stage) {
@@ -45,6 +46,23 @@ async function ensureViewer() {
   globalThis.__mizanViewer = viewer;
   return viewer;
 }
+// ---- الديكور الداخلي: اختيار العميل يُحفظ كبقية الإعدادات ويُعاد عند الفتح؛ بلا اختيار يقترح الميزان طرازًا من بصمة التصميم وذوق العميل
+const loadInteriorTheme = () => { try { const t = localStorage.getItem(INTERIOR_STORAGE_KEY); return isInteriorTheme(t) ? t : null; } catch { return null; } };
+const saveInteriorTheme = t => { try { if (t) localStorage.setItem(INTERIOR_STORAGE_KEY, t); else localStorage.removeItem(INTERIOR_STORAGE_KEY); } catch { /* التخزين غير متاح: يبقى الاختيار في هذه الجلسة */ } };
+function exteriorTaste() { try { const e = JSON.parse(localStorage.getItem('mizan.exterior.v1') || 'null'); return { style: e?.style && e.style !== 'auto' ? e.style : null, taste: e?.feel && e.feel !== 'auto' ? [e.feel] : [] }; } catch { return { style: null, taste: [] }; } }
+function syncInteriorUI() {
+  const info = viewer?.interiorInfo?.(), seg = $('interiorSeg'), note = $('interiorNote'); if (!seg || !info) return;
+  const chosen = loadInteriorTheme();
+  seg.querySelectorAll('button').forEach(b => { const on = b.dataset.theme === (chosen || ''); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const T = INTERIOR_THEMES[info.theme]; note.textContent = T ? `${T.ar}: ${T.blurb}${chosen ? '' : ` (اقتراح الميزان: ${info.reason})`}` : '';
+}
+function buildInteriorUI() {
+  const seg = $('interiorSeg'); if (!seg || seg.children.length) return;
+  const mk = (id, label, swatch) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.theme = id; b.title = id ? INTERIOR_THEMES[id].blurb : 'يقترح الميزان طرازًا ينسجم مع تصميمك وذوقك'; if (swatch) { const sw = document.createElement('span'); sw.setAttribute('aria-hidden', 'true'); sw.style.cssText = 'display:inline-flex;margin-inline-end:6px;vertical-align:middle'; swatch.slice(0, 3).forEach(c => { const i = document.createElement('i'); i.style.cssText = `display:inline-block;width:9px;height:9px;border-radius:50%;background:${c};margin-inline-end:-2px;box-shadow:0 0 0 1px rgba(0,0,0,.25)`; sw.append(i); }); b.append(sw); } b.append(label);
+    b.addEventListener('click', () => { if (!viewer?.built) return; saveInteriorTheme(id || null); const ex = exteriorTaste(); b.disabled = true; say('جارٍ تبديل الديكور…'); setTimeout(() => { try { viewer.setInteriorTheme(id || null, ex); applySun(); } finally { b.disabled = false; say(''); syncInteriorUI(); } }, 30); });
+    seg.append(b); };
+  mk('', 'تلقائي'); for (const id of INTERIOR_THEME_IDS) mk(id, INTERIOR_THEMES[id].ar, INTERIOR_THEMES[id].swatch);
+}
 function syncMode() { document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === viewer?.mode)); }
 
 function applySun() {
@@ -64,7 +82,9 @@ async function init() {
   say('جارٍ بناء المجسّم…');
   let v;
   try { v = await ensureViewer(); } catch { fallbackWithoutWebGL('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
+  { const ex = exteriorTaste(); Object.assign(v.interior, { theme: loadInteriorTheme(), style: ex.style, taste: ex.taste }); }
   v.setDoc(doc); v.frameBuilding(); v.resize(); say('');
+  buildInteriorUI(); syncInteriorUI();
   applySun();
   if (doc.levels.length > 1) {
     $('levelBox').hidden = false;

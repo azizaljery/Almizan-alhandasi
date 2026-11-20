@@ -218,6 +218,8 @@ function stageMaster(st) {
   if (opp) { const ints = st.intervals(opp, { windows: true }).sort((a, b) => (b[1] - b[0]) - (a[1] - a[0]))[0]; if (ints && ints[1] - ints[0] >= TV.w) st.tryWall(opp, 'tv-unit', (ints[0] + ints[1]) / 2, TV.w, TV.d, { role: 'tv' }); }
 }
 const STAGERS = { majlis: stageMajlis, living: stageLiving, master: stageMaster };
+/** للمُؤثِّث الداخلي المتقدّم (interior-dress): الصنف والمؤثّثات نفسها بلا تغيير في سلوكها. */
+export { Stage, STAGERS, obb, overlap as obbOverlap };
 
 /** الغرف القابلة للتأثيث في المستند: الأكبر من كل نوع (مجلس/صالة/رئيسية) مع مفتاحها. */
 export function stageableRooms(doc) {

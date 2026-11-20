@@ -377,7 +377,7 @@ async function ensureViewer() {
     try {
       const [{ loadThreeRuntime }, { DrawViewer }] = await Promise.all([import('./three-runtime.mjs'), import('./draw/viewer-draw.mjs')]);
       const THREE = await loadThreeRuntime();
-      viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 1024, maxPixelRatio: 1.5, onState: ev => { if (ev.type === 'mode') syncModeSeg(); } });
+      viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 1024, maxPixelRatio: 1.5, interior: false, onState: ev => { if (ev.type === 'mode') syncModeSeg(); } });
       globalThis.__mizanViewer = viewer; $('threeHost').addEventListener('pointerdown', () => { userOrbited = true; }); return viewer;
     } catch (e) { $('threeMsg').hidden = false; $('threeMsg').textContent = 'تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط ثنائي الأبعاد يعمل كاملًا.'; viewerLoading = null; return null; }
   })();

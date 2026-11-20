@@ -26,7 +26,7 @@ export async function captureInterior({ doc: docInput, type, style = 'M', lighti
   const host = document.createElement('div'); host.setAttribute('aria-hidden', 'true'); host.style.cssText = `position:fixed;left:-20000px;top:0;width:${shot.width}px;height:${shot.height}px;pointer-events:none`;
   document.body.append(host); let viewer = null;
   try {
-    viewer = new DrawViewer(host, { THREE, shadowSize: shot.shadowSize, maxPixelRatio: 1, autoSelect: false });
+    viewer = new DrawViewer(host, { THREE, shadowSize: shot.shadowSize, maxPixelRatio: 1, autoSelect: false, interior: false }); // الصورة الداخلية المهنية: أثاثها وألوانها من staging والوصف المغلق، فلا تُضاف قطع تزيينية خارجه
     viewer.setDoc(staged.doc); viewer.resize(); applyPalette(viewer.built, style);
     const S = INTERIOR_SUN[lighting] || INTERIOR_SUN.golden; viewer.setStyle(S.style); viewer.setSun({ azimuthDeg: S.azimuthDeg, altitudeDeg: S.altitudeDeg, north: doc.north || 0 });
     const li = Math.max(0, viewer.built.levels.findIndex(l => l.id === staged.levelId));
