@@ -38,9 +38,13 @@ export function docBounds(doc, levelId = null) {
 const fmtLen = m => m.toFixed(2) + ' م';
 const fmtArea = fmtAreaM2;
 /** سماكات الأقلام بالبكسل عند مقياس k (بكسل/متر): نسب LINE_MM ثابتة، والأساس يتبع التكبير بهدوء. */
-export function pens(k) {
+let MOBILE_TEXT = false; // يضبطه renderPlan لكل رسم: لوحة جوال ⇒ حد أدنى أكبر للنص
+export function pens(k, small = false) {
   const base = Math.max(.6, Math.min(2, Math.sqrt(k / 40))) * (.8 / LINE_MM.thin);
-  return { thin: LINE_MM.thin * base, medium: LINE_MM.medium * base, thick: LINE_MM.thick * base, heavy: LINE_MM.heavy * base };
+  const p = { thin: LINE_MM.thin * base, medium: LINE_MM.medium * base, thick: LINE_MM.thick * base, heavy: LINE_MM.heavy * base };
+  // شاشة جوال (لوحة أضيق من 520px): الخطوط لا تنزل عن سماكة مقروءة بالبكسل؛ مسار الطباعة (sheet) لا يستعمل هذا الحد ويبقى كما هو
+  if (small) { p.thin = Math.max(p.thin, 1); p.medium = Math.max(p.medium, 1.6); p.thick = Math.max(p.thick, 2.4); p.heavy = Math.max(p.heavy, 3.2); }
+  return p;
 }
 /** إزاحات سلاسل الأبعاد والمحاور بالبكسل من حد المبنى (فتحات، جدران، إجمالي، فقاعة المحور). */
 export const DIM_OFFSETS_PX = Object.freeze([28, 50, 72, 100]);
@@ -52,7 +56,8 @@ const chainCache = new WeakMap(), labelCache = new WeakMap();
 export function renderPlan(ctx, st) {
   const { doc, levelId, view: v, W, H } = st, S = p => toScreen(v, W, H, p), k = v.scale;
   const flags = { grid: true, dims: true, areas: true, fixtures: true, underlay: true, autoDims: true, axes: true, sheet: false, ...(st.flags || {}) };
-  const sheet = !!flags.sheet, T = sheet ? SHEET_THEME : { ...THEME, ...(st.theme || {}) }, pen = pens(k);
+  const sheet = !!flags.sheet, T = sheet ? SHEET_THEME : { ...THEME, ...(st.theme || {}) }, small = !sheet && W < 520, pen = pens(k, small);
+  MOBILE_TEXT = small;
   const sel = st.selection || new Set();
   ctx.save();
   ctx.fillStyle = T.paper; ctx.fillRect(0, 0, W, H);
@@ -181,7 +186,7 @@ export function renderPlan(ctx, st) {
       const xs = pts.map(p => p.x), ys = pts.map(p => p.y), p0 = S({ x: Math.min(...xs), y: Math.max(...ys) }), p1 = S({ x: Math.max(...xs), y: Math.min(...ys) });
       ctx.strokeRect(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y), Math.abs(p1.x - p0.x), Math.abs(p1.y - p0.y));
       ctx.restore();
-      if (k > 14) { ctx.save(); ctx.fillStyle = T.ink; ctx.font = `600 ${Math.max(9, Math.min(12, k * .22))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(`فتحة السلم · هبوط ${info.N} قائمة`, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2); ctx.restore(); }
+      if (k > 14) { ctx.save(); ctx.fillStyle = T.ink; ctx.font = `600 ${Math.max(MOBILE_TEXT ? 11 : 9, Math.min(12, k * .22))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(`فتحة السلم · هبوط ${info.N} قائمة`, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2); ctx.restore(); }
       stairBoxes.push({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2, w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) });
     } }
   for (const s of doc.stairs) {
@@ -260,7 +265,7 @@ export function renderPlan(ctx, st) {
   }
   for (const t of doc.texts) {
     if (t.level !== levelId) continue;
-    const s = S(t.at); ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(-(t.rot || 0)); ctx.font = `500 ${Math.max(10, (t.size || .3) * k)}px ${FONT}`; ctx.fillStyle = sel.has(t.id) ? T.select : T.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t.text, 0, 0); ctx.restore();
+    const s = S(t.at); ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(-(t.rot || 0)); ctx.font = `500 ${Math.max(MOBILE_TEXT ? 11.5 : 10, (t.size || .3) * k)}px ${FONT}`; ctx.fillStyle = sel.has(t.id) ? T.select : T.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t.text, 0, 0); ctx.restore();
   }
 
   // ------------------------------------------------------------------ dimensions: automatic 3-level exterior chains + grid axes, then the document's own
@@ -345,7 +350,7 @@ export function duplicatesChain(d, chains, tol = .06) {
 
 /** سلاسل الأبعاد الثلاثية على الجهات الأربع (علامات مائلة، خطوط امتداد، نص فوق الخط). */
 function drawChains(ctx, chains, S, k, T, pen) {
-  const fs = Math.max(9.5, Math.min(12, k * .26));
+  const fs = Math.max(MOBILE_TEXT ? 11 : 9.5, Math.min(12, k * .26));
   ctx.save(); ctx.strokeStyle = T.ink; ctx.fillStyle = T.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const side of chains) {
     const vertical = side.axis === 'y', dirPx = vertical ? side.sign : -side.sign;
@@ -425,9 +430,9 @@ function drawDimension(ctx, a, b, offset, text, S, k, color, T = THEME) {
   for (const p of [sa, sb]) { ctx.beginPath(); ctx.moveTo(p.x - 4, p.y + 4); ctx.lineTo(p.x + 4, p.y - 4); ctx.lineWidth = 1.8; ctx.stroke(); }
   const m = { x: (sa.x + sb.x) / 2, y: (sa.y + sb.y) / 2 }; let ang = Math.atan2(sb.y - sa.y, sb.x - sa.x); if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;
   // النص لا يتجاوز طول البُعد: تُحذف الوحدة أولًا ثم يصغر الخط (حتى 8.5) فلا تتراكب أبعاد المقاطع القصيرة على الجوال
-  const segPx = Math.hypot(sb.x - sa.x, sb.y - sa.y); let fsD = Math.max(10, Math.min(13, k * .26)); ctx.font = `600 ${fsD}px ${FONT}`;
+  const segPx = Math.hypot(sb.x - sa.x, sb.y - sa.y); let fsD = Math.max(MOBILE_TEXT ? 11 : 10, Math.min(13, k * .26)); ctx.font = `600 ${fsD}px ${FONT}`;
   if (ctx.measureText(text).width > segPx - 8 && / م$/.test(text)) text = text.replace(/ م$/, '');
-  while (fsD > 8.5 && ctx.measureText(text).width > segPx - 6) { fsD -= .5; ctx.font = `600 ${fsD}px ${FONT}`; }
+  while (fsD > (MOBILE_TEXT ? 10 : 8.5) && ctx.measureText(text).width > segPx - 6) { fsD -= .5; ctx.font = `600 ${fsD}px ${FONT}`; }
   ctx.translate(m.x, m.y); ctx.rotate(ang); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
   ctx.lineWidth = 3; ctx.strokeStyle = T.paper; ctx.strokeText(text, 0, -2); ctx.fillText(text, 0, -2); ctx.restore();
 }
@@ -505,22 +510,22 @@ function drawCompass(ctx, x, y, north, T = THEME, sheet = false, sc = 1) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(north * Math.PI / 180); ctx.lineJoin = 'miter';
   if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.9)'; ctx.beginPath(); ctx.arc(0, 0, R + 3, 0, 7); ctx.fill(); }
   ctx.strokeStyle = gold; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(0, 0, R, 0, 7); ctx.stroke();
-  ctx.lineWidth = .7; ctx.beginPath(); ctx.arc(0, 0, R - 3 * sc, 0, 7); ctx.stroke();
+  ctx.lineWidth = MOBILE_TEXT ? 1 : .7; ctx.beginPath(); ctx.arc(0, 0, R - 3 * sc, 0, 7); ctx.stroke();
   ctx.beginPath(); for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8 + Math.PI / 8, r = i % 2 ? R * .3 : R * .62; i ? ctx.lineTo(Math.sin(a) * r, -Math.cos(a) * r) : ctx.moveTo(Math.sin(a) * r, -Math.cos(a) * r); } ctx.closePath(); ctx.stroke(); // النجمة الثمانية الخافتة
   ctx.fillStyle = T.ink; ctx.strokeStyle = T.ink; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0, -R + 2); ctx.lineTo(5.5 * sc, 5 * sc); ctx.lineTo(0, 1.5 * sc); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = sheet ? '#fff' : T.paper; ctx.beginPath(); ctx.moveTo(0, -R + 2); ctx.lineTo(-5.5 * sc, 5 * sc); ctx.lineTo(0, 1.5 * sc); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.rotate(-north * Math.PI / 180); const a = north * Math.PI / 180;
-  ctx.fillStyle = sheet ? T.ink : T.goldDeep; ctx.font = `700 ${Math.round(12 * sc)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ش', Math.sin(a) * (R + 9 * sc), -Math.cos(a) * (R + 9 * sc)); ctx.restore();
+  ctx.fillStyle = sheet ? T.ink : T.goldDeep; ctx.font = `700 ${Math.max(MOBILE_TEXT ? 11 : 0, Math.round(12 * sc))}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('ش', Math.sin(a) * (R + 9 * sc), -Math.cos(a) * (R + 9 * sc)); ctx.restore();
 }
 /** مقياس الرسم الخطي: صفّان متناوبان بتقسيم أول مفصّل، وأرقام عند كل تقسيم رئيسي. */
 function drawScaleBar(ctx, x, y, k, T = THEME, sheet = false) {
   const cand = [.5, 1, 2, 5, 10, 20], m = cand.find(c => c * k >= 70) || 20, w = m * k, n = m >= 2 ? 4 : 2, h = 3.5;
-  ctx.save(); ctx.strokeStyle = T.ink; ctx.lineWidth = .8;
+  ctx.save(); ctx.strokeStyle = T.ink; ctx.lineWidth = MOBILE_TEXT ? 1.1 : .8;
   if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.88)'; ctx.beginPath(); ctx.roundRect(x - 9, y - 2 * h - 18, w + 34, 2 * h + 24, 5); ctx.fill(); }
   for (let i = 0; i < n; i++) for (const row of [0, 1]) { ctx.fillStyle = (i + row) % 2 ? (sheet ? '#fff' : T.paper) : T.ink; ctx.fillRect(x + i * w / n, y - h * (2 - row), w / n, h); }
   ctx.strokeRect(x, y - 2 * h, w, 2 * h); ctx.beginPath(); ctx.moveTo(x, y - h); ctx.lineTo(x + w, y - h); ctx.stroke();
-  ctx.fillStyle = T.ink; ctx.font = `600 10.5px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = T.ink; ctx.font = `600 ${MOBILE_TEXT ? 11.5 : 10.5}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.fillText('0', x, y - 2 * h - 4); ctx.fillText(String(m / 2), x + w / 2, y - 2 * h - 4); ctx.fillText(m + ' م', x + w, y - 2 * h - 4); ctx.restore();
 }
 

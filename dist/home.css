@@ -22,7 +22,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .brand h1{margin:6px 0 0;font-size:clamp(2.4rem,7vw,4.4rem);font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#fff7e6}
 .rule{display:block;width:150px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 .tagline{margin:0;font-size:clamp(1.15rem,2.6vw,1.6rem);font-weight:500;color:var(--gold);letter-spacing:.06em}
-.promise{margin:6px 0 14px;font-size:clamp(.95rem,1.8vw,1.1rem);font-weight:300;color:var(--ink-soft);line-height:1.8}
+.promise{margin:6px 0 14px;font-size:clamp(.95rem,1.8vw,1.1rem);font-weight:400;color:var(--ink-soft);line-height:1.8}
 .cta{border:0;border-radius:999px;padding:14px 34px;background:var(--gold);color:#10261d;font-weight:600;font-size:1rem;cursor:pointer;transition:transform .15s,background .15s}
 .cta:hover{background:#e3c486;transform:translateY(-1px)}
 .cta:disabled{opacity:.5;cursor:not-allowed;transform:none}
@@ -42,7 +42,7 @@ button,input,textarea,select{font:inherit;color:inherit}
 .center{text-align:center;margin-top:12vh}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 label{display:flex;flex-direction:column;gap:6px;font-weight:500}
-label small{color:var(--muted);font-weight:300}
+label small{color:var(--muted);font-weight:400}
 input[type=number],textarea,input[type=password],#landFloors{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);padding:12px 14px;font-size:1rem}
 input:focus,textarea:focus,#landFloors:focus{border-color:var(--gold)}
 fieldset{border:0;margin:18px 0 0;padding:0}
