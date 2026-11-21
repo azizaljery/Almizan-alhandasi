@@ -316,7 +316,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
       const x = -w / 2 + dw * (i + .5), side = i % 2 ? -1 : 1, dh = h - plinth - .12;
       const face = style === 'dark' ? 'woodMid' : style === 'luxury' ? 'lacquer' : style === 'najdi' ? 'woodMid' : 'lacquer';
       rbox(face, dw - .008, dh, .024, .004, x, plinth + .03, d / 2 - .004);
-      if (style === 'classic' || style === 'najdi' || style === 'luxury') { rbox('woodLight', dw - .14, dh - .3, .01, .003, x, plinth + .18, d / 2 + .01); rbox(face, dw - .24, dh - .5, .008, .003, x, plinth + .28, d / 2 + .018); }
+      if (style === 'classic' || style === 'najdi' || style === 'luxury') { rbox('woodLight', dw - .12, dh - .3, .008, .003, x, plinth + .15, d / 2 + .008); rbox(face, dw - .17, dh - .35, .008, .003, x, plinth + .175, d / 2 + .014); }
       else { box('woodDark', .006, dh - .1, .006, x - side * (dw * .2), plinth + .08, d / 2 + .012); box('woodDark', .006, dh - .1, .006, x, plinth + .08, d / 2 + .012); }
       if (style === 'classic' || style === 'luxury') sph('gold', .016, .016, .016, x + side * (dw / 2 - .06), plinth + dh * .5, d / 2 + .025, 6, 4); else rod(style === 'dark' ? 'blackMetal' : 'gold', x + side * (dw / 2 - .05), plinth + dh * .5 - .16, d / 2 + .03, x + side * (dw / 2 - .05), plinth + dh * .5 + .16, d / 2 + .03, .006, 6);
     }

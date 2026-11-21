@@ -246,7 +246,7 @@ export function woodGrain({ S = 256, seed = 61 } = {}) {
   return cached(`grain|${S}|${seed}`, () => {
     const I = imageOf(S), d = I.img.data;
     for (let py = 0; py < S; py++) for (let px = 0; px < S; px++) {
-      const v = py / S, w = fbm(px / S * 2, v * 3, seed, 3), ring = Math.abs(Math.sin((v * 7 + w * 5) * 3.14159)), fib = fbm(px / S * 6, v * 60, seed + 4, 2), t = 190 + (ring - .5) * 40 + (fib - .5) * 40;
+      const v = py / S, w = fbm(px / S * 1.5, v * 2, seed, 3), ring = Math.abs(Math.sin((v * 5 + w * 1.4) * 3.14159)), fib = fbm(px / S * 2, v * 90, seed + 4, 2), t = 226 + (ring - .5) * 22 + (fib - .5) * 34;
       put(d, (py * S + px) * 4, t, t - 3, t - 7);
     }
     flush(I);

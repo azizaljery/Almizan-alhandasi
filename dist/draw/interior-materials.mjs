@@ -60,7 +60,7 @@ export function attachInterior(THREE, lib, { quality = 1, maxAnisotropy = 4 } = 
         return m;
       }
       case 'rug': { // rug top: [style, field, border, motif, ink] -> own pattern, UV 0..1 over the whole rug
-        const r = PAINTERS.rugPattern({ style: a, field: hex(b), border: hex(parts[4]), motif: hex(parts[5]), ink: hex(parts[6]), S: q(512) });
+        const r = hasCanvas ? PAINTERS.rugPattern({ style: a, field: hex(b), border: hex(parts[4]), motif: hex(parts[5]), ink: hex(parts[6]), S: q(512) }) : {};
         const tx = hasCanvas && r.color ? new THREE.CanvasTexture(r.color) : null; if (tx) { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = maxAnisotropy; texs.push(tx); }
         return std(key, { color: '#ffffff', map: tx, roughness: 1 });
       }

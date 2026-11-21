@@ -534,7 +534,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         if (!['majlis', 'living', 'bedroom', 'master', 'dining', 'office'].includes(space.type) || o.w < .8) continue;
         const nrm = mul(seg.left, roomSide), c = add(o.center, mul(nrm, seg.t / 2 + .1)), rm = roomMats(space), T = IV.T, r = space.fin.seed;
         const fab = 'iv:fab:' + hexKey(IV.pal ? IV.pal.curtain : pickN(T.curtain, r)), sheer = 'iv:sheer:' + hexKey(space.fin.paint);
-        ivPiece('curtain', c.x, c.y, Math.atan2(nrm.x, nrm.y), { w: o.w + .7, d: .12, h: ceilZ - .06 }, rm, { fabric: fab, sheer, seed: 1 });
+        ivPiece('curtain', c.x, c.y, Math.atan2(nrm.x, nrm.y), { w: o.w + .7, d: .12, h: ceilZ - .06 }, rm, { fabric: fab, sheer, seed: 1, style: IV.id, metal: IV.T.metal === 'black' ? 'blackMetal' : 'gold', tie: IV.T.metal === 'black' ? 'blackMetal' : 'gold' });
       }
     }
 

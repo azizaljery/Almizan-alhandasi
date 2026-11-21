@@ -99,18 +99,26 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
       const y = opts.y ?? 1.5, fr = opts.frame || 'gold';
       box(fr, w, h, .035, 0, y - h / 2, 0); const pic = new THREE.PlaneGeometry(w - .08, h - .08); const m = new THREE.Mesh(pic, mt('mirror')); m.position.set(0, y, .019); g.add(m);
     },
-    curtain() { // w = total width (opening + sides), h = drop; panels at both ends + a sheer between
-      const rodY = h, side = Math.min(.45 * w, .75), fold = .06;
-      cyl(metal, .014, .014, w + .1, 0, rodY - .02, .04, 8).rotation.z = Math.PI / 2; g.children.at(-1).position.set(0, rodY - .02 + 0, .04);
-      for (const s of [-1, 1]) sph(metal, .028, s * (w / 2 + .06), rodY - .02, .04);
-      const panel = (x0, pw, mat) => {
-        const segs = Math.max(6, Math.round(pw / .045)), geo = new THREE.PlaneGeometry(pw, h - .06, segs, 1), p = geo.attributes.position;
-        for (let i = 0; i < p.count; i++) { const u = p.getX(i) / pw + .5; p.setZ(i, Math.sin(u * Math.PI * 2 * (pw / fold / 2.2)) * .028 + .05); }
-        geo.computeVertexNormals(); const uv = geo.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, (p.getX(i) + x0) * 1, p.getY(i));
-        const m = new THREE.Mesh(geo, mt(mat)); m.position.set(x0, (h - .06) / 2 + .0, 0); m.castShadow = true; m.receiveShadow = true; g.add(m);
+    curtain() { // w = total width (opening + sides), h = drop. Two gathered drapery panels with real pleats, tie-backs, a sheer between, rod with rings and finials.
+      const style = opts.style || 'contemporary', rodY = h - .04, side = Math.min(.42 * w, .85), lam = style === 'classic' || style === 'luxury' ? .15 : .12, amp = style === 'classic' || style === 'luxury' ? .055 : .042;
+      const rod = cyl(metal, .013, .013, w + .16, 0, rodY - .013, .055, 10); rod.rotation.z = Math.PI / 2; rod.position.set(0, rodY, .055);
+      for (const s of [-1, 1]) { const fx = s * (w / 2 + .1); sph(metal, .03, fx, rodY, .055); cyl(metal, .006, .006, .07, fx - s * .02, rodY - .035, .02, 4).rotation.x = Math.PI / 2; }
+      if (style === 'classic' || style === 'luxury') { box(opts.pelmet || 'woodDark', w + .12, .16, .1, 0, rodY - .07, .06); box(metal, w + .12, .012, .105, 0, rodY - .082, .06); }
+      const panel = (xc, pw, mat, dir, o = {}) => { // dir = -1 gathers towards the left end, +1 towards the right end
+        const segX = Math.max(10, Math.round(pw / .03)), segY = 9, hh = h - .1 - (o.hem ?? 0), geo = new THREE.PlaneGeometry(pw, hh, segX, segY), p = geo.attributes.position, tb = o.tie ? Math.min(.95, hh * .38) : -9;
+        for (let i = 0; i < p.count; i++) {
+          const u = p.getX(i) / pw + .5, v = (p.getY(i) + hh / 2) / hh, y = v * hh;   // v: 0 at the hem, 1 at the rod
+          const ph = u * (pw / lam) * Math.PI * 2, wave = Math.pow(.5 + .5 * Math.sin(ph + v * .6), 1.25), a = (o.amp ?? amp) * (.55 + .45 * (1 - v)) * (1 + (o.hem === undefined ? .35 * Math.exp(-y * 14) : 0));
+          let x = p.getX(i); const g = Math.exp(-Math.pow((y - tb) / .13, 2)); const anchor = dir > 0 ? pw / 2 : -pw / 2; x = anchor + (x - anchor) * (1 - .42 * g);
+          p.setX(i, x); p.setZ(i, a * wave + .05 + (o.depth ?? 0) + .03 * g * (1 - u * dir * .5));
+        }
+        geo.computeVertexNormals(); metreUV(geo); const m = new THREE.Mesh(geo, mt(mat)); m.position.set(xc, .0 + hh / 2 + .0, 0); m.position.y = hh / 2 + (o.hem ?? 0); m.castShadow = true; m.receiveShadow = true; g.add(m);
+        const rings = Math.max(4, Math.round(pw / .1)); for (let k = 0; k < rings; k++) { const t = rings === 1 ? .5 : k / (rings - 1); const r = new THREE.TorusGeometry(.02, .004, 4, 8); metreUV(r); const rm = new THREE.Mesh(r, mt(metal)); rm.position.set(xc - pw / 2 + pw * t, rodY, .055); rm.rotation.y = Math.PI / 2; g.add(rm); }
+        if (o.tie) { const tx = xc + dir * (pw / 2 - pw * .08); cyl(metal, .004, .004, .02, tx, tb + .0, .1, 4); box(opts.tie || metal, pw * .52, .035, .035, tx - dir * pw * .2, tb - .02, .09); }
       };
-      panel(-w / 2 + side / 2, side, opts.fabric || 'fabric'); panel(w / 2 - side / 2, side, opts.fabric || 'fabric');
-      if (w - 2 * side > .3) { const sheer = new THREE.PlaneGeometry(w - 2 * side, h - .06, 1, 1); metreUV(sheer); const m = new THREE.Mesh(sheer, mt(opts.sheer || 'linen')); m.position.set(0, (h - .06) / 2, .02); g.add(m); }
+      const sheerW = w - 2 * side * .72;
+      if (sheerW > .3) panel(0, sheerW, opts.sheer || 'linen', 1, { amp: .012, depth: -.03, hem: .02 });
+      panel(-w / 2 + side / 2, side, opts.fabric || 'fabric', -1, { tie: true }); panel(w / 2 - side / 2, side, opts.fabric || 'fabric', 1, { tie: true });
     },
     chandelier() {
       const top = h, glow = 'iv:glow', rr = Math.min(w, d) * .5, y0 = top - .62;

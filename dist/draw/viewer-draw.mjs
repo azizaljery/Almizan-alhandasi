@@ -20,20 +20,20 @@ export const STYLES = Object.freeze({
     env: .6, exposure: .95, fog: '#dde7ee', sunAltitude: 52, glassGlow: 0, lamp: 0.25,
     // walking inside: the eye adapts (exposure), sky light through the openings is approximated by a stronger hemisphere,
     // and a warm ceiling-height fill follows the walker (no shadow; stands in for room lighting + bounce)
-    walkExposure: 1.22, walkHemi: 2.4, walkFill: 6, walkCeilGlow: .24,
+    walkExposure: .98, walkHemi: 2.0, walkFill: 5, walkCeilGlow: .2, walkSky: '#f5ecda', walkGround: '#c4ad88', walkEnv: 1.15,
   },
   dusk: {
     zenith: '#243257', horizon: '#f2a46b', ground: '#6b5560', sun: '#ff9d5c', sunIntensity: 2.3, hemiSky: '#8d9ad0', hemiGround: '#8a6c62', hemi: .62,
     env: .75, exposure: 1.12, fog: '#d9966b', sunAltitude: 11, glassGlow: .55, lamp: 1.2,
-    walkExposure: 1.3, walkHemi: 1.5, walkFill: 9, walkCeilGlow: .3,
+    walkExposure: 1.22, walkHemi: 1.5, walkFill: 9, walkCeilGlow: .3, walkSky: '#d8c2b0', walkGround: '#a08468', walkEnv: 1,
   },
 });
 
 export class DrawViewer {
-  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorPalette = null, interiorStyle = null, interiorTaste = null } = {}) {
+  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorPalette = null, richFurniture = null, furnitureStyle = null, interiorStyle = null, interiorTaste = null } = {}) {
     this.THREE = THREE || globalThis.THREE;
     // interior finish system (themes, per-room materials, dressing): on by default in the viewer; small textures on touch / small screens
-    this.interior = { on: !!interior, theme: interiorTheme, palette: interiorPalette, style: interiorStyle, taste: interiorTaste };
+    this.interior = { on: !!interior, theme: interiorTheme, palette: interiorPalette, rich: richFurniture, furnStyle: furnitureStyle, style: interiorStyle, taste: interiorTaste };
     this.lowPower = !!(globalThis.matchMedia?.('(pointer: coarse)')?.matches) || (globalThis.innerWidth || 1200) < 760;
     if (!this.THREE) throw new Error('THREE is required');
     const T = this.THREE;
@@ -107,6 +107,27 @@ export class DrawViewer {
     mat.dispose(); envScene.children[0].geometry.dispose();
   }
 
+  /**
+   * Indoors the sky must not tint the room: reflections and ambient fill come from a warm "room" environment (white-warm ceiling, beige walls, darker floor)
+   * instead of the blue sky probe. Built once per colour set and swapped in by applyWalkLighting.
+   */
+  roomEnvironment(S) {
+    const T = this.THREE, key = (S.walkSky || '') + (S.walkGround || '');
+    if (this._roomEnv?.key === key) return this._roomEnv.target.texture;
+    const sc = new T.Scene(), sky = new T.Color(S.walkSky || '#f5ecda'), gnd = new T.Color(S.walkGround || '#c4ad88');
+    const mat = new T.ShaderMaterial({
+      uniforms: { top: { value: sky.clone().multiplyScalar(1.3) }, mid: { value: sky.clone().multiplyScalar(.62).lerp(gnd, .35) }, low: { value: gnd.clone().multiplyScalar(.28) } }, side: T.BackSide, depthWrite: false,
+      vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+      fragmentShader: `uniform vec3 top; uniform vec3 mid; uniform vec3 low; varying vec3 vDir;
+        void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(mid, top, smoothstep(0.0, 0.8, h)) : mix(mid, low, smoothstep(0.0, 0.7, -h));
+          float win = smoothstep(0.55, 0.7, abs(vDir.x)) * smoothstep(0.1, 0.3, vDir.y) * smoothstep(0.6, 0.3, vDir.y); c += vec3(1.0, 0.96, 0.88) * win * 0.9; gl_FragColor = vec4(c, 1.0); }`,
+    });
+    sc.add(new T.Mesh(new T.SphereGeometry(50, 32, 16), mat));
+    const target = this.pmrem.fromScene(sc, .03); mat.dispose(); sc.children[0].geometry.dispose();
+    if (this._roomEnv) this._roomEnv.target.dispose(); this._roomEnv = { key, target };
+    return target.texture;
+  }
+
   applyStyle() {
     const T = this.THREE, S = STYLES[this.style];
     this.skyUniforms.top.value.set(S.zenith); this.skyUniforms.horizon.value.set(S.horizon); this.skyUniforms.ground.value.set(S.ground); this.skyUniforms.sunColor.value.set(S.sun);
@@ -176,7 +197,7 @@ export class DrawViewer {
     this.clearHighlight(); this.clearSection();
     this.doc = doc;
     const iv = this.interior;
-    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorPalette: iv.palette, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
+    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorPalette: iv.palette, richFurniture: iv.rich, furnitureStyle: iv.furnStyle, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
     this.scene.add(this.built.group);
     this.pickables = [];
     this.built.group.traverse(o => { if (o.isMesh) { const p = o.parent?.name; if (['walls', 'floors', 'fixtures', 'openings', 'stairs'].includes(p)) this.pickables.push(o); } });
@@ -394,6 +415,9 @@ export class DrawViewer {
     const S = STYLES[this.style] || STYLES.day, on = !!this.walkLit;
     this.lamp.intensity = on ? S.walkFill : 0;
     this.hemi.intensity = S.hemi * (on ? S.walkHemi : 1);
+    const warm = on && this.interior?.on && S.walkSky;
+    if (warm) { this.hemi.color.set(S.walkSky); this.hemi.groundColor.set(S.walkGround); } else { this.hemi.color.set(S.hemiSky); this.hemi.groundColor.set(S.hemiGround); }
+    if (this.envTarget) this.scene.environment = warm ? this.roomEnvironment(S) : this.envTarget.texture;
     this.renderer.toneMappingExposure = on ? S.walkExposure : S.exposure;
     const ceil = this.built?.lib?.m?.ceiling;
     if (ceil) { ceil.emissive.set(on ? '#fff6e8' : '#000000'); ceil.emissiveIntensity = on ? S.walkCeilGlow : 0; }
@@ -446,7 +470,7 @@ export class DrawViewer {
       for (let x = b.x0 + .3; x < b.x1 - .2; x += .5) for (let y = b.y0 + .3; y < b.y1 - .2; y += .5) if (free(x, y)) grid.push({ x, y });
       starts = grid.sort((a, c) => Math.hypot(a.x - r.centroid.x, a.y - r.centroid.y) - Math.hypot(c.x - r.centroid.x, c.y - r.centroid.y)).slice(0, 6);
     }
-    const lvId = this.built.levels[lvIndex]?.id, furniture = (this.built.fixtureBoxes || []).filter(f => f.level === lvId && pointInPolygon({ x: f.x, y: f.y }, r.polygon, 0)).map(f => ({ x: f.x, y: f.y, w: f.kind === 'rug' ? .3 : 1 }));
+    const lvId = this.built.levels[lvIndex]?.id, furniture = (this.built.fixtureBoxes || []).filter(f => f.level === lvId && pointInPolygon({ x: f.x, y: f.y }, r.polygon, 0)).map(f => ({ x: f.x, y: f.y, w: f.kind === 'rug' ? .3 : f.kind.startsWith('bed') ? 1.6 : f.kind === 'majlis-sofa' || f.kind.startsWith('sofa') ? 1.3 : 1, bed: f.kind.startsWith('bed'), rot: f.rot || 0 }));
     let best = null;
     if (!starts.length) { this.walk.level = prevLevel; return null; }
     for (const p of starts) for (let k = 0; k < 36; k++) {
@@ -457,9 +481,9 @@ export class DrawViewer {
       const x = p.x - Math.sin(a) * s, y = p.y - Math.cos(a) * s, depth = front + s;
       // prefer long views that keep the room centre and its furniture in frame, and views square to the walls
       const toC = Math.atan2(r.centroid.x - x, r.centroid.y - y), off = Math.abs(Math.atan2(Math.sin(toC - a), Math.cos(toC - a)));
-      let seen = 0; for (const f of furniture) { const fa = Math.atan2(f.x - x, f.y - y), d = Math.abs(Math.atan2(Math.sin(fa - a), Math.cos(fa - a))); if (d < 32 * DEG && Math.hypot(f.x - x, f.y - y) > .9) seen += f.w; }
+      let seen = 0, bedFace = 0; for (const f of furniture) { const fa = Math.atan2(f.x - x, f.y - y), d = Math.abs(Math.atan2(Math.sin(fa - a), Math.cos(fa - a))); if (d < 32 * DEG && Math.hypot(f.x - x, f.y - y) > .9) { const dd = Math.hypot(f.x - x, f.y - y), prox = dd < 1.3 ? .35 : dd < 5.2 ? 1 : 5.2 / dd; seen += f.w * prox; if (f.bed) bedFace += Math.cos(a - f.rot) * prox; } } // a bed is photographed from its foot: look along the head direction (plan heading = document rotation)
       const square = rings[0].some((A, i) => { const B = rings[0][(i + 1) % rings[0].length], e = Math.atan2(B.x - A.x, B.y - A.y); return Math.abs(Math.sin(e - a)) < .05 || Math.abs(Math.cos(e - a)) < .05; });
-      const score = Math.min(depth, 9) * .7 - off * .6 + Math.min(seen, 4) * .9 + (square ? .5 : 0);
+      const score = Math.min(depth, 6.5) * .5 - off * .6 + Math.min(seen, 5) * 1.1 + (square ? .5 : 0) + bedFace * 1.8;
       if (!best || score > best.score) best = { x, y, headingDeg: a / DEG, depth, score };
     }
     this.walk.level = prevLevel;
