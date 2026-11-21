@@ -1,0 +1,95 @@
+/* الجوال: أهداف لمس ≥44px، نصوص ≥14px، تباين ≥4.5:1، بلا تجاوز أفقي، وخط عربي واضح. تُحمَّل آخر ورقة نمط في كل صفحة، ولا تمس الطباعة ولا الشاشات العريضة. */
+@media (max-width:860px),(pointer:coarse) and (max-width:1100px){
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{font-size:16px;line-height:1.7}
+  /* العناوين الخطية الزخرفية (Aref Ruqaa) تضعف قراءتها بحجم صغير: خط النص الواضح على الجوال */
+  .titlebar h1,#stageWelcome .brand h1,.fmain>.sec:first-child h2,.fmain>.epk+.sec h2,.pb-head h1,.epk h2,.brand h2,.intro h1,.head h1,.result-head h2,.cinematic-logo h1{font-family:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif!important;font-weight:700;line-height:1.5}
+  /* أهداف اللمس */
+  button,.btn,select,summary,[role=button],[role=tab],a.btn,.quiet-inline,.quiet,.small-button,.chip,.seg button,.steps a,.fnav a{min-height:44px}
+  .btn,button.btn,a.btn{display:inline-flex;align-items:center;justify-content:center}
+  input:not([type=range]):not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea{min-height:44px;font-size:16px}
+  input[type=checkbox],input[type=radio]{width:24px;height:24px;flex:none}
+  label:has(>input[type=checkbox]),label:has(>input[type=radio]){min-height:44px;display:flex;align-items:center;gap:10px}
+  input[type=range]{min-height:32px}
+  .steps a,.steps li a{display:inline-flex;align-items:center;padding-inline:10px}
+  /* النص الصغير */
+  small,.muted,.hint,.kv,.tour-status,figcaption,.note{font-size:14px!important;line-height:1.7}
+  .ph small,.mz-logo small,.brand small{font-size:12px!important;color:var(--ambient-muted,#6a4f1e)}
+  .muted,.kv,.tour-status{color:#4a493f!important}
+  table{font-size:14px}th,td{font-size:14px}
+  /* تباين */
+  .ph .btn.ghost,a.btn.ghost{color:var(--ambient-ink,#0b5a4e)}
+  /* مساعد شرعاء يعلو شريط التنقل السفلي ولا يغطي نصًا */
+  .shp-fab{inset-block-end:calc(84px + env(safe-area-inset-bottom))!important}
+  .ambient-motion{bottom:calc(152px + env(safe-area-inset-bottom))!important;min-height:44px}
+  body.mizan-review{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+  img,svg,video,canvas{max-width:100%}
+  table{display:block;max-width:100%;overflow-x:auto}
+}
+/* ---- صفحة العرض ثلاثي الأبعاد ---- */
+@media (max-width:860px){
+  body[data-stage=view3d] .ph{display:flex;flex-wrap:wrap;gap:6px 8px;padding:8px 12px}
+  body[data-stage=view3d] .ph .mz-logo small{display:none}
+  body[data-stage=view3d] .ph .btn{flex:1 1 calc(50% - 8px);min-height:44px;font-size:14px;padding:6px 8px;white-space:nowrap}
+  body[data-stage=view3d] .steps{order:3;flex:1 0 100%;overflow-x:auto;white-space:nowrap}
+  .v3{display:flex;flex-direction:column;height:auto}
+  .v3 .stage{order:-1;height:min(58dvh,560px);min-height:340px;flex:none}
+  .v3 aside{padding:12px 14px calc(150px + env(safe-area-inset-bottom));gap:8px}
+  .v3 aside>div{padding-bottom:8px}
+  .v3 aside h2{font-size:17px;min-height:44px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:0}
+  .v3 aside>div[data-collapsed]>:not(h2){display:none!important}
+  .v3 aside>div[data-collapsed]>h2::after{content:"＋"}
+  .v3 aside>div[data-collapsible]:not([data-collapsed])>h2::after{content:"－"}
+  .v3 aside h2::after{font-weight:400;color:#6a4f1e}
+  #facadeBox{order:20}#arBox{order:21}
+  .v3 .seg{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .v3 .seg button{font-size:15px;min-height:44px;padding:8px 10px;white-space:normal;line-height:1.3}
+  .v3 select,.v3 .kv select{font-size:16px;min-height:44px}
+  .v3 .stage .msg{inset:auto 12px 76px 12px;font-size:14px}
+  /* شريط طريقة المشاهدة أسفل المشهد (للإبهام) */
+  .mbar{position:absolute;inset:auto 8px 8px 8px;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;z-index:6}
+  .mbar button{min-height:48px;border:1px solid #ffffff66;border-radius:12px;background:#0f3a31e6;color:#fff;font:inherit;font-size:15px;font-weight:600}
+  .mbar button.on{background:#c9a45c;color:#1c2a24;border-color:#c9a45c}
+  .walkpad{position:absolute;inset-inline-end:10px;bottom:70px;display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:6px;z-index:6;touch-action:none;-webkit-user-select:none;user-select:none}
+  .walkpad[hidden]{display:none}
+  .walkpad button{width:56px;height:56px;border-radius:14px;border:1px solid #ffffff77;background:#0f3a31d9;color:#fff;font-size:22px;touch-action:none}
+  .walkpad button.down{background:#c9a45c;color:#1c2a24}
+  .walkpad .tl{grid-area:2/1}.walkpad .dn{grid-area:2/2}.walkpad .tr{grid-area:2/3}.walkpad .up{grid-area:1/2}
+}
+@media (min-width:861px){.mbar,.walkpad{display:none!important}}
+/* الواجهة الواقعية لها أزرارها داخل الإطار: لا يُعرض شريط المجسّم فوقها */
+.stage:has(#facadeFrame:not([hidden])) .mbar,.stage:has(#facadeFrame:not([hidden])) .walkpad{display:none!important}
+/* ---- المرسم (studio.html): الشريط العلوي يلتف بدل أن يوسّع الصفحة ---- */
+@media (max-width:980px){
+  .app{width:100%;max-width:100vw;grid-template-rows:auto auto minmax(0,1fr) minmax(0,32dvh)}
+  .app>.top{flex-wrap:wrap;height:auto;row-gap:6px;padding:6px 8px;min-width:0;max-width:100vw}
+  .app>.top .grow{flex:1 1 0;min-width:0}
+  .top .title{width:100%;flex:1 1 100%;order:5;min-height:44px}
+  .top .btn,.top .seg button{min-height:44px;font-size:14px}
+  .ib{width:44px;height:44px}
+  .app :is(button,.ib){min-width:44px}
+  .floaters button,.three-bar button{min-height:44px;min-width:44px}
+  .rail button{min-height:56px;font-size:12px}
+  .optbar{min-height:52px}.optbar .chip,.optbar select{min-height:44px;font-size:14px}
+  .optbar label,.optbar .hint,.status{font-size:13px}
+  .seg.sm button,.seg3 button{min-height:44px;font-size:14px}
+  .tabs button{min-height:44px;font-size:14px}
+}
+/* ---- المخرجات ---- */
+@media (max-width:700px){
+  .fh .fnav a,.fh .fact .btn{min-height:44px;font-size:14px;display:inline-flex;align-items:center}
+  .sec table th,.sec table td{font-size:14px}
+}
+/* ---- الصفحة الرئيسية ---- */
+@media (max-width:860px){
+  span.n{font-size:14px!important}
+  .journey-list b{font-size:15px}
+  summary{display:flex;align-items:center}
+  .quiet-inline{min-width:44px;padding-inline:12px}
+}
+/* ---- التطبيق الرئيسي (index.html): نصوص ثانوية ≥14px وأهداف لمس ---- */
+@media (max-width:860px){
+  #studioPhase,#studioSubmit,#studioLocal,#studioPlotHint,.studio-speaker,.studio-side-eyebrow,.studio-form label,.studio-side label,label>span,#clearGallery,.footer-settings{font-size:14px}
+  #clearGallery,.footer-settings{min-height:44px;min-width:44px}
+}
+@media print{.mbar,.walkpad{display:none!important}}

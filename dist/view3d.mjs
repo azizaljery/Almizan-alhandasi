@@ -95,6 +95,19 @@ function buildInteriorUI() {
     seg.append(b); };
   mk('', 'تلقائي'); for (const id of INTERIOR_THEME_IDS) mk(id, INTERIOR_THEMES[id].ar, INTERIOR_THEMES[id].swatch);
 }
+// على الجوال اللوحة الجانبية تحت المشهد وطولها آلاف البكسلات: كل قسم يُطوى بعنوانه ويبقى مفتوحًا قسما «طريقة المشاهدة» و«جودة العرض» و«الديكور الداخلي»
+function collapsePanels() {
+  if (!globalThis.matchMedia?.('(max-width:860px)').matches) return;
+  const keep = new Set(['modeSeg', 'detailSeg', 'interiorSeg']);
+  document.querySelectorAll('#threePane > div').forEach(d => {
+    const h = d.querySelector(':scope > h2'); if (!h || d.dataset.collapsible) return;
+    d.dataset.collapsible = '1'; h.tabIndex = 0; h.setAttribute('role', 'button');
+    const set = c => { if (c) d.dataset.collapsed = '1'; else delete d.dataset.collapsed; h.setAttribute('aria-expanded', String(!c)); };
+    set(!keep.has(d.querySelector('.seg')?.id));
+    h.addEventListener('click', () => set(!d.dataset.collapsed));
+    h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!d.dataset.collapsed); } });
+  });
+}
 function syncMode() {
   document.querySelectorAll('#modeSeg [data-mode], #mobileBar [data-mode]').forEach(b => { const on = b.dataset.mode === viewer?.mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
   const pad = $('walkPad'); if (pad) pad.hidden = viewer?.mode !== 'walk';
@@ -137,7 +150,7 @@ async function init() {
   try { v = await ensureViewer(); } catch { fallbackWithoutWebGL('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
   { const ex = exteriorTaste(); Object.assign(v.interior, { theme: loadInteriorTheme(), palette: loadInteriorChoice().palette, style: ex.style, taste: ex.taste }); }
   v.setDoc(doc); v.frameBuilding(); v.resize(); say('');
-  buildInteriorUI(); syncInteriorUI(); buildDetailUI(); syncDetailUI(); buildTouchUI(); syncMode();
+  buildInteriorUI(); syncInteriorUI(); buildDetailUI(); syncDetailUI(); buildTouchUI(); syncMode(); collapsePanels();
   applySun();
   if (doc.levels.length > 1) {
     $('levelBox').hidden = false;

@@ -17,6 +17,7 @@ export function buildingBounds(THREE, S) {
   return bb;
 }
 
+const TOUCH = !!globalThis.matchMedia?.('(pointer: coarse)')?.matches;
 export function enableNavigation(THREE, { renderer, scene, camera, S, host, initial = null, refiner = null, maxPixelRatio = 1.5, heroSign = 1 }) {
   const canvas = renderer.domElement, bb = buildingBounds(THREE, S), EL_MIN = refiner ? -40 * DEG : 2 * DEG; // مع إزاحة العدسة يجوز أن تكون نقطة النظر أعلى من العين (كاميرا الشارع)
   const center = bb.getCenter(new THREE.Vector3()), size = bb.getSize(new THREE.Vector3());
@@ -160,7 +161,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     } else { moveTo(orbitPose(orbit), 600); }
     ui.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
     ui.querySelector('.fn-walkpad').hidden = m !== 'walk';
-    ui.querySelector('.fn-hint').textContent = m === 'walk' ? 'اسحب للنظر حولك، وتقدّم بالأسهم أو W/S، وخطوة جانبية A/D — أو بالأزرار.' : 'اسحب للدوران حول المبنى، والعجلة أو إصبعان للتكبير، وزر الفأرة الأيمن أو Shift للتحريك.';
+    ui.querySelector('.fn-hint').textContent = TOUCH ? (m === 'walk' ? 'اسحب بإصبعك للنظر حولك، وتقدّم بالأزرار.' : 'اسحب بإصبع للدوران حول المبنى، وبإصبعين للتكبير.') : m === 'walk' ? 'اسحب للنظر حولك، وتقدّم بالأسهم أو W/S، وخطوة جانبية A/D — أو بالأزرار.' : 'اسحب للدوران حول المبنى، والعجلة أو إصبعان للتكبير، وزر الفأرة الأيمن أو Shift للتحريك.';
   }
   function view(name) {
     if (mode !== 'orbit') { mode = 'orbit'; walk.keys.clear(); ui.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === 'orbit'))); ui.querySelector('.fn-walkpad').hidden = true; }
@@ -187,7 +188,8 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
 .fn-hint{pointer-events:none;background:#000a;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;max-width:min(560px,100%)}
 .fn-walkpad{display:grid;grid-template-columns:repeat(3,44px);gap:6px;pointer-events:auto}
 .fn-walkpad[hidden]{display:none}
-.fn-walkpad button{padding:0;width:44px;height:44px;border-radius:12px;font-size:18px}`;
+.fn-walkpad button{padding:0;width:44px;height:44px;border-radius:12px;font-size:18px}
+@media (max-width:640px),(pointer:coarse){.fn-ui{inset:auto 8px 8px 8px}.fn-row{flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch}.fn-row::-webkit-scrollbar{display:none}.fn-ui button{min-height:44px;flex:none;font-size:14px}.fn-hint{font-size:13px}.fn-walkpad{grid-template-columns:repeat(3,52px)}.fn-walkpad button{width:52px;height:52px;font-size:20px}}`;
   document.head.append(css);
   const ui = document.createElement('div'); ui.className = 'fn-ui'; ui.dir = 'rtl';
   ui.innerHTML = `<div class="fn-row" role="group" aria-label="طريقة التنقل"><button data-mode="orbit" aria-pressed="true">حول المبنى</button><button data-mode="walk" aria-pressed="false">تجوّل بمستوى العين</button></div>
@@ -201,7 +203,7 @@ export function enableNavigation(THREE, { renderer, scene, camera, S, host, init
     const k = b.dataset.k, on = e => { e.preventDefault(); walk.keys.add(k); kick(); }, off = () => walk.keys.delete(k);
     b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointerleave', off); b.addEventListener('pointercancel', off);
   });
-  ui.querySelector('.fn-hint').textContent = 'اسحب للدوران حول المبنى، والعجلة أو إصبعان للتكبير، وزر الفأرة الأيمن أو Shift للتحريك.';
+  ui.querySelector('.fn-hint').textContent = TOUCH ? 'اسحب بإصبع للدوران حول المبنى، وبإصبعين للتكبير.' : 'اسحب للدوران حول المبنى، والعجلة أو إصبعان للتكبير، وزر الفأرة الأيمن أو Shift للتحريك.';
 
   // ---------------------------------------------------------------- الحجم: يملأ الإطار ويتبعه
   function resize() {
