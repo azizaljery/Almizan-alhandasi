@@ -57,7 +57,9 @@ const lenOf = (u, z) => { const I = iv(u.make({ along: z.axis, zone: z.id }).nod
 export function assign(units, zones, lv, seed = 0) {
   const by = Object.fromEntries(zones.map(z => [z.id, []])), load = Object.fromEntries(zones.map(z => [z.id, 0])), unplaced = [];
   const ok = (u, z) => by[z.id].length < z.cap && !(u.kind === 'men' && !z.front) && !(z.noBed && CLS[u.kind] === 'bed');
-  const score = (u, z) => load[z.id] + lenOf(u, z) + (z.pref.length && !z.pref.includes(CLS[u.kind]) ? 6 : 0) + (u.kind === 'master' && z.front ? 5 : 0) + (seed ? 4 * noise(seed, u.kind + (u.b?.id || ''), z.id) : 0);
+  const has = (z, k) => by[z.id].some(x => x.kind === k);
+  const aff = (u, z) => (u.kind === 'dine' ? (has(z, 'men') ? -9 : has(z, 'women') ? -4 : 0) : ['maid', 'driver'].includes(u.kind) ? (has(z, 'dine') ? -9 : 0) : CLS[u.kind] === 'bed' ? (has(z, 'men') ? 8 : 0) : 0);
+  const score = (u, z) => load[z.id] + lenOf(u, z) + aff(u, z) + (z.pref.length && !z.pref.includes(CLS[u.kind]) ? 6 : 0) + (u.kind === 'master' && z.front ? 5 : 0) + (seed ? 4 * noise(seed, u.kind + (u.b?.id || ''), z.id) : 0);
   const put = (u, z) => { by[z.id].push(u); load[z.id] += lenOf(u, z); };
   const pool = [...units].sort((a, b) => PRI[a.kind] - PRI[b.kind]);
   // وحدة أولى لكل منطقة لازمة

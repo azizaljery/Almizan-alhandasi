@@ -1557,7 +1557,7 @@ function poolPut(key, v) { if (!key) return; POOLS.set(key, v); while (POOLS.siz
 function hashBit(str) { let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return ((h >>> 3) & 1) === 1; }
 export function clearVillaPools() { POOLS.clear(); }
 
-export function generateVillaDesigns({ land, counts, requirements = {}, keep = 4, pick = null, maxFails = null, maxSim = VISUAL_LIMIT.relaxed, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null }) {
+function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4, pick = null, maxFails = null, maxSim = VISUAL_LIMIT.relaxed, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null }) {
   // shown: بصمات بصرية لما عُرض على العميل؛ لا يُعاد ما يشبهها مرئيًا فوق الحد (VISUAL_LIMIT)
   let visLimit = shown.length ? VISUAL_LIMIT.strict : 1, visSkips = 0;
   const tw = requirements.tweaks || {};
@@ -1793,7 +1793,7 @@ function lShapeNote(program, W, D, plot, entry) {
  * دوران: الأرضي للضيافة والخدمة (مجالس، طعام، مطبخ، خادمة، مكتب، غرفة كبار السن) والسلم في نهاية الصالة؛
  * العلوي لأجنحة النوم حول صالة علوية، والسلم في الموضع ذاته. الغلاف واحد للدورين (العلوي فوق الأرضي تمامًا).
  */
-export function generateVillaTwoFloors({ land, counts, requirements = {}, keep = 3, pick = null, maxFails = null, maxSim = VISUAL_LIMIT.relaxed, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null }) {
+function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 3, pick = null, maxFails = null, maxSim = VISUAL_LIMIT.relaxed, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null }) {
   const tw = requirements.tweaks || {}, exSet = new Set(exclude.map(patCore)), prefPat = patCore(prefer?.pat ?? prefer) || null, prefMirror = prefer?.mirror ?? null;
   // ما رآه العميل: عدد مرات كل فكرة، وتواقيع الأدوار الأرضية المعروضة (الأرضي نفسه بعلوي آخر ليس تصميمًا جديدًا)
   const shownIdeas = ideaCounts(exclude), exGround = new Set(exclude.map(groundPat));
@@ -2567,3 +2567,20 @@ export const __internals = { stack, row, distribute, subsets, byRank, foyerDepth
 export function referenceKit() {
   return { buildProgram, validatePlot, generatorFootprint, layoutToDoc, drawLevel, frame, addStair, checkDoc, relaxFixtures, quality, settleDoors, visualSig, visualSim, VISUAL_LIMIT, splitFails, diversify, applyElevators, applyGardens, hashBit, maxBedOf, hallNotes, softIds, SOFT_FAIL_COST, patCore };
 }
+
+
+// ------------------------------------------------------------------------------------------ مفتاح المحرك المرجعي (الافتراضي: القديم وحده)
+import { generateReferenceDesigns, engineMode } from './villa-reference.mjs';
+function viaReference(args, floors, legacy) {
+  const mode = engineMode(args.requirements);
+  if (mode === 'legacy') return legacy(args);
+  let ref = null;
+  try { ref = generateReferenceDesigns({ ...args, floors }, referenceKit()); } catch (e) { if (!/^VILLA_(NO_FIT|BUILD_FAILED)$/.test(e.code || '')) throw e; }
+  if (mode === 'reference') { if (!ref) { const e = Error('لم يصلح أي مرجع لهذه الأرض.'); e.code = 'VILLA_NO_FIT'; throw e; } return ref; }
+  if (ref && ref.designs.length >= (args.keep ?? 4)) return ref;
+  const old = legacy(args);
+  if (!ref) return { ...old, engine: (old.engine || 'legacy') + '+fallback' };
+  return { ...old, designs: [...ref.designs, ...old.designs].slice(0, args.keep ?? old.designs.length), engine: 'hybrid' };
+}
+export function generateVillaDesigns(args) { return viaReference(args, 1, generateVillaDesignsLegacy); }
+export function generateVillaTwoFloors(args) { return viaReference(args, 2, generateVillaTwoFloorsLegacy); }

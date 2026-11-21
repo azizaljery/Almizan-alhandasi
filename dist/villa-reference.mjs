@@ -123,6 +123,8 @@ export function generateReferenceDesigns({ land, counts, requirements = {}, keep
   }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل مرجعي سليم.'); e.code = 'VILLA_BUILD_FAILED'; throw e; }
   designs.sort((a, b) => a.fails - b.fails || a.quality - b.quality);
+  // عقد البرنامج: تصميم يخالف شرطًا إلزاميًا من طلب العميل لا يُسلَّم من هذا المحرك (يتولاه القديم)
+  if (!tw.allowRefFails) { const okd = designs.filter(d => d.fails === 0); if (!okd.length) { const e = Error('كل البدائل المرجعية تخالف شرطًا إلزاميًا.'); e.code = 'VILLA_BUILD_FAILED'; throw e; } designs.length = 0; designs.push(...okd); }
   const out = kit.diversify(designs, keep, { prefer: [], seed: !shown.length ? tw.designSeed : null });
   for (const d of out) d.doc = kit.settleDoors(d.doc);
   if (floors === 1) { kit.applyElevators(out, requirements); kit.applyGardens(out, requirements); } else { kit.applyElevators(out, requirements); kit.applyGardens(out, requirements); }

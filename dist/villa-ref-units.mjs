@@ -60,7 +60,7 @@ export function suiteUnit(b, P, { along = 'y', flip = false, dress = true } = {}
   const links = [], ids = [bedId];
   if (!b.bath) return { node: bed, access: [{ id: bedId, prefer: ['hall', 'corr', 'foyer'], avoid: ['foyer', 'men'] }], links, ids, kind: 'bed', b };
   const bs = bathSpan(b.master), ds = dressSpan(b.master);
-  const bath = L(b.id + '-bath', bs.w, bs.h, { type: 'bath', kind: 'bath', name: b.bathShared ? 'دورة مياه مشتركة' : b.master ? 'حمام الرئيسية' : 'حمام ' + b.name.replace('غرفة ', '') });
+  const bath = L(b.id + '-bath', bs.w, bs.h, { type: 'bath', kind: 'bath', name: b.bathShared ? 'دورة مياه مشتركة' : b.master ? 'حمام الرئيسية' : 'حمام ' + b.name });
   const dr = dress ? L(b.id + '-dress', ds.w, ds.h, { type: 'storage', kind: 'dress', name: b.master ? 'غرفة ملابس' : 'خزانة ملابس', sink: !!b.master }) : null;
   links.push({ a: bath.id, b: bedId, kind: 'door', w: .8 });
   if (dr) links.push({ a: dr.id, b: bedId, kind: 'arch', w: 1.1 });
