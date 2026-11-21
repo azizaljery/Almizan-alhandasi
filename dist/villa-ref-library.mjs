@@ -11,7 +11,8 @@ const spineCol = (c, k, after = [], stair = 'back') => {
   if (!k.stair) return Y(k.foyer, k.hall, ...after);
   if (stair === 'side') return Y(k.foyer, X(k.hall, k.stair), ...after);
   if (stair === 'front') return Y(X(k.foyer, k.stair), k.hall, ...after);
-  return Y(k.foyer, k.hall, ...after, k.stair);
+  const sy = courtLeaf('stairYard', [1.4, 3, 12], [1.4, 4.4, 40], { name: 'ساحة خدمة', fenceH: 1.8, trees: false, court: false });
+  return Y(k.foyer, k.hall, X(k.stair, sy), ...after);
 };
 
 /**
@@ -116,6 +117,20 @@ export const REFERENCES = [
       const court = courtLeaf('court', [3.4, 5, 10], [6, 10, 40], { name: 'فناء جانبي', fenceH: null });
       const tail = courtLeaf('court2', [3.0, 4.2, 9], [2.6, 4, 12], { name: 'فناء داخلي', fenceH: null });
       return { tree: X(men, court, Y(X(fl, spineCol(c, k, [tail], v.stair)), fb)), zones: [men, fl, fb], k };
+    },
+  },
+  {
+    id: 'bands', name: 'أشرطة عرضية: ضيافة أمامية ثم صالة وخدمة ثم صف نوم', shape: 'bands', floors: [1, 2], allowNarrow: true,
+    summary: 'ثلاثة أشرطة عرضية: ضيافة ومدخل في الواجهة، وصالة بجانبها المطبخ والخدمة في الوسط، وصف غرف نوم خلفي على ممر عرضي؛ تناسب الأرض الضيقة.',
+    variants: [{ stair: 'front' }, { stair: 'side' }],
+    build(c) {
+      const k = core(c), v = c.v;
+      const fa = Z('fa', { axis: 'x', front: true, pref: ['guest'], cap: 2 }), fb = Z('fb', { axis: 'x', front: true, pref: ['guest', 'svc'], cap: 2, opt: true, empty: 'yard' });
+      const hm = Z('hm', { axis: 'y', pref: ['svc', 'guest'], cap: 2 });
+      const back = Z('back', { axis: 'x', corr: 'y0', pref: ['bed'], cap: 4 });
+      const front = v.stair === 'front' && k.stair ? X(fa, k.foyer, k.stair, fb) : X(fa, k.foyer, fb);
+      const mid = v.stair === 'side' && k.stair ? X(k.hall, k.stair, hm) : X(k.hall, hm);
+      return { tree: Y(front, mid, back), zones: [fa, fb, hm, back], k };
     },
   },
   {

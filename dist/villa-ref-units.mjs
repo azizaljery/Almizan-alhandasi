@@ -160,8 +160,8 @@ export const courtLeaf = (id, w, h, o = {}) => L(id, w, h, { type: 'courtyard', 
 
 /** حشوة مرنة في نهاية المنطقة تمتص فرق العمق بين المنطقة وقلب المبنى: مخزن (أرضي) / تراس (علوي) / ساحة (دور واحد). */
 export function padLeaf(zid, lv, axis) {
-  const along = [0, 0, 7], cross = [1.2, 3, 40], w = axis === 'x' ? along : cross, h = axis === 'x' ? cross : along;
-  if (lv === 'g') return L('pad:' + zid, w, h, { type: 'storage', kind: 'store', name: 'مخزن عام', sink: true, pad: true });
+  const along = [0, 0, 14], cross = [1.2, 3, 40], w = axis === 'x' ? along : cross, h = axis === 'x' ? cross : along;
+  if (lv === 'g') return L('pad:' + zid, w, h, { type: 'courtyard', kind: 'terrace', name: 'ساحة خارجية', sink: true, pad: true, outdoor: true, trees: false, fenceH: 1.8 });
   if (lv === 'u') return L('pad:' + zid, w, h, { type: 'balcony', kind: 'terrace', name: 'تراس علوي', sink: true, pad: true, outdoor: true, fenceH: 1.1 });
   return L('pad:' + zid, w, h, { type: 'courtyard', kind: 'terrace', name: 'ساحة خارجية', sink: true, pad: true, outdoor: true, trees: false, fenceH: 1.8 });
 }

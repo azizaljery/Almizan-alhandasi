@@ -25,7 +25,7 @@ const MODES = ['pref', 'mid', 'max'];
  * لا يبني مستندات (سريع). kitchenSink: الفائض يذهب للفراغات الماصّة ثم للغرف حتى حدودها القصوى (لا تمديد نسبي).
  */
 export function referenceCandidates({ program, W, D, floors = 1, only = null, modes = MODES, flipVariants = false }) {
-  const P = adapt(program), narrow = W < 11.2, out = [], rejected = [];
+  const P = adapt(program), narrow = W < 13.5, out = [], rejected = [];
   for (const ref of REFERENCES) {
     if (only && !only.includes(ref.id)) continue;
     if (!eligible(ref, { floors, W, D, narrow, nBeds: program.counts?.bedrooms })) continue;
@@ -41,7 +41,7 @@ export function referenceCandidates({ program, W, D, floors = 1, only = null, mo
         const miss = wired.flatMap((w, i) => w.missing.map(m => ({ ...m, lv: inst.levels[i].lv })));
         if (miss.length) { rejected.push({ ref: ref.id, vi, mode, why: 'wire:' + miss.slice(0, 3).map(m => `${m.a}${m.b ? '>' + m.b : ''}:${m.why}`).join(',') }); continue; }
         const levels = inst.levels.map((l, i) => ({ ...l, doors: wired[i].doors }));
-        const env = { W: inst.W, D: inst.D }, chk = levels.map(l => checkLevel(l, env, P, { narrow })), st = checkStack(levels);
+        const env = { W: inst.W, D: inst.D }, chk = levels.map(l => checkLevel(l, env, P, { narrow, floors })), st = checkStack(levels);
         const hard = [...chk.flatMap((c, i) => c.hard.map(h => `${levels[i].lv}:${h}`)), ...st.hard];
         if (hard.length) { rejected.push({ ref: ref.id, vi, mode, why: 'check:' + hard.slice(0, 4).join(',') }); continue; }
         out.push({ ref, vi, v, mode, split, inst, levels, env, cost: chk.reduce((s, c) => s + c.cost, 0) + st.cost, metrics: chk.map(c => c.metrics), stack: st.metrics, key: structureKey(levels, env), P });
@@ -66,7 +66,7 @@ export function sameDesign(docA, docB) {
 export { COPY_LIMIT };
 
 // ------------------------------------------------------------------------------------------ بناء التصاميم
-const MODE_AR = { 'spine-rect': 'صالة وسطى', 'spine-U': 'U', 'spine-atrium': 'فناء مغلق', 'spine-T': 'T', 'spine-L': 'L', 'rows-T': 'صفوف', 'front-court-U': 'فناء أمامي', 'side-court': 'كتلتان', 'narrow-side': 'ممر جانبي' };
+const MODE_AR = { 'spine-rect': 'صالة وسطى', 'spine-U': 'U', 'spine-atrium': 'فناء مغلق', 'spine-T': 'T', 'spine-L': 'L', 'rows-T': 'صفوف', 'front-court-U': 'فناء أمامي', 'side-court': 'كتلتان', 'narrow-side': 'ممر جانبي', bands: 'أشرطة' };
 
 /** يبني مستند المرسم لمرشح (دور أو دورين) بنفس مسار المولّد القديم: layoutToDoc ثم الدور العلوي والسلم. */
 export function buildDocFor(cand, { land, plot, fp, entry, mirror, title }, kit) {

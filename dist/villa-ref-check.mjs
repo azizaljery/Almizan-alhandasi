@@ -59,7 +59,8 @@ function walkFrom(rooms, doors, srcId) {
  * يفحص مستوى واحدًا. level: { lv, rooms, doors, upper }، env: { W, D }، P: البرنامج المهيأ.
  * يعيد { hard:[...], cost, metrics } حيث hard أسباب رفض.
  */
-export function checkLevel(level, env, P, { narrow = false } = {}) {
+export function checkLevel(level, env, P, opts = {}) {
+  const { narrow = false } = opts;
   const { rooms, doors, upper } = level, hard = [], soft = [], m = {};
   const L = CHECK_LIMITS, byId = new Map(rooms.map(r => [r.id, r]));
   const voids = rooms.filter(r => r.kind === 'terrace' || r.outdoor);
@@ -109,9 +110,9 @@ export function checkLevel(level, env, P, { narrow = false } = {}) {
     if (Math.min(n.w, n.h) < minW - .02) soft.push(['hall-narrow', 30 * (minW - Math.min(n.w, n.h))]);
   }
   // الحركة: حصة الممرات + طول المسار الفعلي
-  const total = indoor.reduce((s, r) => s + netArea(r), 0), circ = indoor.filter(r => r.circ || r.type === 'stairs').reduce((s, r) => s + netArea(r), 0);
+  const total = indoor.reduce((s, r) => s + netArea(r), 0), circ = indoor.filter(r => r.circ).reduce((s, r) => s + netArea(r), 0);
   m.circShare = r2(circ / Math.max(1, total));
-  if (m.circShare > L.circShare.max) hard.push('circ-share:' + m.circShare);
+  if (m.circShare > L.circShare.max + (opts.floors === 2 ? .1 : 0)) hard.push('circ-share:' + m.circShare);
   else if (m.circShare > L.circShare.warn) soft.push(['circ-share', 120 * (m.circShare - L.circShare.warn)]);
   const originId = upper ? (byId.has('stair') ? 'stair' : 'hall') : (byId.get('hall') ? 'hall' : 'foyer');
   const walk = walkFrom(rooms, doors, originId); m.walkMax = 0;

@@ -82,7 +82,7 @@ export function zoneTree(z, units, { flipUnits = false, lv = 's', pad = true } =
   const nodes0 = built.map(b => b.node), padN = pad && z.pad !== false ? padLeaf(z.id, lv, along) : null;
   const body = along === 'x' ? X(...nodes0, padN) : Y(...nodes0, padN);
   let node = body;
-  if (z.corr) {
+  if (z.corr && built.length >= 2) {
     const c = corrLeaf('corr:' + z.id, along === 'x' ? 'x' : 'y', { min: z.minLen || 3 });
     node = along === 'x' ? Y(z.corr === 'y0' ? [c, body] : [body, c]) : X(z.corr === 'x0' ? [c, body] : [body, c]);
   }
@@ -137,7 +137,7 @@ export function instantiate(sk, P, { floors = 1, envW, envH, mode = 'max', flipU
   const levels = [];
   for (const lv of lvs) {
     const rooms = [], links = [], accesses = [], upper = lv === 'u';
-    const push = (r, node, extra = {}) => { const o = { x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1, id: node.id, type: node.type, name: node.name, kind: node.kind, ...(node.circ ? { circ: true, ckind: node.ckind } : {}), ...(node.zone ? { zone: node.zone } : {}), ...(node.master ? { master: true } : {}), ...(node.men ? { men: true } : {}), ...(node.women ? { women: true } : {}), ...(node.trees ? { trees: true } : {}), ...(node.fenceH ? { fenceH: node.fenceH } : {}), ...(node.outdoor ? { outdoor: true, court: !!node.court } : {}), ...extra }; rooms.push(o); return o; };
+    const push = (r, node0, extra = {}) => { const node = upper && node0.outdoor && !/تراس/.test(node0.name || '') ? { ...node0, name: 'تراس علوي', fenceH: 1.1 } : node0; const o = { x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1, id: node.id, type: node.type, name: node.name, kind: node.kind, ...(node.circ ? { circ: true, ckind: node.ckind } : {}), ...(node.zone ? { zone: node.zone } : {}), ...(node.master ? { master: true } : {}), ...(node.men ? { men: true } : {}), ...(node.women ? { women: true } : {}), ...(node.trees ? { trees: true } : {}), ...(node.fenceH ? { fenceH: node.fenceH } : {}), ...(node.outdoor ? { outdoor: true, court: !!node.court } : {}), ...extra }; rooms.push(o); return o; };
     for (const l of top.leaves) {
       const n = l.node;
       if (n.zoneId) {
@@ -165,8 +165,8 @@ export function instantiate(sk, P, { floors = 1, envW, envH, mode = 'max', flipU
       if (f && h) {
         const same = Math.abs(f.x0 - h.x0) < 1e-3 && Math.abs(f.x1 - h.x1) < 1e-3 && (Math.abs(f.y1 - h.y0) < 1e-3 || Math.abs(h.y1 - f.y0) < 1e-3);
         const hr = rooms.find(r => r.id === 'hall');
-        if (same && hr) { hr.x0 = Math.min(f.x0, h.x0); hr.x1 = Math.max(f.x1, h.x1); hr.y0 = Math.min(f.y0, h.y0); hr.y1 = Math.max(f.y1, h.y1); }
-        else if (!same) { rooms.push({ x0: f.x0, y0: f.y0, x1: f.x1, y1: f.y1, id: 'foyer', type: 'corridor', name: 'ممر الصالة', kind: 'corr', circ: true, ckind: 'corr' }); }
+        if (same && hr && (hr.x1 - hr.x0) * (hr.y1 - hr.y0) + (f.x1 - f.x0) * (f.y1 - f.y0) <= 30) { hr.x0 = Math.min(f.x0, h.x0); hr.x1 = Math.max(f.x1, h.x1); hr.y0 = Math.min(f.y0, h.y0); hr.y1 = Math.max(f.y1, h.y1); }
+        else { rooms.push({ x0: f.x0, y0: f.y0, x1: f.x1, y1: f.y1, id: 'foyer', type: 'corridor', name: 'ممر الصالة', kind: 'corr', circ: true, ckind: 'corr' }); }
       }
       const hr = rooms.find(r => r.id === 'hall'); if (hr) hr.name = upperFamily || 'الصالة العلوية';
     }
