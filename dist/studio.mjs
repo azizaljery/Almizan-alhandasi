@@ -638,6 +638,8 @@ function openAlternative(doc, row) {
 editor.setTool('select'); renderLevels(); renderProps(); renderRooms(); updateStats(); runReview(); updateWelcome(); syncTool();
 editor.on = undefined;
 const _origAfter = editor.afterChange.bind(editor); editor.afterChange = () => { _origAfter(); refreshAiSeesSoon(); };
+// على الجوال يفتح المرسم على المخطط وحده (مقسوم = مخطط صغير جدًا فوق مجسّم صغير)؛ ثلاثي الأبعاد بزر العرض
+if (globalThis.matchMedia?.('(max-width:760px)').matches && $('app').dataset.view === 'split') { setView('plan'); editor.fit(); }
 if (threeVisible()) rebuild3D();
 if (startedEmpty) $('welcome').hidden = false;
 if (homeHandoff) toast('فُتح تصميمك الأولي من شرعاء. عدّل عليه كما تشاء.' + (homeHandoff.backedUp ? ' نُسخ مشروعك السابق احتياطيًا.' : '') + (homeHandoff.meta?.note ? ' ' + homeHandoff.meta.note : ''));
