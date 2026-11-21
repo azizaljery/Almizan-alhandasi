@@ -220,7 +220,8 @@ export function buildBuildingScene(doc, THREE, options = {}) {
               if (jE && len - u < .5) a *= .8 + .2 * smooth((len - u) / .5);
               return [tint[0] * a, tint[1] * a, tint[2] * a];
             } : () => tint;
-            if (IV && space.fin) emitIvFace(space, seg, side, piece, A, Bp, nrm, uOff, len, (u, z) => { let a = z < .9 ? .72 + .28 * smooth(z / .9) : 1; const zt = ceilZ - z; if (zt < .55) a *= .86 + .14 * smooth(zt / .55); if (jS && u < .5) a *= .8 + .2 * smooth(u / .5); if (jE && len - u < .5) a *= .8 + .2 * smooth((len - u) / .5); return a; }, jS, jE);
+            if (IV && space.fin) emitIvFace(space, seg, side, piece, A, Bp, nrm, uOff, len, (u, z) => { // faked ambient occlusion for furnished rooms: darker where wall meets floor, ceiling and the vertical corners
+              let a = z < 1.1 ? .6 + .4 * smooth(z / 1.1) : 1; const zt = ceilZ - z; if (zt < .7) a *= .8 + .2 * smooth(zt / .7); if (jS && u < .7) a *= .68 + .32 * smooth(u / .7); if (jE && len - u < .7) a *= .68 + .32 * smooth((len - u) / .7); return a; }, jS, jE);
             else faceGrid('paint', A, Bp, nrm, piece.z0, z1, uOff, colorAt, colRows(len, jS, jE).cols, rowsInterior);
           } else {
             const z0 = (piece.z0 <= 1e-9) ? -groundExt : piece.z0;
@@ -318,7 +319,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     // rich procedural furniture (interior-furniture): on with the interior finish system, or on request (professional photo path); falls back to fixtures3d
     const RICH = opt.richFurniture ?? !!IV, furnStyle = IV ? IV.id : (opt.furnitureStyle || 'contemporary');
     const mkFix = (kind, dims, mats, vkey) => {
-      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed }); if (g) return g; } catch { /* fall back to the plain model */ } }
+      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed, low: (opt.quality ?? 1) < .8 }); if (g) return g; } catch { /* fall back to the plain model */ } }
       return buildFixture(THREE, kind, dims, mats);
     };
     // ---- interior helpers: room furniture materials, ceiling pieces, light fittings ----------------------------------------------------

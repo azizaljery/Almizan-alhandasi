@@ -21,7 +21,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
   if (!isRichKind(kind)) return null;
   const def = FIXTURES[kind] || {}, w = dims.w ?? def.w ?? 1, d = dims.d ?? def.d ?? 1, h = dims.h ?? def.h ?? 1;
   const style = FURNITURE_STYLES.includes(opts.style) ? opts.style : 'contemporary', variant = opts.variant | 0, seed = opts.seed ?? 1;
-  const K = makeKit(THREE, mats, 'fixture:' + kind); K.g.userData = { kind, dims: { w, d, h }, style, rich: true };
+  const K = makeKit(THREE, mats, 'fixture:' + kind, { low: !!opts.low }); K.g.userData = { kind, dims: { w, d, h }, style, rich: true };
   const { box, rbox, cush, cyl, sph, tor, rod, lathe, tube, leaf, sub } = K;
   const has = n => !!mats[n];
   const MG = has('glow') ? 'glow' : 'lampShade';
@@ -62,7 +62,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
     }
     // back
     const by = legH + deck - .02;
-    if (style === 'luxury') { const nr = Math.max(8, Math.round(innerW / .13)), rw = innerW / nr; for (let i = 0; i < nr; i++) rbox('upholsteryAlt', rw - .004, backTop - by - .02, .2, .05, -innerW / 2 + rw * (i + .5), by, -d / 2 + .13); }
+    if (style === 'luxury') { const nr = Math.max(8, Math.round(innerW / .13)), rw = innerW / nr; for (let i = 0; i < nr; i++) rbox('upholsteryAlt', rw - .004, backTop - by - .02, .2, .026, -innerW / 2 + rw * (i + .5), by, -d / 2 + .13); }
     else if (style === 'classic') {
       rbox('upholstery', innerW + .02, backTop - by - .02, .22, .08, 0, by, -d / 2 + .14); rbox('woodDark', innerW + .06, .035, .26, .012, 0, backTop - .06, -d / 2 + .14);
       const cols = Math.max(4, Math.round(innerW / .22)), rows = 3; for (let c = 0; c <= cols; c++) for (let r = 0; r < rows; r++) button('gold', -innerW / 2 + innerW * c / cols, by + .12 + r * ((backTop - by - .3) / (rows - 1 || 1)), -d / 2 + .255 - (r % 2) * 0, .011);
@@ -114,7 +114,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
       rbox(lux ? 'gold' : 'woodDark', w - .04, .1, d - .04, .01, 0, 0, 0); rbox(lux ? 'upholstery' : 'woodDark', w, .1, d, .03, 0, .1, 0); if (!lux) box('gold', w + .004, .014, d + .004, 0, .17, 0);
       cush('upholsteryAlt', w - .08, .15, d - .22, 0, .2, .07, 0, 0, 0, { r: .06, pinch: .2, crown: .05 });
       rbox('upholstery', w, .56, .2, .08, 0, .2, -d / 2 + .12);
-      if (lux) { const nr = Math.round(w / .16), rw = (w - .04) / nr; for (let i = 0; i < nr; i++) rbox('upholstery', rw - .006, .54, .1, .04, -w / 2 + .02 + rw * (i + .5), .2, -d / 2 + .2); }
+      if (lux) { const nr = Math.round(w / .16), rw = (w - .04) / nr; for (let i = 0; i < nr; i++) rbox('upholstery', rw - .006, .54, .1, .026, -w / 2 + .02 + rw * (i + .5), .2, -d / 2 + .2); }
       else { rbox('woodDark', w + .02, .04, .22, .01, 0, .76, -d / 2 + .12); const cols = Math.round(w / .28); for (let c = 0; c <= cols; c++) for (let r = 0; r < 2; r++) button('gold', -w / 2 + .08 + (w - .16) * c / cols, .38 + r * .24, -d / 2 + .225, .011); }
       for (const s of [-1, 1]) { cyl('upholstery', .1, .1, d - .24, s * (w / 2 - .12), 0, .06, 16, Math.PI / 2).position.set(s * (w / 2 - .12), .34, .06); cyl('gold', .104, .104, .02, s * (w / 2 - .12), 0, d / 2 - .1, 16, Math.PI / 2).position.set(s * (w / 2 - .12), .34, d / 2 - .1); }
       const nc = Math.max(2, Math.round(w / .9)); for (let i = 0; i < nc; i++) cush(i % 2 ? 'cushionA' : 'cushionB', .4, .11, .4, -w / 2 + .55 + (w - 1.1) * (i / Math.max(1, nc - 1)), .35, -d / 2 + .42, i % 2 ? .2 : -.2, -.55, 0, { pinch: .42 });
@@ -227,7 +227,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
       rbox('woodDark', hw, hbH - .5, .08, .015, 0, .2, hz); const arch = cyl('woodDark', hw / 2, hw / 2, .08, 0, 0, hz, 20, Math.PI / 2); arch.position.set(0, hbH - .5 + .2, hz); arch.scale.set(1, 1, .55);
       rbox('bedHead', hw - .24, hbH - .6, .04, .03, 0, .28, hz + .055); studs('gold', -hw / 2 + .06, .3, hz + .06, -hw / 2 + .06, hbH - .4, hz + .06, 6); studs('gold', hw / 2 - .06, .3, hz + .06, hw / 2 - .06, hbH - .4, hz + .06, 6);
     } else if (style === 'luxury') {
-      const nr = Math.round(hw / .16), rw = hw / nr; for (let i = 0; i < nr; i++) rbox('bedHead', rw - .005, hbH - .1, .1, .045, -hw / 2 + rw * (i + .5), .1, hz);
+      const nr = Math.round(hw / .16), rw = hw / nr; for (let i = 0; i < nr; i++) rbox('bedHead', rw - .005, hbH - .1, .1, .026, -hw / 2 + rw * (i + .5), .1, hz);
       box('gold', hw + .04, .03, .13, 0, hbH, hz); for (const s of [-1, 1]) box('gold', .03, hbH, .13, s * (hw / 2 + .02), 0, hz);
     } else if (style === 'dark') { rbox('leather', hw + .1, hbH - .15, .1, .03, 0, .1, hz); rbox('blackMetal', hw + .14, .03, .14, .01, 0, hbH - .06, hz); }
     else { const nv = Math.round(hw / .35); for (let i = 0; i < nv; i++) rbox('bedHead', hw / nv - .015, hbH - .2, .1, .045, -hw / 2 + hw / nv * (i + .5), .14, hz); rbox('woodMid', hw + .06, .04, .13, .01, 0, hbH - .08, hz); }

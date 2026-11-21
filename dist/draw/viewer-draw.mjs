@@ -415,7 +415,7 @@ export class DrawViewer {
     const S = STYLES[this.style] || STYLES.day, on = !!this.walkLit;
     this.lamp.intensity = on ? S.walkFill : 0;
     this.hemi.intensity = S.hemi * (on ? S.walkHemi : 1);
-    const warm = on && this.interior?.on && S.walkSky;
+    const warm = on && (this.interior?.on || this.interior?.rich) && S.walkSky; // furnished rooms (finish system or the photo path's rich furniture) get the warm room environment, not the blue sky probe
     if (warm) { this.hemi.color.set(S.walkSky); this.hemi.groundColor.set(S.walkGround); } else { this.hemi.color.set(S.hemiSky); this.hemi.groundColor.set(S.hemiGround); }
     if (this.envTarget) this.scene.environment = warm ? this.roomEnvironment(S) : this.envTarget.texture;
     this.renderer.toneMappingExposure = on ? S.walkExposure : S.exposure;

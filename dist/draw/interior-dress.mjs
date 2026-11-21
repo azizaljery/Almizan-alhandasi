@@ -97,8 +97,8 @@ export function dressRoom({ space, level, fixtures = [], themeId = 'contemporary
     const bed = extra.find(i => i.kind === 'bed-double') || fixtures.find(f => f.kind === 'bed-double' || f.kind === 'bed-single');
     if (bed) {
       const bw = Math.min(bed.w ?? 1.8, 2.2), bd = bed.d ?? 2.1, ax = { x: Math.sin(bed.rot || 0), y: Math.cos(bed.rot || 0) };
-      // the head wall is whichever end of the bed axis lies closer to a wall
-      const ends = [1, -1].map(sg => edgeOf({ x: bed.x + ax.x * sg * (bd / 2 + .05), y: bed.y + ax.y * sg * (bd / 2 + .05) })).sort((p, q) => p.d - q.d), he = ends[0].e, hd = he ? he.n : { x: -ax.x, y: -ax.y };
+      // the bed MODEL has its headboard at +axis (fixtures3d: head toward +y at rotation 0), so the foot is at -axis whatever walls are near; the head wall is the one at the +axis end
+      const headEnd = edgeOf({ x: bed.x + ax.x * (bd / 2 + .05), y: bed.y + ax.y * (bd / 2 + .05) }), he = headEnd.e && headEnd.d < .6 ? headEnd.e : null, hd = { x: -ax.x, y: -ax.y };
       const foot = { x: bed.x + hd.x * (bd / 2 + .27), y: bed.y + hd.y * (bd / 2 + .27) };
       if (type === 'master') addFree('bench', foot.x, foot.y, Math.atan2(hd.x, hd.y) + Math.PI, { w: Math.min(1.4, bw * .78), d: .42, h: .45, role: 'bench' });
       if (he) hang('wall-art', he, sOnEdge(he, { x: bed.x, y: bed.y }), Math.min(1.5, bw * .75), .75, { y: 1.62 });

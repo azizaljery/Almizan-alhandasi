@@ -83,3 +83,42 @@ test('الستارة: ثنيات حقيقية (تباين عمق) وقضيب و�
 test('المخطط الراسم: رسّامو السجادة والنسيج موجودون ويرفضون الاستدعاء دون كانفس بسلاسة (بيئة node)', () => {
   assert.equal(typeof PAINTERS.rugPattern, 'function'); assert.equal(typeof PAINTERS.fabricWeave, 'function');
 });
+
+// ---- المشهد الكامل ---------------------------------------------------------------------------------------------------------------
+import { readFileSync } from 'node:fs';
+import { parseDoc } from '../dist/draw/doc.mjs';
+import { sampleVilla } from '../dist/draw/samples.mjs';
+import { buildBuildingScene } from '../dist/draw/scene3d.mjs';
+import { INTERIOR_THEME_IDS } from '../dist/draw/interior-themes.mjs';
+import { palettesOf } from '../dist/draw/interior-palettes.mjs';
+
+const FLOW = parseDoc(readFileSync(new URL('./fixtures/flow-30x20-doc.json', import.meta.url), 'utf8'));
+const SCENE_TRI_CAP = 320000; // سقف المثلثات للمشهد الداخلي الكامل (تصميمان اختباريان) — يُسجَّل في التقرير
+test('المشهد الغني: لكل طراز لوحة محلولة، والمثلثات ضمن السقف، والمستند لا يتغير، والتأثيث الغني أغنى من العادي', () => {
+  for (const doc of [FLOW, parseDoc(JSON.stringify(sampleVilla()))]) {
+    const before = JSON.stringify(doc);
+    const plain = buildBuildingScene(doc, THREE, { textures: false, interior: true, interiorTheme: 'najdi', richFurniture: false }).stats.triangles;
+    for (const id of INTERIOR_THEME_IDS) {
+      const b = buildBuildingScene(doc, THREE, { textures: false, interior: true, interiorTheme: id });
+      assert.equal(b.interior.theme, id); assert.ok(palettesOf(id).some(p => p.id === b.interior.palette.id), id); assert.ok(b.interior.palette.why.length > 20);
+      assert.ok(b.stats.triangles <= SCENE_TRI_CAP, `${id}: ${b.stats.triangles}`);
+      const bb = new THREE.Box3().setFromObject(b.group); assert.ok(Number.isFinite(bb.min.x + bb.max.y + bb.max.z));
+    }
+    assert.ok(buildBuildingScene(doc, THREE, { textures: false, interior: true, interiorTheme: 'najdi' }).stats.triangles > plain, 'الغني أعلى تفصيلًا');
+    assert.equal(JSON.stringify(doc), before, 'المستند لم يتغير');
+  }
+});
+
+test('اللوحة المختارة تتحكم بالألوان: لوحتان مختلفتان في الطراز نفسه تعطيان دهانًا وأرضية مختلفين لأي غرفة، والتفاصيل حتمية', () => {
+  const finA = buildBuildingScene(FLOW, THREE, { textures: false, interior: true, interiorTheme: 'classic', interiorPalette: 0 }).interior, finB = buildBuildingScene(FLOW, THREE, { textures: false, interior: true, interiorTheme: 'classic', interiorPalette: 1 }).interior;
+  assert.notEqual(finA.palette.id, finB.palette.id);
+  const key = [...finA.rooms.keys()].find(k => finA.rooms.get(k).type === 'majlis') || [...finA.rooms.keys()][0];
+  assert.notEqual(finA.rooms.get(key).paint, finB.rooms.get(key).paint);
+  const again = buildBuildingScene(FLOW, THREE, { textures: false, interior: true, interiorTheme: 'classic', interiorPalette: 0 }).interior;
+  assert.equal(JSON.stringify([...again.rooms.entries()]), JSON.stringify([...finA.rooms.entries()]));
+});
+
+test('مسار الصورة الاحترافية: interior=false مع richFurniture يرسم الأثاث الغني (مثلثات أكثر) ولا يضيف تشطيبات', () => {
+  const rich = buildBuildingScene(FLOW, THREE, { textures: false, richFurniture: true, furnitureStyle: 'najdi' }), plain = buildBuildingScene(FLOW, THREE, { textures: false });
+  assert.equal(rich.interior, null); assert.ok(rich.stats.triangles > plain.stats.triangles * 1.05, `${rich.stats.triangles} vs ${plain.stats.triangles}`);
+});
