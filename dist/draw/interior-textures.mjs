@@ -268,4 +268,54 @@ export function artPicture({ kind = 'field', pal = ['#e8dfcf', '#b9825a', '#3b4a
   });
 }
 
-export const PAINTERS = Object.freeze({ marble, porcelain, wood, cementTile, clayTile, wallTile, wallPanel, flutedSlats, ashlar, limewash, woodGrain, artPicture });
+
+/**
+ * Rug top view (UV 0..1 over the whole rug): border bands, a field and a motif by style. All colours come from the room palette.
+ * najdi = horizontal woven-stripe bands with diamond runs (Sadu-like; ILLUSTRATIVE, not a traced pattern) · classic = lobed medallion + corner spandrels ·
+ * luxury = tonal lattice with a gold frame · contemporary = tonal geometry · dark = plain field with piping and offset rectangles.
+ */
+export function rugPattern({ style = 'contemporary', field = '#c9c0ae', border = '#8a7a62', motif = '#e4dccb', ink = '#3a3028', S = 512, seed = 1 } = {}) {
+  return cached(`rug|${style}|${field}|${border}|${motif}|${ink}|${S}|${seed}`, () => {
+    const W = S, H = Math.round(S * .72), c = makeCanvas(W, H), x = c.getContext('2d');
+    x.fillStyle = field; x.fillRect(0, 0, W, H);
+    // weave grain
+    for (let i = 0; i < 1800; i++) { x.fillStyle = `rgba(${i % 2 ? '255,255,255' : '0,0,0'},.035)`; x.fillRect(hash2(i, 1, seed) * W, hash2(i, 2, seed) * H, 2 + hash2(i, 3, seed) * 6, 1); }
+    const bw = Math.round(W * .055);
+    const frame = (inset, lw, col) => { x.strokeStyle = col; x.lineWidth = lw; x.strokeRect(inset, inset, W - 2 * inset, H - 2 * inset); };
+    if (style === 'najdi') {
+      const bands = [['#00000000', .0], [border, .1], [motif, .02], [ink, .06], [motif, .02], [border, .12], [motif, .02], [ink, .05], [motif, .02], [border, .1]];
+      let y = H * .08; x.fillStyle = border; x.fillRect(0, 0, W, H * .06); x.fillRect(0, H * .94, W, H * .06);
+      for (let b = 0; b < 7; b++) { // woven bands with diamond runs
+        const bh = H * (b % 2 ? .06 : .09), yy = H * (.1 + b * .115);
+        x.fillStyle = b % 2 ? ink : border; x.fillRect(0, yy, W, bh);
+        const n = 22, dw = W / n; for (let i = 0; i < n; i++) { x.fillStyle = b % 2 ? motif : field; const cx = i * dw + dw / 2, cy = yy + bh / 2, r = bh * .32; x.beginPath(); x.moveTo(cx, cy - r); x.lineTo(cx + r, cy); x.lineTo(cx, cy + r); x.lineTo(cx - r, cy); x.closePath(); x.fill(); }
+        x.fillStyle = motif; x.fillRect(0, yy - 3, W, 2); x.fillRect(0, yy + bh + 1, W, 2);
+      }
+    } else if (style === 'classic' || style === 'luxury') {
+      x.fillStyle = border; x.fillRect(0, 0, W, bw); x.fillRect(0, H - bw, W, bw); x.fillRect(0, 0, bw, H); x.fillRect(W - bw, 0, bw, H);
+      frame(bw, 3, motif); frame(bw * .4, 2, motif);
+      x.save(); x.translate(W / 2, H / 2);
+      for (let k = 0; k < 4; k++) { x.fillStyle = k % 2 ? motif : border; x.beginPath(); x.ellipse(0, 0, W * (.3 - k * .06), H * (.34 - k * .07), 0, 0, 7); x.fill(); }
+      x.fillStyle = field; x.beginPath(); x.ellipse(0, 0, W * .1, H * .12, 0, 0, 7); x.fill();
+      for (let k = 0; k < 8; k++) { x.save(); x.rotate(k * Math.PI / 4); x.fillStyle = ink; x.beginPath(); x.ellipse(W * .17, 0, W * .025, W * .012, 0, 0, 7); x.fill(); x.restore(); }
+      x.restore();
+      for (const [cx, cy] of [[bw, bw], [W - bw, bw], [bw, H - bw], [W - bw, H - bw]]) { x.fillStyle = border; x.beginPath(); x.arc(cx, cy, W * .13, 0, 7); x.fill(); x.fillStyle = motif; x.beginPath(); x.arc(cx, cy, W * .09, 0, 7); x.fill(); }
+      if (style === 'luxury') { x.strokeStyle = 'rgba(255,255,255,.12)'; x.lineWidth = 1; for (let i = -H; i < W; i += 22) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + H, H); x.stroke(); x.beginPath(); x.moveTo(i + H, 0); x.lineTo(i, H); x.stroke(); } }
+    } else if (style === 'dark') {
+      x.fillStyle = border; x.fillRect(0, 0, W, bw * .5); x.fillRect(0, H - bw * .5, W, bw * .5); x.fillRect(0, 0, bw * .5, H); x.fillRect(W - bw * .5, 0, bw * .5, H);
+      x.fillStyle = motif; x.globalAlpha = .55; x.fillRect(W * .18, H * .2, W * .42, H * .5); x.fillStyle = border; x.fillRect(W * .34, H * .32, W * .46, H * .46); x.globalAlpha = 1;
+    } else {
+      x.fillStyle = border; x.fillRect(0, 0, W, bw * .8); x.fillRect(0, H - bw * .8, W, bw * .8); x.fillRect(0, 0, bw * .8, H); x.fillRect(W - bw * .8, 0, bw * .8, H);
+      x.strokeStyle = motif; x.lineWidth = 3; for (let i = 0; i < 5; i++) { x.strokeRect(W * (.14 + i * .04), H * (.2 + i * .05), W * (.72 - i * .08), H * (.6 - i * .1)); }
+      x.fillStyle = motif; x.globalAlpha = .5; x.beginPath(); x.ellipse(W / 2, H / 2, W * .12, H * .14, 0, 0, 7); x.fill(); x.globalAlpha = 1;
+    }
+    return { color: c };
+  });
+}
+
+/** Tileable fabric weave as a height map (normal map source): crossed threads. */
+export function fabricWeave({ S = 128, coarse = 1 } = {}) {
+  return cached(`weave|${S}|${coarse}`, () => greyHeight(S, (px, py) => { const t = S / (16 / coarse), a = Math.sin(px / S * Math.PI * 2 * (16 / coarse)), b = Math.sin(py / S * Math.PI * 2 * (16 / coarse)), o = ((Math.floor(px / t) + Math.floor(py / t)) & 1); return 128 + 60 * (o ? a : b) + 20 * (a * b); }));
+}
+
+export const PAINTERS = Object.freeze({ rugPattern, fabricWeave, marble, porcelain, wood, cementTile, clayTile, wallTile, wallPanel, flutedSlats, ashlar, limewash, woodGrain, artPicture });

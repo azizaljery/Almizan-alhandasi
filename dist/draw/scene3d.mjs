@@ -20,6 +20,7 @@ import { attachInterior } from './interior-materials.mjs';
 import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
 import { hexLinear } from './interior-textures.mjs';
 import { buildPiece } from './interior-pieces.mjs';
+import { buildRichFixture, isRichKind } from './interior-furniture.mjs';
 import { dressRoom } from './interior-dress.mjs';
 
 export { stairLayout, stairHeightAt };
@@ -31,6 +32,8 @@ export const DEFAULTS = Object.freeze({
   skirting: true, cornice: true, ao: true, fixtures: true, site: true, car: true,
   stoneAccent: 'entry',     // stone cladding on the façade that holds the entry door ('entry' | 'none')
   textures: true, maxAnisotropy: 4, quality: 1,
+  richFurniture: null,      // procedural upholstered furniture (null = on with the interior finish system)
+  furnitureStyle: null,     // najdi | classic | contemporary | luxury | dark when `interior` is off but richFurniture is on
   interior: false,          // interior finish system (themes, per-room materials, cove lighting, curtains, dressing); the viewer turns it on
   interiorTheme: null, interiorPalette: null, interiorStyle: null, interiorTaste: null, dress: true,
   materials: null,          // supply a material library to share textures between scenes
@@ -312,13 +315,21 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       for (const j of cop.joints) PA.prism({ top: 'cap', side: 'cap', bottom: 'none' }, j.poly, E + H + parapetH, E + H + parapetH + .07);
     }
 
+    // rich procedural furniture (interior-furniture): on with the interior finish system, or on request (professional photo path); falls back to fixtures3d
+    const RICH = opt.richFurniture ?? !!IV, furnStyle = IV ? IV.id : (opt.furnitureStyle || 'contemporary');
+    const mkFix = (kind, dims, mats, vkey) => {
+      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed }); if (g) return g; } catch { /* fall back to the plain model */ } }
+      return buildFixture(THREE, kind, dims, mats);
+    };
     // ---- interior helpers: room furniture materials, ceiling pieces, light fittings ----------------------------------------------------
-    const roomMatsCache = new Map(), WOOD_NAMES = new Set(['woodDark', 'woodMid', 'woodLight']);
+    const roomMatsCache = new Map(), WOOD_NAMES = new Set(['woodDark', 'woodMid', 'woodLight']), FABRIC_NAMES = new Set(['upholstery', 'upholsteryAlt', 'cushionA', 'cushionB', 'cushionC', 'throwFab', 'bedHead', 'majlisFabric', 'majlisCream', 'fabric', 'fabricDark']);
     const roomMats = sp => { // shared fixture materials, recoloured for this room by the theme palette
       if (!IV || !sp?.fin) return { fx: lib.fixtures, led: 'ffdca0' };
       if (roomMatsCache.has(sp.key)) return roomMatsCache.get(sp.key);
       const pal = furniturePalette(IV.id, sp.type, sp.key, IV.seed, IV.pal), fx = { ...lib.fixtures };
-      for (const [name, hx] of Object.entries(pal)) { if (!lib.fixtures[name]) continue; fx[name] = lib.get((WOOD_NAMES.has(name) ? 'iv:fxw:' : 'iv:fx:') + name + ':' + hexKey(hx)) || fx[name]; }
+      for (const [name, hx] of Object.entries(pal)) { if (!lib.fixtures[name]) continue; fx[name] = lib.get((WOOD_NAMES.has(name) ? 'iv:fxw:' : FABRIC_NAMES.has(name) ? 'iv:fxf:' : 'iv:fx:') + name + ':' + hexKey(hx)) || fx[name]; }
+      fx.glow = lib.get('iv:glow:' + hexKey(sp.fin.led)) || fx.lampShade;
+      if (IV.pal && pal.rug) fx.rug = lib.get(['iv:rug', IV.id, hexKey(pal.rug), hexKey(IV.pal.accent), hexKey(IV.pal.accent2), hexKey(IV.pal.woodDark)].join(':')) || fx.rug;
       const rm = { fx, led: hexKey(sp.fin.led), pal }; roomMatsCache.set(sp.key, rm); return rm;
     };
     const ivM = rm => name => name === 'iv:glow' ? lib.get('iv:glow:' + (rm?.led || 'ffdca0')) : name.startsWith('iv:') ? lib.get(name) : (rm?.fx?.[name] || lib.fixtures[name] || lib.fixtures.fallback);
@@ -477,7 +488,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         const def = FIXTURES[fx.kind]; if (!def) continue;
         if (def.outdoor && fx.kind !== 'tree') continue; // مسبح/شلال/عشب/أحواض: يرسمها site3d على أرض الحوش
         const dims = { w: fx.w ?? def.w, d: fx.d ?? def.d, h: fx.h ?? def.h, seed: fx.x * 3.1 + fx.y };
-        const grp = buildFixture(THREE, fx.kind, dims, IV ? roomMats(L.locate({ x: fx.x, y: fx.y })).fx : lib.fixtures);
+        const grp = mkFix(fx.kind, dims, IV ? roomMats(L.locate({ x: fx.x, y: fx.y })).fx : lib.fixtures, fx.x * 7 + fx.y * 13);
         const m = fixtureMatrix(THREE, fx.x, fx.y, E, fx.rot || 0, fx.kind);
         F.addObject(grp, keyOf, m);
         if (opt.ao && fx.kind !== 'rug' && fx.kind !== 'car' && fx.kind !== 'tree') { // contact shadow
@@ -502,7 +513,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         const rm = roomMats(sp), list = [];
         for (const it of plan.items) {
           const dm = { w: it.w, d: it.d, h: it.h, seed: it.x * 3.1 + it.y };
-          if (!it.piece) { F.addObject(buildFixture(THREE, it.kind, dm, rm.fx), keyOf, fixtureMatrix(THREE, it.x, it.y, E, it.rot || 0, it.kind)); }
+          if (!it.piece) { F.addObject(mkFix(it.kind, dm, rm.fx, it.x * 7 + it.y * 13), keyOf, fixtureMatrix(THREE, it.x, it.y, E, it.rot || 0, it.kind)); }
           else {
             const po = { ...(it.po || {}), seed: ++dn };
             if (it.kind === 'wall-art') { const A = IV.T.art, kd = pickN(A.kinds, ((dn * 37 + (sp.fin.seed * 1000 | 0)) % 97) / 97), apal = IV.pal ? [IV.pal.wall, IV.pal.mainAlt, IV.pal.main, IV.pal.accent] : A.pal; po.art = lib.iv.art(kd, apal, dn % 4); po.frame = IV.T.metal === 'black' ? 'blackMetal' : (sp.fin.seed > .5 ? 'woodDark' : 'gold'); }

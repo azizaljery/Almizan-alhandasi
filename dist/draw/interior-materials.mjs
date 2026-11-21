@@ -29,7 +29,7 @@ export function attachInterior(THREE, lib, { quality = 1, maxAnisotropy = 4 } = 
   const hex = h => '#' + h;
 
   const make = key => {
-    const [, kind, a, b] = key.split(':');
+    const parts = key.split(':'), [, kind, a, b] = parts;
     switch (kind) {
       case 'floor': {
         const s = FLOOR_PRESETS[a]; if (!s) return null; const t = painted(s, s.ns ?? 0);
@@ -53,6 +53,16 @@ export function attachInterior(THREE, lib, { quality = 1, maxAnisotropy = 4 } = 
         const src = lib.fixtures[a]; if (!src) return null; const m = src.clone(); m.color.set(hex(b)); m.name = key;
         if (kind === 'fxw' && hasCanvas) { const t = PAINTERS.woodGrain({ S: q(256) }); m.map = T(t.color, .8); m.needsUpdate = true; }
         return m;
+      }
+      case 'fxf': { // upholstery / fabric variant of a fixture material: colour + a fine woven normal map and a soft sheen
+        const src = lib.fixtures[a]; if (!src) return null; const m = src.clone(); m.color.set(hex(b)); m.name = key; m.roughness = .92;
+        if (hasCanvas) { const wv = PAINTERS.fabricWeave({ S: q(128), coarse: a.startsWith('cushion') || a === 'throwFab' ? 1.5 : 1 }); const nt = T(normalFromHeight(wv, 2.2), .22, false); if (nt) { m.normalMap = nt; m.normalScale = new THREE.Vector2(.5, .5); } m.needsUpdate = true; }
+        return m;
+      }
+      case 'rug': { // rug top: [style, field, border, motif, ink] -> own pattern, UV 0..1 over the whole rug
+        const r = PAINTERS.rugPattern({ style: a, field: hex(b), border: hex(parts[4]), motif: hex(parts[5]), ink: hex(parts[6]), S: q(512) });
+        const tx = hasCanvas && r.color ? new THREE.CanvasTexture(r.color) : null; if (tx) { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = maxAnisotropy; texs.push(tx); }
+        return std(key, { color: '#ffffff', map: tx, roughness: 1 });
       }
       case 'fab': { const m = std(key, { color: hex(a), roughness: 1, side: THREE.DoubleSide }); return m; }
       case 'sheer': return std(key, { color: hex(a), roughness: 1, transparent: true, opacity: .42, side: THREE.DoubleSide, depthWrite: false });
