@@ -26,7 +26,7 @@ function fallbackWithoutWebGL(message) {
     // كل قسم أدوات يحوي عنصر التحكم: نخفي القسم كاملًا (عنوانه ومحتواه)
     // القسم = الابن المباشر للوحة الجانبية الذي يحوي عنصر التحكم (closest('div') كان يعيد العنصر نفسه فيبقى العنوان ظاهرًا)
     const section = el => { while (el && el.parentElement && el.parentElement.id !== 'threePane') el = el.parentElement; return el?.parentElement?.id === 'threePane' ? el : null; };
-    for (const sel of ['#modeSeg', '#styleSeg', '#city', '#interiorSeg']) hide(section(document.querySelector(sel)));
+    for (const sel of ['#modeSeg', '#styleSeg', '#city', '#interiorSeg', '#detailSeg']) hide(section(document.querySelector(sel)));
     document.querySelectorAll('.tourbox, #autoTourStatus, #levelBox, #facadeBox, #shot, #shotHQ, .shots, #threeHost, #facadeFrame').forEach(hide);
     const stage = document.querySelector('.stage');
     if (stage) {
@@ -39,11 +39,34 @@ function fallbackWithoutWebGL(message) {
 }
 
 
+// ---- جودة العرض: «تلقائي» يختار الخفيف على الجوال والأجهزة الضعيفة والكامل على غيرها؛ اختيار العميل يُحفظ
+const DETAIL_KEY = 'mizan.view3d.detail.v1', DETAIL_NOTE = {
+  lite: 'عرض خفيف: أثاث مبسّط وستائر وإضاءة أخف وظلال أصغر لتبقى الحركة سلسة على الجوال. اللقطة عالية الجودة تبقى كاملة.',
+  full: 'عرض كامل: أثاث غني وخامات أدق وظلال ناعمة. قد يبطؤ على الجوال.',
+};
+function loadDetail() { try { const v = localStorage.getItem(DETAIL_KEY); return v === 'lite' || v === 'full' ? v : null; } catch { return null; } }
+function saveDetail(v) { try { if (v) localStorage.setItem(DETAIL_KEY, v); else localStorage.removeItem(DETAIL_KEY); } catch { /* التخزين غير متاح: يبقى الاختيار في هذه الجلسة */ } }
+function syncDetailUI() {
+  const seg = $('detailSeg'), note = $('detailNote'); if (!seg || !viewer) return;
+  const chosen = loadDetail() || '';
+  seg.querySelectorAll('button').forEach(b => { const on = b.dataset.detail === chosen; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const eff = viewer.detail, s = viewer.stats?.();
+  note.textContent = (chosen ? '' : `تلقائي ← ${eff === 'lite' ? 'خفيف' : 'كامل'}. `) + DETAIL_NOTE[eff] + (s?.sceneTriangles ? ` (${Math.round(s.sceneTriangles / 1000)} ألف مثلث)` : '');
+}
+function onPerf(info) { say(`بطء الحركة على هذا الجهاز: خُفّضت الجودة تلقائيًا${info.detail === 'lite' ? ' (عرض خفيف)' : ''}.`); setTimeout(() => say(''), 4500); syncDetailUI(); }
+function buildDetailUI() {
+  const seg = $('detailSeg'); if (!seg || seg.children.length) return;
+  for (const [id, label] of [['', 'تلقائي'], ['lite', 'خفيف'], ['full', 'كامل']]) {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.detail = id;
+    b.addEventListener('click', () => { if (!viewer?.built) return; saveDetail(id || null); b.disabled = true; say('جارٍ تبديل جودة العرض…'); setTimeout(() => { try { viewer.setDetail(id || 'auto'); } finally { b.disabled = false; say(''); syncDetailUI(); } }, 30); });
+    b.textContent = label; seg.append(b);
+  }
+}
 async function ensureViewer() {
   if (viewer) return viewer;
   const [{ loadThreeRuntime }, { DrawViewer }] = await Promise.all([import('./three-runtime.mjs'), import('./draw/viewer-draw.mjs')]);
   const THREE = await loadThreeRuntime();
-  viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 2048, maxPixelRatio: 2, onState: ev => { if (ev.type === 'mode') syncMode(); } });
+  viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 2048, maxPixelRatio: 2, detail: loadDetail() || 'auto', onState: ev => { if (ev.type === 'mode') syncMode(); else if (ev.type === 'perf') onPerf(ev.detail); } });
   globalThis.__mizanViewer = viewer;
   return viewer;
 }
@@ -72,7 +95,28 @@ function buildInteriorUI() {
     seg.append(b); };
   mk('', 'تلقائي'); for (const id of INTERIOR_THEME_IDS) mk(id, INTERIOR_THEMES[id].ar, INTERIOR_THEMES[id].swatch);
 }
-function syncMode() { document.querySelectorAll('#modeSeg [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === viewer?.mode)); }
+function syncMode() {
+  document.querySelectorAll('#modeSeg [data-mode], #mobileBar [data-mode]').forEach(b => { const on = b.dataset.mode === viewer?.mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const pad = $('walkPad'); if (pad) pad.hidden = viewer?.mode !== 'walk';
+}
+// ---- لمس الجوال: شريط طريقة المشاهدة أسفل المشهد (يصل إليه الإبهام) ولوحة مشي في وضع التجوّل (السحب يلتفت فقط، فلا طريقة للتقدّم بلا لوحة)
+function buildTouchUI() {
+  const bar = $('mobileBar'), pad = $('walkPad'); if (!bar || bar.children.length) return;
+  document.querySelectorAll('#modeSeg [data-mode]').forEach(src => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.mode = src.dataset.mode; b.textContent = src.textContent;
+    b.addEventListener('click', () => { if (viewer?.built) viewer.setMode(b.dataset.mode); syncMode(); }); bar.append(b);
+  });
+  if (!pad) return;
+  const hold = (b, input) => {
+    const on = e => { e.preventDefault(); b.setPointerCapture?.(e.pointerId); b.classList.add('down'); viewer?.setWalkInput(input); };
+    const off = () => { b.classList.remove('down'); viewer?.setWalkInput({ forward: 0, turn: 0 }); };
+    b.addEventListener('pointerdown', on); for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, off);
+    b.addEventListener('contextmenu', e => e.preventDefault());
+  };
+  for (const [cls, label, aria, input] of [['up', '▲', 'تقدّم', { forward: 1 }], ['dn', '▼', 'تراجع', { forward: -1 }], ['tl', '↺', 'التفت يسارًا', { turn: -1 }], ['tr', '↻', 'التفت يمينًا', { turn: 1 }]]) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label; b.setAttribute('aria-label', aria); hold(b, input); pad.append(b);
+  }
+}
 
 function applySun() {
   const city = CITIES[$('city').value] || CITIES.riyadh, day = +$('day').value, hour = +$('hour').value;
@@ -93,7 +137,7 @@ async function init() {
   try { v = await ensureViewer(); } catch { fallbackWithoutWebGL('تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط والمخرجات تعمل كاملة.'); return; }
   { const ex = exteriorTaste(); Object.assign(v.interior, { theme: loadInteriorTheme(), palette: loadInteriorChoice().palette, style: ex.style, taste: ex.taste }); }
   v.setDoc(doc); v.frameBuilding(); v.resize(); say('');
-  buildInteriorUI(); syncInteriorUI();
+  buildInteriorUI(); syncInteriorUI(); buildDetailUI(); syncDetailUI(); buildTouchUI(); syncMode();
   applySun();
   if (doc.levels.length > 1) {
     $('levelBox').hidden = false;

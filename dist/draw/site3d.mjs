@@ -140,7 +140,7 @@ export function buildSite(THREE, doc, lib, ctx) {
   const clearOfGates = p => out.gates.every(gt => dist(p, gt.pos) > 3.2) && !(ctx.entryPoint && dist(p, ctx.entryPoint) < 3.4);
   const placed = [];
   const place = (kind, p, dims, rotY = 0) => {
-    const grp = buildFixture(THREE, kind, dims, lib.fixtures);
+    const grp = buildFixture(THREE, kind, ctx.low ? { ...dims, low: true } : dims, lib.fixtures);
     const m = fixtureMatrix(THREE, p.x, p.y, g0, rotY, kind);
     B.addObject(grp, mat => lib.reverse(mat), m); placed.push({ kind, p });
   };

@@ -25,6 +25,7 @@ import { dressRoom } from './interior-dress.mjs';
 
 export { stairLayout, stairHeightAt };
 
+const LITE_PIECES = new Set(['wall-art', 'wall-mirror', 'floor-lamp', 'pouf', 'side-table', 'bench', 'towel-rail', 'console']);
 export const DEFAULTS = Object.freeze({
   doors: 'ajar',            // interior door leaves: 'ajar' | 'closed' | 'open'   (entry doors stay closed)
   plinth: .45,              // finished floor above the ground, metres
@@ -36,6 +37,7 @@ export const DEFAULTS = Object.freeze({
   furnitureStyle: null,     // najdi | classic | contemporary | luxury | dark when `interior` is off but richFurniture is on
   interior: false,          // interior finish system (themes, per-room materials, cove lighting, curtains, dressing); the viewer turns it on
   interiorTheme: null, interiorPalette: null, interiorStyle: null, interiorTaste: null, dress: true,
+  detail: 'full',           // 'full' | 'lite': lite (phones / weak devices) = no rich furniture, only cheap dressing pieces, low-poly curtains and lights; quality should be <= .5
   materials: null,          // supply a material library to share textures between scenes
 });
 
@@ -58,6 +60,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     if (fac.base === 'stone') { for (const k of ['map', 'bumpMap', 'normalMap', 'roughnessMap']) m.render[k] = m.accent[k]; m.render.bumpScale = m.accent.bumpScale; m.render.normalScale?.copy?.(m.accent.normalScale); m.render.roughness = m.accent.roughness; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
     if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
   }
+  const LITE = opt.detail === 'lite';
   const T = opt.slab, PL = opt.plinth;
   // interior finish system: theme chosen by the client (selector) > doc.finish.interior > taste > exterior style > design fingerprint
   const IV = opt.interior ? (() => {
@@ -261,7 +264,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
               if (sk.kind === 'stepped') { const p2 = at(.014 + .004); W.box(key, p2.x, E + sk.h - .015, -p2.y, len, .03, .028, ry); }
             }
             if (f.band?.cap && piece.z0 < f.band.h - 1e-6 && piece.z1 > f.band.h + 1e-6 && accentOf.get(space.key) !== seg.id + '|' + side) { const p = at(.02); W.box('iv:trim:' + hexKey(f.trim), p.x, E + f.band.h + .012, -p.y, len, .05, .04, ry); }
-            if (opt.cornice && atCeil && f.cornice !== 'none') {
+            if (opt.cornice && !LITE && atCeil && f.cornice !== 'none') {
               const ck = 'iv:ceil:' + hexKey(f.ceiling);
               if (f.cornice === 'simple') { const p = at(.03); W.box(ck, p.x, E + ceilZ - .035, -p.y, len, .07, .06, ry); }
               else { const p = at(.045), p2 = at(.02); W.box(ck, p.x, E + ceilZ - .05, -p.y, len, .1, .09, ry); W.box(ck, p2.x, E + ceilZ - .13, -p2.y, len, .05, .04, ry); }
@@ -273,7 +276,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
             }
           } else {
           if (opt.skirting && piece.z0 <= 1e-6 && (piece.kind === 'full' || piece.kind === 'pier' || piece.kind === 'sill')) W.box('skirting', mid.x, E + .055, -mid.y, len, .11, .014, ry);
-          if (opt.cornice && piece.z1 >= ceilZ - 1e-6 && piece.kind !== 'sill') { const m2 = { x: (A.x + Bp.x) / 2 + nrm.x * .02, y: (A.y + Bp.y) / 2 + nrm.y * .02 }; W.box('ceiling', m2.x, E + ceilZ - .04, -m2.y, len, .08, .04, ry); }
+          if (opt.cornice && !LITE && piece.z1 >= ceilZ - 1e-6 && piece.kind !== 'sill') { const m2 = { x: (A.x + Bp.x) / 2 + nrm.x * .02, y: (A.y + Bp.y) / 2 + nrm.y * .02 }; W.box('ceiling', m2.x, E + ceilZ - .04, -m2.y, len, .08, .04, ry); }
           }
         }
       }
@@ -317,10 +320,10 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     }
 
     // rich procedural furniture (interior-furniture): on with the interior finish system, or on request (professional photo path); falls back to fixtures3d
-    const RICH = opt.richFurniture ?? !!IV, furnStyle = IV ? IV.id : (opt.furnitureStyle || 'contemporary');
+    const RICH = opt.richFurniture ?? (!!IV && !LITE), furnStyle = IV ? IV.id : (opt.furnitureStyle || 'contemporary');
     const mkFix = (kind, dims, mats, vkey) => {
-      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed, low: (opt.quality ?? 1) < .8 }); if (g) return g; } catch { /* fall back to the plain model */ } }
-      return buildFixture(THREE, kind, dims, mats);
+      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed, low: LITE || (opt.quality ?? 1) < .8 }); if (g) return g; } catch { /* fall back to the plain model */ } }
+      return buildFixture(THREE, kind, LITE ? { ...dims, low: true } : dims, mats);
     };
     // ---- interior helpers: room furniture materials, ceiling pieces, light fittings ----------------------------------------------------
     const roomMatsCache = new Map(), WOOD_NAMES = new Set(['woodDark', 'woodMid', 'woodLight']), FABRIC_NAMES = new Set(['upholstery', 'upholsteryAlt', 'cushionA', 'cushionB', 'cushionC', 'throwFab', 'bedHead', 'majlisFabric', 'majlisCream', 'fabric', 'fabricDark']);
@@ -338,7 +341,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     };
     const ivM = rm => name => name === 'iv:glow' ? lib.get('iv:glow:' + (rm?.led || 'ffdca0')) : name.startsWith('iv:') ? lib.get(name) : (rm?.fx?.[name] || lib.fixtures[name] || lib.fixtures.fallback);
     const ivPiece = (kind, x, y, rot, dims, rm, po = {}) => {
-      const grp = buildPiece(THREE, kind, dims, ivM(rm), { metal: 'gold', ...po });
+      const grp = buildPiece(THREE, kind, dims, ivM(rm), { metal: 'gold', ...(LITE ? { low: true } : {}), ...po });
       F.addObject(grp, mat => lib.reverse(mat), fixtureMatrix(THREE, x, y, E, rot, null));
     };
     const ivBlob = (x, y, w, d, rot) => {
@@ -516,6 +519,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         try { plan = dressRoom({ space: sp, level: L, fixtures: inRoom, themeId: IV.id }); } catch { continue; }
         const rm = roomMats(sp), list = [];
         for (const it of plan.items) {
+          if (LITE && (!it.piece || !LITE_PIECES.has(it.kind))) continue; // lite tier: only cheap pieces (art, mirrors, lamps, side tables, poufs, benches)
           const dm = { w: it.w, d: it.d, h: it.h, seed: it.x * 3.1 + it.y };
           if (!it.piece) { F.addObject(mkFix(it.kind, dm, rm.fx, it.x * 7 + it.y * 13), keyOf, fixtureMatrix(THREE, it.x, it.y, E, it.rot || 0, it.kind)); }
           else {
@@ -575,7 +579,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
   let bbox = boundsOf(outlineAll.flat().length ? outlineAll.flat() : doc.walls.flatMap(w => [w.a, w.b]));
   if (opt.site) {
     const entry = result.entry;
-    result.site = buildSite(THREE, doc, lib, { y: -PL, outline: groundOutline, entryPoint: entry?.point || null, entryNormal: entry?.normal || null, stepsOut: entry?.steps, skipCar: !opt.car });
+    result.site = buildSite(THREE, doc, lib, { y: -PL, outline: groundOutline, entryPoint: entry?.point || null, entryNormal: entry?.normal || null, stepsOut: entry?.steps, skipCar: !opt.car || LITE, low: LITE });
     group.add(result.site.group);
     result.site.group.position.y = 0;
   }

@@ -33,6 +33,10 @@
       <label class="kv">الوقت (توقيت شمسي) <span id="timeTxt"></span></label><input type="range" id="hour" min="5.5" max="18.5" step=".25" value="15">
       <p class="muted" id="sunTxt"></p>
       <p class="muted">موضع الشمس محسوب بمعادلات فلكية تقريبية لخط عرض المدينة المختارة والشمال في المخطط؛ ليس دراسة إظلال معتمدة.</p></div>
+    <div id="detailBox"><h2>جودة العرض</h2>
+      <div class="seg" id="detailSeg" role="group" aria-label="جودة العرض ثلاثي الأبعاد"></div>
+      <p class="muted" id="detailNote" aria-live="polite"></p>
+    </div>
     <div id="interiorBox"><h2>الديكور الداخلي</h2>
       <div class="seg" id="interiorSeg" role="group" aria-label="طراز الديكور الداخلي"></div>
       <p class="muted" id="interiorNote" aria-live="polite"></p>
@@ -76,7 +80,7 @@
       <p class="muted" id="arStatus" role="status" aria-live="polite"></p>
       <p class="muted">العرض تقريبي لتصور الحجم، وليس مخططًا تنفيذيًا. كتلة المبنى بجدرانه وفتحاته وسقفه بمقياس 1:1 بلا أثاث. يُبنى النموذج داخل متصفحك ولا يُرسل إلى أي خادم.</p></div>
   </aside>
-  <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div><iframe id="facadeFrame" title="الواجهة الخارجية" hidden style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f1ea"></iframe></div>
+  <div class="stage"><div class="host" id="threeHost"></div><div class="msg" id="threeMsg" hidden></div><div class="mbar" id="mobileBar" role="group" aria-label="طريقة المشاهدة"></div><div class="walkpad" id="walkPad" role="group" aria-label="التحرك في التجوّل" hidden></div><iframe id="facadeFrame" title="الواجهة الخارجية" hidden style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f1ea"></iframe></div>
 </div>
 <div id="arOverlay" hidden><div data-ar="touch"></div>
   <div class="ar-top"><div class="ar-bar"><span data-ar="status"></span><small data-ar="size"></small><small>العرض تقريبي لتصور الحجم، وليس مخططًا تنفيذيًا.</small></div></div>

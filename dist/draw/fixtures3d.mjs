@@ -133,7 +133,7 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
   THREE_BufferAttr = THREE.BufferAttribute;
   const mats = materials || createFixtureMaterials(THREE);
   const def = FIXTURES[kind] || {};
-  const w = dims.w ?? def.w ?? 1, d = dims.d ?? def.d ?? 1, h = dims.h ?? def.h ?? 1;
+  const w = dims.w ?? def.w ?? 1, d = dims.d ?? def.d ?? 1, h = dims.h ?? def.h ?? 1, low = !!dims.low; // dims.low = lite detail tier: fewer segments on round parts
   const g = new THREE.Group();
   g.name = 'fixture:' + kind; g.userData.kind = kind; g.userData.dims = { w, d, h };
   const M = n => mats[n] || mats.fallback;
@@ -147,9 +147,9 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
   };
   // sx,sy,sz = size; x,y0,z = centre x, BOTTOM y, centre z
   const box = (mat, sx, sy, sz, x, y0, z, ry = 0, rx = 0, rz = 0) => add(new THREE.BoxGeometry(sx, sy, sz), mat, x, y0 + sy / 2, z, rx, ry, rz);
-  const rbox = (mat, sx, sy, sz, r, x, y0, z, ry = 0, rx = 0, rz = 0) => add(roundedBoxGeometry(THREE, sx, sy, sz, r), mat, x, y0 + sy / 2, z, rx, ry, rz);
-  const cyl = (mat, rt, rb, hh, x, y0, z, seg = 14, rx = 0, rz = 0, ry = 0) => add(new THREE.CylinderGeometry(rt, rb, hh, seg), mat, x, y0 + hh / 2, z, rx, ry, rz);
-  const ell = (mat, rx_, ry_, rz_, x, y, z, ws = 10, hs = 7, rx = 0, ry = 0, rz = 0) => add(new THREE.SphereGeometry(1, ws, hs), mat, x, y, z, rx, ry, rz, rx_, ry_, rz_);
+  const rbox = (mat, sx, sy, sz, r, x, y0, z, ry = 0, rx = 0, rz = 0) => add(low && r < .06 ? new THREE.BoxGeometry(sx, sy, sz) : roundedBoxGeometry(THREE, sx, sy, sz, r), mat, x, y0 + sy / 2, z, rx, ry, rz);
+  const cyl = (mat, rt, rb, hh, x, y0, z, seg = 14, rx = 0, rz = 0, ry = 0) => add(new THREE.CylinderGeometry(rt, rb, hh, low ? Math.min(seg, 8) : seg), mat, x, y0 + hh / 2, z, rx, ry, rz);
+  const ell = (mat, rx_, ry_, rz_, x, y, z, ws = 10, hs = 7, rx = 0, ry = 0, rz = 0) => add(new THREE.SphereGeometry(1, low ? Math.min(ws, 7) : ws, low ? Math.min(hs, 4) : hs), mat, x, y, z, rx, ry, rz, rx_, ry_, rz_);
   const bar = (mat, len, th, x, y, z, axis = 'y', seg = 8) => { // thin cylinder along an axis, centred at (x,y,z)
     const m = cyl(mat, th, th, len, x, y - len / 2, z, seg); if (axis === 'x') { m.rotation.z = Math.PI / 2; m.position.set(x, y, z); } else if (axis === 'z') { m.rotation.x = Math.PI / 2; m.position.set(x, y, z); } return m;
   };
@@ -467,9 +467,9 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     for (let i = 0; i < blobs; i++) {
       const a = (i / blobs) * Math.PI * 2 + R(), r = i ? w * (.2 + R() * .12) : 0;
       const s = w * (.3 + R() * .1);
-      add(new THREE.IcosahedronGeometry(1, 1), i % 2 ? 'leafA' : 'leafB', Math.cos(a) * r, trunkH + h * (.22 + R() * .2), Math.sin(a) * r, 0, R() * 3, 0, s, s * .85, s);
+      add(new THREE.IcosahedronGeometry(1, low ? 0 : 1), i % 2 ? 'leafA' : 'leafB', Math.cos(a) * r, trunkH + h * (.22 + R() * .2), Math.sin(a) * r, 0, R() * 3, 0, s, s * .85, s);
     }
-    add(new THREE.IcosahedronGeometry(1, 1), 'leafA', 0, trunkH + h * .5, 0, 0, 0, 0, w * .32, w * .3, w * .32);
+    add(new THREE.IcosahedronGeometry(1, low ? 0 : 1), 'leafA', 0, trunkH + h * .5, 0, 0, 0, 0, w * .32, w * .3, w * .32);
   }
 
   function palm() {
@@ -564,7 +564,7 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
     const R = rng(Math.round((dims.seed ?? 2) * 4421) + 9);
     for (let i = 0; i < 4; i++) {
       const a = i * 1.6 + R(), r = i ? w * .22 : 0, s = w * (.28 + R() * .1);
-      add(new THREE.IcosahedronGeometry(1, 1), i % 2 ? 'leafA' : 'leafB', Math.cos(a) * r, s * .8, Math.sin(a) * r, 0, 0, 0, s, s * .8, s);
+      add(new THREE.IcosahedronGeometry(1, low ? 0 : 1), i % 2 ? 'leafA' : 'leafB', Math.cos(a) * r, s * .8, Math.sin(a) * r, 0, 0, 0, s, s * .8, s);
     }
   }
 

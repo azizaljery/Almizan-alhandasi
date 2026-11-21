@@ -30,19 +30,25 @@ export const STYLES = Object.freeze({
 });
 
 export class DrawViewer {
-  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorPalette = null, richFurniture = null, furnitureStyle = null, interiorStyle = null, interiorTaste = null } = {}) {
+  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorPalette = null, richFurniture = null, furnitureStyle = null, interiorStyle = null, interiorTaste = null, detail = 'auto', adaptive = true } = {}) {
     this.THREE = THREE || globalThis.THREE;
     // interior finish system (themes, per-room materials, dressing): on by default in the viewer; small textures on touch / small screens
     this.interior = { on: !!interior, theme: interiorTheme, palette: interiorPalette, rich: richFurniture, furnStyle: furnitureStyle, style: interiorStyle, taste: interiorTaste };
     this.lowPower = !!(globalThis.matchMedia?.('(pointer: coarse)')?.matches) || (globalThis.innerWidth || 1200) < 760;
     if (!this.THREE) throw new Error('THREE is required');
     const T = this.THREE;
+    // detail tier: 'lite' on phones / weak devices (simple furniture, 512-or-smaller textures, one-third the triangles, 1.5x pixel ratio, 1024 shadow map), 'full' elsewhere; 'auto' decides from the device,
+    // and a measured slow frame rate steps the quality down by itself (adaptive) until the motion is smooth
+    this.detailPref = detail === 'lite' || detail === 'full' ? detail : 'auto'; this.adaptive = !!adaptive;
+    const lite = this.resolveDetail() === 'lite';
+    this.detail = lite ? 'lite' : 'full'; this._baseMaxPR = maxPixelRatio; this._baseShadowSize = shadowSize;
+    if (lite) { maxPixelRatio = Math.min(maxPixelRatio, 1.5); shadowSize = Math.min(shadowSize, 1024); }
     this.container = container; this.onState = onState; this.autoSelect = autoSelect; this.maxPixelRatio = maxPixelRatio;
     this.shadowsOn = shadows; this.shadowSize = shadowSize;
     this.renderer = new T.WebGLRenderer({ antialias, preserveDrawingBuffer, powerPreference: 'high-performance' });
     const r = this.renderer;
     r.outputColorSpace = T.SRGBColorSpace; r.toneMapping = T.ACESFilmicToneMapping; r.toneMappingExposure = 1;
-    r.shadowMap.enabled = shadows; r.shadowMap.type = T.PCFSoftShadowMap;
+    r.shadowMap.enabled = shadows; r.shadowMap.type = lite ? T.PCFShadowMap : T.PCFSoftShadowMap;
     r.shadowMap.autoUpdate = false; // the sun and the model are static while the camera moves: redraw the shadow map only when something changes (markShadowDirty)
     r.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, maxPixelRatio));
     this.canvas = r.domElement; this.canvas.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;outline:none';
@@ -77,6 +83,52 @@ export class DrawViewer {
     this.requestRender();
   }
 
+  resolveDetail() {
+    if (this.detailPref !== 'auto') return this.detailPref;
+    const mem = globalThis.navigator?.deviceMemory;
+    return this.lowPower || (mem && mem <= 2) ? 'lite' : 'full';
+  }
+
+  /**
+   * Switch the detail tier ('lite' | 'full' | 'auto') and rebuild the building in place (camera, walk position, level visibility and style are kept).
+   * 'full' also restores the interactive pixel ratio / shadow map; a still taken with captureHQ is always rendered at its own full settings.
+   */
+  setDetail(pref) {
+    this.detailPref = pref === 'lite' || pref === 'full' ? pref : 'auto';
+    const next = this.resolveDetail(), lite = next === 'lite';
+    this.detail = next;
+    const r = this.renderer, T = this.THREE, base = this._baseMaxPR;
+    this.maxPixelRatio = lite ? Math.min(base, 1.5) : base;
+    r.shadowMap.type = lite ? T.PCFShadowMap : T.PCFSoftShadowMap;
+    const size = lite ? Math.min(this._baseShadowSize, 1024) : this._baseShadowSize;
+    this.shadowSize = size; this.sun.shadow.mapSize.set(size, size); if (this.sun.shadow.map) { this.sun.shadow.map.dispose(); this.sun.shadow.map = null; }
+    r.shadowMap.enabled = this.shadowsOn; this.sun.castShadow = this.shadowsOn;
+    if (this.doc) { const lv = this.visibleLevels; this.setDoc(this.doc, { keepCamera: true }); if (lv) { this.visibleLevels = lv; this.applyVisibility(); } }
+    this.resize(); this.emit('detail'); return this.detail;
+  }
+
+  /** Quality the viewer has fallen back to after slow frames (null = never). Steps in order: pixel ratio 1.25, lite scene, pixel ratio 1, shadows off. */
+  degrade() {
+    const r = this.renderer, step = (this._perfStep = (this._perfStep || 0) + 1);
+    if (this.maxPixelRatio > 1.25) this.maxPixelRatio = 1.25;
+    else if (this.detail === 'full' && this.detailPref !== 'full') { this.setDetail('lite'); this.maxPixelRatio = Math.min(this.maxPixelRatio, 1.25); }
+    else if (this.maxPixelRatio > 1) this.maxPixelRatio = 1;
+    else if (this.shadowsOn && r.shadowMap.enabled) { r.shadowMap.enabled = false; this.sun.castShadow = false; this.shadowsOn = false; this.built?.group.traverse(o => { if (o.material) for (const m of [].concat(o.material)) m.needsUpdate = true; }); }
+    else { this._perfStep = step - 1; return null; }
+    this.resize(); this.emit('perf', { step, detail: this.detail, pixelRatio: Math.min(globalThis.devicePixelRatio || 1, this.maxPixelRatio), shadows: this.shadowsOn }); return step;
+  }
+
+  /** Frame-rate watchdog: called from tick() on frames of continuous motion; a smoothed frame time above ~55 ms for 20 frames triggers one degrade step. */
+  perfWatch(now, moving) {
+    if (!this.adaptive || this.fixedSize || this._hqFrustum) { this._pw = null; return; }
+    if (!moving) { this._pw = null; return; }
+    const pw = this._pw;
+    if (!pw) { this._pw = { t: now, ema: 0, n: 0 }; return; }
+    const dt = now - pw.t; pw.t = now; if (dt > 500) { this._pw = null; return; } // a pause, not a slow frame
+    pw.ema = pw.n ? pw.ema * .85 + dt * .15 : dt; pw.n++;
+    if (pw.n >= 20 && pw.ema > 55) { this._pw = null; this.degrade(); }
+  }
+
   // ---------------------------------------------------------------------------------------------------------- sky / environment
   makeSkyMaterial() {
     const T = this.THREE;
@@ -100,7 +152,7 @@ export class DrawViewer {
         void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(horizon, top, pow(clamp(h, 0.0, 1.0), 0.5)) * 1.15 : mix(horizon * 0.7, ground, clamp(-h * 2.5, 0.0, 1.0));
           float s = max(dot(normalize(vDir), normalize(sunDir)), 0.0); c += sunColor * (pow(s, 90.0) * 1.2 + pow(s, 12.0) * 0.12); gl_FragColor = vec4(c, 1.0); }`,
     });
-    envScene.add(new T.Mesh(new T.SphereGeometry(50, 32, 16), mat));
+    envScene.add(new T.Mesh(new T.SphereGeometry(50, 24, 12), mat));
     if (this.envTarget) this.envTarget.dispose();
     this.envTarget = this.pmrem.fromScene(envScene, .02);
     this.scene.environment = this.envTarget.texture;
@@ -197,7 +249,7 @@ export class DrawViewer {
     this.clearHighlight(); this.clearSection();
     this.doc = doc;
     const iv = this.interior;
-    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorPalette: iv.palette, richFurniture: iv.rich, furnitureStyle: iv.furnStyle, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
+    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.detail === 'lite' ? .5 : (this.detailPref === 'full' ? 1 : this.lowPower ? .6 : 1), detail: this.detail, interior: iv.on, interiorTheme: iv.theme, interiorPalette: iv.palette, richFurniture: iv.rich, furnitureStyle: iv.furnStyle, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
     this.scene.add(this.built.group);
     this.pickables = [];
     this.built.group.traverse(o => { if (o.isMesh) { const p = o.parent?.name; if (['walls', 'floors', 'fixtures', 'openings', 'stairs'].includes(p)) this.pickables.push(o); } });
@@ -699,6 +751,7 @@ export class DrawViewer {
       active = active || !!(fwd || side || turn) || Math.abs((w.targetFloor ?? w.floor) - w.floor) > 1e-3;
       if (fwd || side || turn) this.emit('walk');
     }
+    this.perfWatch(now, active || !!this.tween);
     if (this.needsRender) { this.needsRender = false; this.renderNow(); }
     if (active) this.kick();
   }

@@ -33,12 +33,13 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
     const m = new THREE.Mesh(geo, mt(mat)); m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = true; m.receiveShadow = true; g.add(m); return m;
   };
   const box = (mat, sx, sy, sz, x, y0, z, ry = 0) => add(new THREE.BoxGeometry(sx, sy, sz), mat, x, y0 + sy / 2, z, 0, ry, 0);
-  const rbox = (mat, sx, sy, sz, rad, x, y0, z) => add(roundedBoxGeometry(THREE, sx, sy, sz, rad), mat, x, y0 + sy / 2, z);
+  const rbox = (mat, sx, sy, sz, rad, x, y0, z) => add(opts.low && rad < .06 ? new THREE.BoxGeometry(sx, sy, sz) : roundedBoxGeometry(THREE, sx, sy, sz, rad), mat, x, y0 + sy / 2, z);
   const cyl = (mat, rt, rb, hh, x, y0, z, seg = 16) => add(new THREE.CylinderGeometry(rt, rb, hh, seg), mat, x, y0 + hh / 2, z);
   const sph = (mat, rad, x, y, z, sy = 1, ws = 9, hs = 6) => { const m = add(new THREE.SphereGeometry(rad, ws, hs), mat, x, y, z); m.scale.y = sy; return m; };
-  const metal = opts.metal || 'gold', wood = opts.wood || 'woodMid', top = opts.top || wood;
+  const metal = opts.metal || 'gold', wood = opts.wood || 'woodMid', top = opts.top || wood, low = !!opts.low; // low = lite detail tier (phones): fewer segments, no small decor
 
   const decor = (x, y, z, n = 0) => { // small objects on a surface
+    if (low) return;
     if (n % 3 === 0) { cyl('ceramic', .045, .06, .2, x, y, z, 12); sph('ceramic', .06, x, y + .2, z, .9); cyl('leafA', .006, .006, .22, x + .01, y + .2, z, 5); sph('leafB', .07, x + .02, y + .42, z, .8); }
     else if (n % 3 === 1) { cyl('gold', .06, .045, .05, x, y, z, 14); sph('pot', .04, x + .02, y + .06, z, .8); }
     else { box('linen', .16, .03, .22, x, y, z); box('woodDark', .15, .025, .2, x, y + .03, z, .2); }
@@ -70,7 +71,7 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
       for (let s = 0; s < shelves; s++) {
         const y = .06 + (h - .1) * (s / shelves); if (s) box(wood, w - .06, .025, d - .02, 0, y, 0);
         if (s === 0 && opts.doors !== false) { box(wood, w / 2 - .035, y + .3, .015, -w / 4, .06, d / 2 - .005); box(wood, w / 2 - .035, y + .3, .015, w / 4, .06, d / 2 - .005); continue; }
-        let x = -w / 2 + .05; while (x < w / 2 - .12) { const bw = .025 + r() * .035, bh2 = .18 + r() * .13; if (r() > .14) box(books[Math.floor(r() * books.length)], bw, Math.min(bh2, (h - .1) / shelves - .05), d * .7, x + bw / 2, y + .025, 0); x += bw + .004; if (r() > .92) x += .12; }
+        let x = -w / 2 + .05; while (x < w / 2 - .12) { const bw = .025 + r() * .035, bh2 = .18 + r() * .13; if (!low && r() > .14) box(books[Math.floor(r() * books.length)], bw, Math.min(bh2, (h - .1) / shelves - .05), d * .7, x + bw / 2, y + .025, 0); x += bw + .004; if (r() > .92) x += .12; }
       }
     },
     dresser() {
@@ -101,11 +102,11 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
     },
     curtain() { // w = total width (opening + sides), h = drop. Two gathered drapery panels with real pleats, tie-backs, a sheer between, rod with rings and finials.
       const style = opts.style || 'contemporary', rodY = h - .04, side = Math.min(.42 * w, .85), lam = style === 'classic' || style === 'luxury' ? .15 : .12, amp = style === 'classic' || style === 'luxury' ? .055 : .042;
-      const rod = cyl(metal, .013, .013, w + .16, 0, rodY - .013, .055, 10); rod.rotation.z = Math.PI / 2; rod.position.set(0, rodY, .055);
-      for (const s of [-1, 1]) { const fx = s * (w / 2 + .1); sph(metal, .03, fx, rodY, .055); cyl(metal, .006, .006, .07, fx - s * .02, rodY - .035, .02, 4).rotation.x = Math.PI / 2; }
+      const rod = cyl(metal, .013, .013, w + .16, 0, rodY - .013, .055, low ? 5 : 10); rod.rotation.z = Math.PI / 2; rod.position.set(0, rodY, .055);
+      for (const s of [-1, 1]) { const fx = s * (w / 2 + .1); if (low) { cyl(metal, .03, .03, .06, fx, rodY - .03, .055, 5); continue; } sph(metal, .03, fx, rodY, .055); cyl(metal, .006, .006, .07, fx - s * .02, rodY - .035, .02, 4).rotation.x = Math.PI / 2; }
       if (style === 'classic' || style === 'luxury') { box(opts.pelmet || 'woodDark', w + .12, .16, .1, 0, rodY - .07, .06); box(metal, w + .12, .012, .105, 0, rodY - .082, .06); }
       const panel = (xc, pw, mat, dir, o = {}) => { // dir = -1 gathers towards the left end, +1 towards the right end
-        const segX = Math.max(10, Math.round(pw / .03)), segY = 9, hh = h - .1 - (o.hem ?? 0), geo = new THREE.PlaneGeometry(pw, hh, segX, segY), p = geo.attributes.position, tb = o.tie ? Math.min(.95, hh * .38) : -9;
+        const segX = low ? Math.max(6, Math.round(pw / .075)) : Math.max(10, Math.round(pw / .03)), segY = low ? 4 : 9, hh = h - .1 - (o.hem ?? 0), geo = new THREE.PlaneGeometry(pw, hh, segX, segY), p = geo.attributes.position, tb = o.tie ? Math.min(.95, hh * .38) : -9;
         for (let i = 0; i < p.count; i++) {
           const u = p.getX(i) / pw + .5, v = (p.getY(i) + hh / 2) / hh, y = v * hh;   // v: 0 at the hem, 1 at the rod
           const ph = u * (pw / lam) * Math.PI * 2, wave = Math.pow(.5 + .5 * Math.sin(ph + v * .6), 1.25), a = (o.amp ?? amp) * (.55 + .45 * (1 - v)) * (1 + (o.hem === undefined ? .35 * Math.exp(-y * 14) : 0));
@@ -113,8 +114,8 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
           p.setX(i, x); p.setZ(i, a * wave + .05 + (o.depth ?? 0) + .03 * g * (1 - u * dir * .5));
         }
         geo.computeVertexNormals(); metreUV(geo); const m = new THREE.Mesh(geo, mt(mat)); m.position.set(xc, .0 + hh / 2 + .0, 0); m.position.y = hh / 2 + (o.hem ?? 0); m.castShadow = true; m.receiveShadow = true; g.add(m);
-        const rings = Math.max(4, Math.round(pw / .1)); for (let k = 0; k < rings; k++) { const t = rings === 1 ? .5 : k / (rings - 1); const r = new THREE.TorusGeometry(.02, .004, 4, 8); metreUV(r); const rm = new THREE.Mesh(r, mt(metal)); rm.position.set(xc - pw / 2 + pw * t, rodY, .055); rm.rotation.y = Math.PI / 2; g.add(rm); }
-        if (o.tie) { const tx = xc + dir * (pw / 2 - pw * .08); cyl(metal, .004, .004, .02, tx, tb + .0, .1, 4); box(opts.tie || metal, pw * .52, .035, .035, tx - dir * pw * .2, tb - .02, .09); }
+        const rings = low ? 0 : Math.max(4, Math.round(pw / .1)); for (let k = 0; k < rings; k++) { const t = rings === 1 ? .5 : k / (rings - 1); const r = new THREE.TorusGeometry(.02, .004, 4, 8); metreUV(r); const rm = new THREE.Mesh(r, mt(metal)); rm.position.set(xc - pw / 2 + pw * t, rodY, .055); rm.rotation.y = Math.PI / 2; g.add(rm); }
+        if (o.tie && !low) { const tx = xc + dir * (pw / 2 - pw * .08); cyl(metal, .004, .004, .02, tx, tb + .0, .1, 4); box(opts.tie || metal, pw * .52, .035, .035, tx - dir * pw * .2, tb - .02, .09); }
       };
       const sheerW = w - 2 * side * .72;
       if (sheerW > .3) panel(0, sheerW, opts.sheer || 'linen', 1, { amp: .012, depth: -.03, hem: .02 });
@@ -122,6 +123,7 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
     },
     chandelier() {
       const top = h, glow = 'iv:glow', rr = Math.min(w, d) * .5, y0 = top - .62;
+      if (low) { cyl(metal, .012, .012, .5, 0, top - .5, 0, 4); const ring = new THREE.TorusGeometry(rr, .015, 4, 12); ring.rotateX(Math.PI / 2); add(ring, metal, 0, y0, 0, 0, 0, 0, false); cyl(glow, rr * .6, rr * .6, .08, 0, y0 - .06, 0, 8); return; }
       cyl(metal, .012, .012, .3, 0, top - .3, 0, 6); cyl(metal, .07, .035, .1, 0, top - .4, 0, 12); sph(metal, .05, 0, top - .44, 0);
       for (const [rad, yy] of [[rr, y0], [rr * .62, y0 - .17]]) {
         const ring = new THREE.TorusGeometry(rad, .012, 6, 28); ring.rotateX(Math.PI / 2); add(ring, metal, 0, yy, 0, 0, 0, 0, false);
@@ -139,7 +141,7 @@ export function buildPiece(THREE, kind, dims = {}, M, opts = {}) {
       cyl(metal, .01, .01, .6, 0, top - .6, 0, 6); cyl(metal, rad * .5, rad * .9, .1, 0, ly + .5, 0, 8); cyl(metal, .01, rad * .4, .08, 0, ly + .6, 0, 8);
       cyl('iv:glow', rad * .7, rad * .7, .46, 0, ly + .03, 0, 8); cyl(metal, rad * .9, rad * .6, .05, 0, ly - .04, 0, 8);
       for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; cyl(metal, .007, .007, .52, Math.cos(a) * rad * .88, ly, Math.sin(a) * rad * .88, 4); }
-      sph(metal, .03, 0, ly - .1, 0);
+      if (!low) sph(metal, .03, 0, ly - .1, 0);
     },
     linear() {
       const top = h, ly = top - .75; for (const s of [-1, 1]) cyl('blackMetal', .004, .004, .75, s * w * .4, ly, 0, 4);
