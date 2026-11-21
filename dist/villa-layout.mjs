@@ -926,7 +926,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
   const add = (r, o) => { const x = { x0: snap(r.x0), y0: snap(r.y0), x1: snap(r.x1), y1: snap(r.y1), ...o }; rooms.push(x); return x; };
   const hallName = cand.upper ? (program.upperHallName || 'الصالة العلوية') : (program.hall ? 'الصالة' : 'صالة الحركة');
   const courtRect = cand.court || null;
-  const courtRoom = cand.circ.some(c => c.id === 'court') ? add(cand.circ.find(c => c.id === 'court').r, { id: 'court', type: 'courtyard', name: 'الحديقة الداخلية', kind: 'court', open: 'y1' }) : null;
+  const courtRoom = cand.circ.some(c => c.id === 'court') ? add(cand.circ.find(c => c.id === 'court').r, { id: 'court', type: 'courtyard', name: cand.courtClosed ? 'الحوش الداخلي' : 'الحديقة الداخلية', kind: 'court', open: cand.courtClosed ? null : 'y1' }) : null;
   const circRooms = cand.circ.filter(c => c.id !== 'court').map(c => add(c.r, { id: c.id, circ: true, type: c.id === 'foyer' ? 'entrance' : c.id === 'hall' ? 'living' : 'corridor', name: c.id === 'foyer' ? (program.blocks.some(b => b.men) ? 'مدخل العائلة' : 'الردهة') : c.id === 'hall' ? hallName : c.id.startsWith('gallery') && courtRect ? 'ممر الحديقة' : c.id === 'gallery' && cand.serviceBack ? 'ممر الخدمة' : 'ممر الغرف' }));
   const realFoyer = circRooms.find(c => c.id === 'foyer'), foyer = realFoyer || circRooms[0];
   if (cand.stairRect) { const h = circRooms.find(c => c.id === 'hall'); if (h) h.stairZone = cand.stairRect; }
@@ -937,7 +937,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
   for (const gal of circRooms.filter(c => c.id.startsWith('gallery'))) if (hall) { const e = shared(hall, gal); if (e) doors.push({ a: 'hall', b: gal.id, edge: e, kind: 'arch', w: Math.min(3.2, e.to - e.from - .4) }); }
   // ممر المحور بعد الصالة: فتحة من الصالة، وأخرى إلى الممر العرضي إن وُجد
   for (const sp of circRooms.filter(c => c.id === 'spine')) for (const o of circRooms.filter(c => c.id === 'hall' || c.id.startsWith('gallery'))) { const e = shared(sp, o); if (e && e.to - e.from >= 1.2) doors.push({ a: 'spine', b: o.id, edge: e, kind: 'arch', w: Math.min(1.4, e.to - e.from - .3) }); }
-  if (hall && courtRoom) { const e = shared(hall, courtRoom); if (e) { doors.push({ a: 'hall', b: 'court', edge: e, kind: 'door2', w: Math.min(2.4, e.to - e.from - .6) }); notes.push('مبنى على شكل U: حديقة داخلية في المنتصف مفتوحة على الحوش الخلفي بسور، تطل عليها الصالة بباب زجاجي مزدوج وغرف الجناحين بنوافذها، وممرا الحديقة يصلان الغرف الخلفية.'); } }
+  if (hall && courtRoom) { const e = shared(hall, courtRoom); if (e) { doors.push({ a: 'hall', b: 'court', edge: e, kind: 'door2', w: Math.min(2.4, e.to - e.from - .6) }); if (!cand.courtClosed) notes.push('مبنى على شكل U: حديقة داخلية في المنتصف مفتوحة على الحوش الخلفي بسور، تطل عليها الصالة بباب زجاجي مزدوج وغرف الجناحين بنوافذها، وممرا الحديقة يصلان الغرف الخلفية.'); } }
   if (cand.placed.some(p => p.block.filler)) notes.push(`${cand.upper ? 'الدور العلوي' : 'الدور الأرضي'} أوسع من برنامجه (الدوران بمسطح واحد): خُصّص الفائض ${cand.placed.filter(p => p.block.filler).map(p => '«' + p.block.name + '»').join(' و')} بدل تكبير غرفة واحدة؛ لم يطلبها العميل ويمكن تغيير استعمالها أو حذفها في المرسم.`);
   if (cand.mode === 'L') notes.push('مبنى على شكل L: جناح أمامي بعرض المبنى وذراع خلفي على جانب، والزاوية الباقية ساحة خارجية؛ الممر الخلفي يصل الصالة بالذراع.');
   if (cand.courtVoid) notes.push('الدور العلوي يحيط بفراغ الحديقة (مفتوح للسماء) وتطل عليه الغرف.');
@@ -1013,7 +1013,7 @@ export function realizeLayout(cand, program0, W, D, { secondEntry = null } = {})
     if (!done) notes.push('المدخل الثاني للأرض: لا يلامس فراغًا عامًا مناسبًا على تلك الجهة في هذا البديل؛ يمكن إضافته في المرسم.');
   }
   if (program.prefs?.guestEntrance && !doors.some(d => d.guest || d.men)) notes.push('مدخل الضيوف المستقل: المجلس لا يلامس الواجهة الأمامية في هذا البديل.');
-  return { rooms, doors, notes, W, D, mode: cand.mode, court: courtRect, courtOpen: !!courtRoom, upper: !!cand.upper };
+  return { rooms, doors, notes, W, D, mode: cand.mode, court: courtRect, courtOpen: !!courtRoom && !cand.courtClosed, courtClosed: !!(courtRoom && cand.courtClosed), voids: cand.voids || [], upper: !!cand.upper };
 
   function kitchenStrip(host, items) {
     // شريط على الجهة العمودية لباب المطبخ، بعيدًا عن الطعام؛ الغسيل في الطرف الخارجي (نافذة) والمخزن عند جهة الحركة
@@ -1332,10 +1332,10 @@ export function drawLevel(doc0, layout, { level, T }) {
   const addSeg = (axis, at, a, b) => { const k = r2(at); if (!segs[axis].has(k)) segs[axis].set(k, []); segs[axis].get(k).push([a, b]); };
   const court = layout.court || null;
   // التراس والجلسة الخارجية: فراغ خارجي محفور في الكتلة؛ حدوده مع الغرف جدران خارجية، وحافته الحرة حاجز منخفض لا جدار
-  const terraces = rooms.filter(r => r.kind === 'terrace'), voids = [court, ...terraces].filter(Boolean);
+  const terraces = rooms.filter(r => r.kind === 'terrace'), voids = [court, ...terraces, ...(layout.voids || [])].filter(Boolean);
   for (const r of rooms) { if (r.kind === 'terrace') continue; addSeg('y', r.y0, r.x0, r.x1); if (!(r.kind === 'court' && r.open === 'y1')) addSeg('y', r.y1, r.x0, r.x1); addSeg('x', r.x0, r.y0, r.y1); addSeg('x', r.x1, r.y0, r.y1); }
   const onCourt = (axis, at, a, b) => !!court && (axis === 'x' ? (Math.abs(at - court.x0) < 1e-3 || Math.abs(at - court.x1) < 1e-3) && Math.min(b, court.y1) - Math.max(a, court.y0) > 1e-3 : Math.abs(at - court.y0) < 1e-3 && Math.min(b, court.x1) - Math.max(a, court.x0) > 1e-3);
-  const onTerrace = (axis, at, a, b) => terraces.some(v => (axis === 'x' ? (Math.abs(at - v.x0) < 1e-3 || Math.abs(at - v.x1) < 1e-3) && Math.min(b, v.y1) - Math.max(a, v.y0) > 1e-3 : (Math.abs(at - v.y0) < 1e-3 || Math.abs(at - v.y1) < 1e-3) && Math.min(b, v.x1) - Math.max(a, v.x0) > 1e-3));
+  const onTerrace = (axis, at, a, b) => [...terraces, ...(layout.voids || [])].some(v => (axis === 'x' ? (Math.abs(at - v.x0) < 1e-3 || Math.abs(at - v.x1) < 1e-3) && Math.min(b, v.y1) - Math.max(a, v.y0) > 1e-3 : (Math.abs(at - v.y0) < 1e-3 || Math.abs(at - v.y1) < 1e-3) && Math.min(b, v.x1) - Math.max(a, v.x0) > 1e-3));
   const isExt = (axis, at, a = 0, b = 0) => (axis === 'y' ? Math.abs(at) < EPS || Math.abs(at - D) < 1e-3 : Math.abs(at) < EPS || Math.abs(at - W) < 1e-3) || onCourt(axis, at, a, b) || onTerrace(axis, at, a, b);
   const walls = [];
   for (const axis of ['x', 'y']) for (const [at, list] of segs[axis]) {
@@ -1352,7 +1352,7 @@ export function drawLevel(doc0, layout, { level, T }) {
   for (const v of terraces) for (const [axis, at, a0, b0] of [['y', v.y0, v.x0, v.x1], ['y', v.y1, v.x0, v.x1], ['x', v.x0, v.y0, v.y1], ['x', v.x1, v.y0, v.y1]]) {
     const cover = walls.filter(x => x.axis === axis && Math.abs(x.at - at) < 1e-3 && x.b > a0 + 1e-3 && x.a < b0 - 1e-3).map(x => [Math.max(a0, x.a), Math.min(b0, x.b)]).sort((p, q) => p[0] - q[0]);
     let c = a0; const gaps = []; for (const [x0, x1] of cover) { if (x0 > c + .05) gaps.push([c, x0]); c = Math.max(c, x1); } if (c < b0 - .05) gaps.push([c, b0]);
-    for (const [g0, g1] of gaps) { const pa = axis === 'y' ? T(g0, at) : T(at, g0), pb = axis === 'y' ? T(g1, at) : T(at, g1); try { run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: .2, h: layout.upper ? OPEN_CAPS.parapet : OPEN_CAPS.seatWall, kind: 'fence' }); } catch { /* حاجز اختياري */ } }
+    for (const [g0, g1] of gaps) { const pa = axis === 'y' ? T(g0, at) : T(at, g0), pb = axis === 'y' ? T(g1, at) : T(at, g1); try { run({ type: 'add-wall', level: LVL, a: pa, b: pb, t: .2, h: v.fenceH ?? (layout.upper ? OPEN_CAPS.parapet : OPEN_CAPS.seatWall), kind: 'fence' }); } catch { /* حاجز اختياري */ } }
   }
   const opening = (axis, at, pos, kind, extra = {}) => {
     const w = walls.find(x => x.axis === axis && Math.abs(x.at - at) < 1e-3 && pos >= x.a - 1e-3 && pos <= x.b + 1e-3); if (!w) return null;
@@ -1422,7 +1422,9 @@ export function drawLevel(doc0, layout, { level, T }) {
   chain(rooms.filter(r => r.x1 > W - 1e-3).flatMap(r => [r.y0, r.y1]), y => ({ x: W, y }), { x: 1, y: 0 });
   furnish(rooms, T, run, doorAt, W, D, LVL);
   // أشجار الحديقة الداخلية
-  if (court && layout.courtOpen) { const cw = court.x1 - court.x0, cd = court.y1 - court.y0; for (const [fx, fy] of cd >= 7 ? [[.5, .3], [.5, .72]] : [[.5, .5]]) { const p = T(court.x0 + cw * fx, court.y0 + cd * fy); try { run({ type: 'add-fixture', level: LVL, kind: 'tree', x: p.x, y: p.y, rot: 0 }); } catch { /* شجرة اختيارية */ } } }
+  if (court && (layout.courtOpen || layout.courtClosed)) { const cw = court.x1 - court.x0, cd = court.y1 - court.y0; for (const [fx, fy] of cd >= 7 ? [[.5, .3], [.5, .72]] : [[.5, .5]]) { const p = T(court.x0 + cw * fx, court.y0 + cd * fy); try { run({ type: 'add-fixture', level: LVL, kind: 'tree', x: p.x, y: p.y, rot: 0 }); } catch { /* شجرة اختيارية */ } } }
+  // أشجار الفراغات الخارجية المرجعية (فناء/ساحة) على الدور الأرضي فقط
+  if (!layout.upper) for (const r of rooms.filter(r => r.trees && r.kind === 'terrace')) { const cw = r.x1 - r.x0, cd = r.y1 - r.y0; if (cw < 3 || cd < 3) continue; for (const [fx, fy] of cd >= 7 ? [[.5, .3], [.5, .72]] : [[.5, .5]]) { const p = T(r.x0 + cw * fx, r.y0 + cd * fy); try { run({ type: 'add-fixture', level: LVL, kind: 'tree', x: p.x, y: p.y, rot: 0 }); } catch { /* شجرة اختيارية */ } } }
   doc = fixWindowJunctions(doc); // حارس أخير: لا يغيّر شيئًا متى وُضعت النوافذ سليمة
   return doc;
 
@@ -2557,3 +2559,11 @@ export function checkDoc(doc) {
 }
 
 export default { generateVillaDesigns, buildProgram, searchLayouts, realizeLayout, layoutToDoc, checkDoc, countsFromRooms, DESIGN_TARGETS, VILLA_ENGINE_VERSION };
+
+/** داخليات المولّد التي تستعملها طبقة المساقط المرجعية (villa-reference.mjs). */
+export const __internals = { stack, row, distribute, subsets, byRank, foyerDepth, applyElevators, applyGardens, diversify, frame, addStair, hashBit, maxBedOf, hallNotes, defectOf, softIds, ideaCounts, buildPlan, differentFrom, W_, H_, A_, touch, shared, cut, split, isX, opp, snap, r2, MACRO_COST, macLimitFor, patTokens, MIN_RUN, PREFER_MODE_BONUS, MIN_SIDE };
+
+/** أدوات المولّد التي تحتاجها طبقة المراجع (villa-reference.mjs) بلا استيراد دائري: تُمرَّر عند الاستدعاء. */
+export function referenceKit() {
+  return { buildProgram, validatePlot, generatorFootprint, layoutToDoc, drawLevel, frame, addStair, checkDoc, relaxFixtures, quality, settleDoors, visualSig, visualSim, VISUAL_LIMIT, splitFails, diversify, applyElevators, applyGardens, hashBit, maxBedOf, hallNotes, softIds, SOFT_FAIL_COST, patCore };
+}
