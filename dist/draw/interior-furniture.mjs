@@ -231,6 +231,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
       box('gold', hw + .04, .03, .13, 0, hbH, hz); for (const s of [-1, 1]) box('gold', .03, hbH, .13, s * (hw / 2 + .02), 0, hz);
     } else if (style === 'dark') { rbox('leather', hw + .1, hbH - .15, .1, .03, 0, .1, hz); rbox('blackMetal', hw + .14, .03, .14, .01, 0, hbH - .06, hz); }
     else { const nv = Math.round(hw / .35); for (let i = 0; i < nv; i++) rbox('bedHead', hw / nv - .015, hbH - .2, .1, .045, -hw / 2 + hw / nv * (i + .5), .14, hz); rbox('woodMid', hw + .06, .04, .13, .01, 0, hbH - .08, hz); }
+    if (style !== 'najdi') box(style === 'dark' ? 'blackMetal' : 'woodDark', hw, hbH - .22, .016, 0, .12, hz - .066); // finished back of the headboard (the bed is often seen from behind)
     // mattress + bedding
     const my = baseY + frameH - .02;
     cush('linen', bw - .02, matH, bd - .08, 0, my, .02, 0, 0, 0, { r: .07, pinch: .1, crown: .02 });
@@ -363,7 +364,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
     cyl('chrome', .014, .014, .2, 0, .12 + cab + .035, -d / 2 + .06, 8); tube('chrome', [[0, .12 + cab + .23, -d / 2 + .06], [0, .12 + cab + .27, -d / 2 + .1], [0, .12 + cab + .22, -d / 2 + .16]], .01, 8, 5);
     // framed mirror with a warm LED halo, towel and soap
     const mw = w * .9, my = 1.12;
-    if (style === 'contemporary' || style === 'dark') { sph('mirror', mw / 2, mw / 2, .006, 0, my + .1, -d / 2 + .02, 24, 2); tor(frame, mw / 2, .014, 0, my + .1, -d / 2 + .02, 0, 0, 0, 5, 28); }
+    if (style === 'contemporary' || style === 'dark') { cyl('mirror', mw / 2, mw / 2, .01, 0, my + .1 - .005, -d / 2 + .022, 32, Math.PI / 2); tor(frame, mw / 2, .014, 0, my + .1, -d / 2 + .02, 0, 0, 0, 5, 32); }
     else { box(frame, mw + .06, .86, .02, 0, my - .35, -d / 2 + .01); box('mirror', mw, .8, .012, 0, my - .32, -d / 2 + .022); }
     box(MG, mw, .012, .01, 0, my + .52, -d / 2 + .03);
     rbox('linen', .3, .04, .18, .012, w * .45, .12 + cab + .035, .0); cyl('ceramic', .025, .025, .12, -w * .38, .12 + cab + .035, .03, 8);

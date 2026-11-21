@@ -483,7 +483,7 @@ export class DrawViewer {
       const toC = Math.atan2(r.centroid.x - x, r.centroid.y - y), off = Math.abs(Math.atan2(Math.sin(toC - a), Math.cos(toC - a)));
       let seen = 0, bedFace = 0; for (const f of furniture) { const fa = Math.atan2(f.x - x, f.y - y), d = Math.abs(Math.atan2(Math.sin(fa - a), Math.cos(fa - a))); if (d < 32 * DEG && Math.hypot(f.x - x, f.y - y) > .9) { const dd = Math.hypot(f.x - x, f.y - y), prox = dd < 1.3 ? .35 : dd < 5.2 ? 1 : 5.2 / dd; seen += f.w * prox; if (f.bed) bedFace += Math.cos(a - f.rot) * prox; } } // a bed is photographed from its foot: look along the head direction (plan heading = document rotation)
       const square = rings[0].some((A, i) => { const B = rings[0][(i + 1) % rings[0].length], e = Math.atan2(B.x - A.x, B.y - A.y); return Math.abs(Math.sin(e - a)) < .05 || Math.abs(Math.cos(e - a)) < .05; });
-      const score = Math.min(depth, 6.5) * .5 - off * .6 + Math.min(seen, 5) * 1.1 + (square ? .5 : 0) + bedFace * 1.8;
+      const score = Math.min(depth, 6.5) * .5 - off * .6 + Math.min(seen, 5) * 1.1 + (square ? .5 : 0) + bedFace * 3.4 - (front < 2.6 ? (2.6 - front) * 1.4 : 0); // a view that ends in a wall a metre ahead is not a composition
       if (!best || score > best.score) best = { x, y, headingDeg: a / DEG, depth, score };
     }
     this.walk.level = prevLevel;
