@@ -470,6 +470,11 @@ export class DrawViewer {
       for (let x = b.x0 + .3; x < b.x1 - .2; x += .5) for (let y = b.y0 + .3; y < b.y1 - .2; y += .5) if (free(x, y)) grid.push({ x, y });
       starts = grid.sort((a, c) => Math.hypot(a.x - r.centroid.x, a.y - r.centroid.y) - Math.hypot(c.x - r.centroid.x, c.y - r.centroid.y)).slice(0, 6);
     }
+    { // more candidate start points over the whole room (a bed or table on the centroid otherwise leaves only starts beside it, and a bed can then only be seen from behind)
+      const b = r.bounds, extra = [];
+      for (let x = b.x0 + .5; x < b.x1 - .4; x += .9) for (let y = b.y0 + .5; y < b.y1 - .4; y += .9) if (free(x, y)) extra.push({ x, y });
+      starts = [...starts, ...extra.sort((a, c) => Math.hypot(a.x - r.centroid.x, a.y - r.centroid.y) - Math.hypot(c.x - r.centroid.x, c.y - r.centroid.y)).slice(0, 18)];
+    }
     const lvId = this.built.levels[lvIndex]?.id, furniture = (this.built.fixtureBoxes || []).filter(f => f.level === lvId && pointInPolygon({ x: f.x, y: f.y }, r.polygon, 0)).map(f => ({ x: f.x, y: f.y, w: f.kind === 'rug' ? .3 : f.kind.startsWith('bed') ? 1.6 : f.kind === 'majlis-sofa' || f.kind.startsWith('sofa') ? 1.3 : 1, bed: f.kind.startsWith('bed'), rot: f.rot || 0 }));
     let best = null;
     if (!starts.length) { this.walk.level = prevLevel; return null; }

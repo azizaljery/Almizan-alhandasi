@@ -17,7 +17,7 @@ import { stairLayout, emitStair, stairHeightAt } from './stairs3d.mjs';
 import { emitOpening, archProfile } from './openings3d.mjs';
 import { buildSite } from './site3d.mjs';
 import { attachInterior } from './interior-materials.mjs';
-import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
+import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, shade, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
 import { hexLinear } from './interior-textures.mjs';
 import { buildPiece } from './interior-pieces.mjs';
 import { buildRichFixture, isRichKind } from './interior-furniture.mjs';
@@ -330,7 +330,10 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       const pal = furniturePalette(IV.id, sp.type, sp.key, IV.seed, IV.pal), fx = { ...lib.fixtures };
       for (const [name, hx] of Object.entries(pal)) { if (!lib.fixtures[name]) continue; fx[name] = lib.get((WOOD_NAMES.has(name) ? 'iv:fxw:' : FABRIC_NAMES.has(name) ? 'iv:fxf:' : 'iv:fx:') + name + ':' + hexKey(hx)) || fx[name]; }
       fx.glow = lib.get('iv:glow:' + hexKey(sp.fin.led)) || fx.lampShade;
-      if (IV.pal && pal.rug) fx.rug = lib.get(['iv:rug', IV.id, hexKey(pal.rug), hexKey(IV.pal.accent), hexKey(IV.pal.accent2), hexKey(IV.pal.woodDark)].join(':')) || fx.rug;
+      if (IV.pal && pal.rug) { // rug colours: the accent shows in the border only where the style wants a bold rug (najdi Sadu bands, classic/luxury medallions); modern rugs stay tonal
+        const bold = IV.id === 'najdi' || IV.id === 'classic' || IV.id === 'luxury', P = IV.pal;
+        fx.rug = lib.get(['iv:rug', IV.id, hexKey(pal.rug), hexKey(bold ? P.accent : shade(pal.rug, -.2)), hexKey(bold ? P.accent2 : shade(pal.rug, .28)), hexKey(P.woodDark)].join(':')) || fx.rug;
+      }
       const rm = { fx, led: hexKey(sp.fin.led), pal }; roomMatsCache.set(sp.key, rm); return rm;
     };
     const ivM = rm => name => name === 'iv:glow' ? lib.get('iv:glow:' + (rm?.led || 'ffdca0')) : name.startsWith('iv:') ? lib.get(name) : (rm?.fx?.[name] || lib.fixtures[name] || lib.fixtures.fallback);
