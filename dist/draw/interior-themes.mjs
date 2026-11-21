@@ -2,6 +2,7 @@
 // Pure data + pure functions (no THREE, no DOM) so it is testable in node and shared by scene3d and the UI.
 // The finishes are ILLUSTRATIVE (what a finished room could look like); they never change walls, openings, areas or quantities.
 import { designHash } from '../facade-j/facade-realism/variation.mjs';
+import { PALETTES, palettesOf, paletteById } from './interior-palettes.mjs';
 
 export const INTERIOR_STORAGE_KEY = 'mizan.interior.theme.v1';
 
@@ -220,7 +221,7 @@ const strHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { 
  * Concrete finish of one room: floor preset, wall paint, optional feature wall / wainscot / tiles, ceiling, skirting, light fitting.
  * Deterministic in (theme, room type, room key, design seed) so a rebuild never reshuffles, but each room of a type can differ.
  */
-export function roomFinish(themeId, type, roomKey = '', designSeed = 0, { area = 12 } = {}) {
+export function roomFinish(themeId, type, roomKey = '', designSeed = 0, { area = 12, palette = null } = {}) {
   const T = INTERIOR_THEMES[themeId] || INTERIOR_THEMES[DEFAULT_INTERIOR_THEME], R = T.rooms[type] || T.rooms.corridor, group = roomGroup(type);
   const r = mulberry((strHash(String(roomKey) + type) ^ designSeed) >>> 0);
   const pool = T.paint[group] || T.paint.service;
@@ -232,14 +233,45 @@ export function roomFinish(themeId, type, roomKey = '', designSeed = 0, { area =
     else { const ci = R.accent.color ?? 0; f.accent = { color: T.accents[Math.min(T.accents.length - 1, ci)] }; }
   }
   if (themeId === 'najdi' && type === 'majlis') f.beams = true;
+  if (palette) applyPalette(f, palette, type, group);
   if (group === 'wet') { f.cove = false; f.accent = null; f.band = null; }
   if (type === 'kitchen') f.accent = null;
   if (f.band && f.accent?.preset && /marble|ashlar|fluted/.test(f.accent.preset) && !f.band.preset.startsWith('panel')) f.band = null;
   return f;
 }
 
+const FLOOR_FAMILY = { majlis: 'public', living: 'public', dining: 'public', corridor: 'public', stairs: 'public', entrance: 'entrance', bedroom: 'private', master: 'private', office: 'private', kitchen: 'kitchen', storage: 'kitchen', bath: 'wet', laundry: 'wet' };
+const PAINT_FIELD = { public: 'wall', private: 'wallPrivate', service: 'wallService', wet: 'wallWet' };
+/** The palette decides floor, wall colour, feature-wall colour and the wet-room tile; the theme keeps structure (trim, cornice, lights, door style). */
+function applyPalette(f, p, type, group) {
+  f.paletteId = p.id; f.paint = p[PAINT_FIELD[group]] || p.wall;
+  f.floor = p.floors[FLOOR_FAMILY[type] || 'public'] || f.floor;
+  if (f.accent?.color) f.accent = { color: p.accentWall?.color || shade(p.wall, -.07) };
+  else if (f.accent?.preset && p.accentWall?.preset) f.accent = { preset: p.accentWall.preset };
+  else if (f.accent?.preset && p.accentWall?.color) f.accent = { color: p.accentWall.color };
+  if (f.full) f.full = { ...f.full, preset: p.wetWall };
+  if (f.band && type === 'kitchen') f.band = { ...f.band, preset: p.band };
+  if (type === 'kitchen' && f.full) f.full = { ...f.full, preset: p.band };
+}
+const clamp8 = v => Math.max(0, Math.min(255, Math.round(v)));
+/** Lighten (amt>0) or darken (amt<0) a hex colour by mixing towards white / black. */
+export function shade(hex, amt) {
+  const h = String(hex).replace('#', ''), c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)), t = amt >= 0 ? 255 : 0, k = Math.abs(amt);
+  return '#' + c.map(v => clamp8(v + (t - v) * k).toString(16).padStart(2, '0')).join('');
+}
+const METAL_HEX = { brass: '#c8a24a', chrome: '#d9dcdd', black: '#2b2c2e', steel: '#bfc2c4' };
+
+/** Which palette this design gets: an explicit id / index (the selector), else one of the theme's palettes by the design fingerprint. */
+export function resolveInteriorPalette(themeId, seed = 0, choice = null) {
+  const list = palettesOf(themeId);
+  if (typeof choice === 'string') { const p = paletteById(choice); if (p && list.includes(p)) return p; }
+  if (Number.isInteger(choice) && choice >= 0) return list[choice % list.length];
+  return list[Math.floor(mulberry(seed ^ 0x51ed270b)() * list.length) % list.length];
+}
+
 /** Colour overrides for the shared furniture material names of one room (consumed by scene3d to create material variants). */
-export function furniturePalette(themeId, type, roomKey = '', designSeed = 0) {
+export function furniturePalette(themeId, type, roomKey = '', designSeed = 0, palette = null) {
+  if (palette) return paletteFurniture(themeId, type, palette);
   const T = INTERIOR_THEMES[themeId] || INTERIOR_THEMES[DEFAULT_INTERIOR_THEME], r = mulberry((strHash('f' + roomKey + type) ^ designSeed) >>> 0), out = {};
   const ix = r(); // one shared index keeps a room's pieces coherent (sofa + cushions + table come from the same family)
   for (const [name, arr] of Object.entries(T.furn)) out[name] = arr[Math.min(arr.length - 1, Math.floor((name === 'woodDark' || name === 'woodMid' || name === 'woodLight' ? ix : (ix * 7.13 + (name.length % 3) * .21) % 1) * arr.length))];
@@ -249,3 +281,17 @@ export function furniturePalette(themeId, type, roomKey = '', designSeed = 0) {
 }
 
 export const THEME_FIELDS = Object.freeze(['paint', 'accents', 'ceiling', 'trim', 'skirt', 'cornice', 'led', 'metal', 'rooms', 'door', 'furn', 'curtain', 'art', 'rug']);
+
+/** Furniture colours straight from the palette (no random choice: the 60/30/10 roles are fixed per palette). */
+function paletteFurniture(themeId, type, p) {
+  const T = INTERIOR_THEMES[themeId] || INTERIOR_THEMES[DEFAULT_INTERIOR_THEME], F = T.furn, gold = METAL_HEX[p.metal] || METAL_HEX.brass;
+  const out = {
+    upholstery: p.main, upholsteryAlt: p.mainAlt, cushionA: p.accent, cushionB: p.accent2, cushionC: shade(p.mainAlt, .35), throwFab: p.accent, bedHead: p.mainAlt, curtainFab: p.curtain,
+    majlisFabric: p.main, majlisCream: p.mainAlt, fabric: p.main, fabricDark: shade(p.main, -.25), fabricBlue: p.accent,
+    woodDark: p.woodDark, woodMid: p.woodMid, woodLight: p.woodLight, leather: p.leather, duvet: p.duvet, duvetAccent: p.accent, pillowA: shade(p.duvet, .35), pillowB: p.accent2,
+    lacquer: p.cabinet || F.lacquer[0], quartz: F.quartz[0], gold, lampShade: shade(p.duvet, .4), rug: p.rug,
+  };
+  if (type === 'kitchen' && !p.cabinet) out.lacquer = F.lacquer[0];
+  return out;
+}
+export { PALETTES };

@@ -30,10 +30,10 @@ export const STYLES = Object.freeze({
 });
 
 export class DrawViewer {
-  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorStyle = null, interiorTaste = null } = {}) {
+  constructor(container, { THREE, onState = null, shadows = true, shadowSize = 2048, antialias = true, preserveDrawingBuffer = false, maxPixelRatio = 2, autoSelect = true, interior = true, interiorTheme = null, interiorPalette = null, interiorStyle = null, interiorTaste = null } = {}) {
     this.THREE = THREE || globalThis.THREE;
     // interior finish system (themes, per-room materials, dressing): on by default in the viewer; small textures on touch / small screens
-    this.interior = { on: !!interior, theme: interiorTheme, style: interiorStyle, taste: interiorTaste };
+    this.interior = { on: !!interior, theme: interiorTheme, palette: interiorPalette, style: interiorStyle, taste: interiorTaste };
     this.lowPower = !!(globalThis.matchMedia?.('(pointer: coarse)')?.matches) || (globalThis.innerWidth || 1200) < 760;
     if (!this.THREE) throw new Error('THREE is required');
     const T = this.THREE;
@@ -176,7 +176,7 @@ export class DrawViewer {
     this.clearHighlight(); this.clearSection();
     this.doc = doc;
     const iv = this.interior;
-    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
+    this.built = buildBuildingScene(doc, this.THREE, { maxAnisotropy: Math.min(this.lowPower ? 4 : 8, this.renderer.capabilities.getMaxAnisotropy()), quality: this.lowPower ? .6 : 1, interior: iv.on, interiorTheme: iv.theme, interiorPalette: iv.palette, interiorStyle: iv.style, interiorTaste: iv.taste, ...options });
     this.scene.add(this.built.group);
     this.pickables = [];
     this.built.group.traverse(o => { if (o.isMesh) { const p = o.parent?.name; if (['walls', 'floors', 'fixtures', 'openings', 'stairs'].includes(p)) this.pickables.push(o); } });
@@ -193,10 +193,10 @@ export class DrawViewer {
 
   getBuilt() { return this.built; }
   /** The interior theme of the current building ({ theme, source, reason }) or null when the finish system is off. */
-  interiorInfo() { const i = this.built?.interior; return i ? { theme: i.theme, source: i.source, reason: i.reason } : null; }
+  interiorInfo() { const i = this.built?.interior; return i ? { theme: i.theme, source: i.source, reason: i.reason, palette: i.palette } : null; }
   /** Switch the interior theme (id from interior-themes, or null = let the design choose) and rebuild in place; keeps camera, walk position and style. */
-  setInteriorTheme(id, { style, taste } = {}) {
-    Object.assign(this.interior, { on: true, theme: id || null }); if (style !== undefined) this.interior.style = style; if (taste !== undefined) this.interior.taste = taste;
+  setInteriorTheme(id, { style, taste, palette } = {}) {
+    Object.assign(this.interior, { on: true, theme: id || null, palette: palette ?? null }); if (style !== undefined) this.interior.style = style; if (taste !== undefined) this.interior.taste = taste;
     if (!this.doc) return null;
     const lv = this.visibleLevels; this.setDoc(this.doc, { keepCamera: true }); if (lv) { this.visibleLevels = lv; this.applyVisibility(); }
     this.emit('interior'); return this.interiorInfo();

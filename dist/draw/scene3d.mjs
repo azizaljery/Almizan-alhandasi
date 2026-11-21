@@ -17,7 +17,7 @@ import { stairLayout, emitStair, stairHeightAt } from './stairs3d.mjs';
 import { emitOpening, archProfile } from './openings3d.mjs';
 import { buildSite } from './site3d.mjs';
 import { attachInterior } from './interior-materials.mjs';
-import { resolveInteriorTheme, roomFinish, furniturePalette, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
+import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
 import { hexLinear } from './interior-textures.mjs';
 import { buildPiece } from './interior-pieces.mjs';
 import { dressRoom } from './interior-dress.mjs';
@@ -32,7 +32,7 @@ export const DEFAULTS = Object.freeze({
   stoneAccent: 'entry',     // stone cladding on the façade that holds the entry door ('entry' | 'none')
   textures: true, maxAnisotropy: 4, quality: 1,
   interior: false,          // interior finish system (themes, per-room materials, cove lighting, curtains, dressing); the viewer turns it on
-  interiorTheme: null, interiorStyle: null, interiorTaste: null, dress: true,
+  interiorTheme: null, interiorPalette: null, interiorStyle: null, interiorTaste: null, dress: true,
   materials: null,          // supply a material library to share textures between scenes
 });
 
@@ -60,12 +60,13 @@ export function buildBuildingScene(doc, THREE, options = {}) {
   const IV = opt.interior ? (() => {
     attachInterior(THREE, lib, { quality: opt.quality, maxAnisotropy: opt.maxAnisotropy });
     const res = resolveInteriorTheme(doc, { theme: opt.interiorTheme, style: opt.interiorStyle, taste: opt.interiorTaste || [] });
-    return { ...res, seed: safeDesignHash(doc), T: INTERIOR_THEMES[res.id], rooms: new Map(), dressed: [] };
+    const seed = safeDesignHash(doc), pal = opt.interiorPalettes === false ? null : resolveInteriorPalette(res.id, seed, opt.interiorPalette);
+    return { ...res, seed, T: INTERIOR_THEMES[res.id], pal, rooms: new Map(), dressed: [] };
   })() : null;
   const hexKey = h => String(h).replace('#', '').toLowerCase();
   // interior light is generous (walk-mode hemisphere + fill): paint is stored a little darker so rooms keep their colour instead of washing out to white
   const IV_GAIN = .74, paintLin = hx => hexLinear(hx).map(v => v * IV_GAIN);
-  const result = { group, rooms: new Map(), levels: [], site: null, stats: {}, lib, options: opt, doc, interior: IV ? { theme: IV.id, source: IV.source, reason: IV.reason, rooms: IV.rooms, dressed: IV.dressed } : null };
+  const result = { group, rooms: new Map(), levels: [], site: null, stats: {}, lib, options: opt, doc, interior: IV ? { theme: IV.id, source: IV.source, reason: IV.reason, palette: IV.pal ? { id: IV.pal.id, ar: IV.pal.ar, why: IV.pal.why } : null, rooms: IV.rooms, dressed: IV.dressed } : null };
   const levelsDoc = doc.levels?.length ? doc.levels : [{ id: 'L1', name: 'الدور الأرضي', elevation: 0, height: 3.2 }];
   let acc = 0;
   const lvData = levelsDoc.map((lv, i) => {
@@ -85,7 +86,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       const label = labels.find(l => inSpace(l.seed, s)) || null;
       const type = label?.type || 'other', def = ROOM_TYPES[type] || ROOM_TYPES.other;
       const sp = Object.assign(s, { key: L.id + ':' + s.id, levelId: L.id, label, type, name: label?.name || roomTypeName(type), floorKind: def.floor, open: !!def.open, tint: tintOf(type), levelIndex: L.i });
-      if (IV) { sp.fin = roomFinish(IV.id, type, sp.key, IV.seed, { area: sp.area }); IV.rooms.set(sp.key, sp.fin); }
+      if (IV) { sp.fin = roomFinish(IV.id, type, sp.key, IV.seed, { area: sp.area, palette: IV.pal }); IV.rooms.set(sp.key, sp.fin); }
       return sp;
     });
     const next = lvData[L.i + 1];
@@ -316,7 +317,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     const roomMats = sp => { // shared fixture materials, recoloured for this room by the theme palette
       if (!IV || !sp?.fin) return { fx: lib.fixtures, led: 'ffdca0' };
       if (roomMatsCache.has(sp.key)) return roomMatsCache.get(sp.key);
-      const pal = furniturePalette(IV.id, sp.type, sp.key, IV.seed), fx = { ...lib.fixtures };
+      const pal = furniturePalette(IV.id, sp.type, sp.key, IV.seed, IV.pal), fx = { ...lib.fixtures };
       for (const [name, hx] of Object.entries(pal)) { if (!lib.fixtures[name]) continue; fx[name] = lib.get((WOOD_NAMES.has(name) ? 'iv:fxw:' : 'iv:fx:') + name + ':' + hexKey(hx)) || fx[name]; }
       const rm = { fx, led: hexKey(sp.fin.led), pal }; roomMatsCache.set(sp.key, rm); return rm;
     };
@@ -504,7 +505,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
           if (!it.piece) { F.addObject(buildFixture(THREE, it.kind, dm, rm.fx), keyOf, fixtureMatrix(THREE, it.x, it.y, E, it.rot || 0, it.kind)); }
           else {
             const po = { ...(it.po || {}), seed: ++dn };
-            if (it.kind === 'wall-art') { const A = IV.T.art, kd = pickN(A.kinds, ((dn * 37 + (sp.fin.seed * 1000 | 0)) % 97) / 97); po.art = lib.iv.art(kd, A.pal, dn % 4); po.frame = IV.T.metal === 'black' ? 'blackMetal' : (sp.fin.seed > .5 ? 'woodDark' : 'gold'); }
+            if (it.kind === 'wall-art') { const A = IV.T.art, kd = pickN(A.kinds, ((dn * 37 + (sp.fin.seed * 1000 | 0)) % 97) / 97), apal = IV.pal ? [IV.pal.wall, IV.pal.mainAlt, IV.pal.main, IV.pal.accent] : A.pal; po.art = lib.iv.art(kd, apal, dn % 4); po.frame = IV.T.metal === 'black' ? 'blackMetal' : (sp.fin.seed > .5 ? 'woodDark' : 'gold'); }
             if (it.kind === 'wall-mirror') po.frame = IV.T.metal === 'black' ? 'blackMetal' : 'gold';
             if (it.kind === 'console' || it.kind === 'sideboard' || it.kind === 'bookcase' || it.kind === 'dresser') { po.wood = 'woodMid'; po.top = it.kind === 'console' || it.kind === 'sideboard' ? 'marbleTop' : 'woodMid'; }
             ivPiece(it.kind, it.x, it.y, it.rot || 0, dm, rm, po);
@@ -521,7 +522,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       for (const { seg, o, space, roomSide } of windowsToDress) { // full-height curtains on habitable-room windows
         if (!['majlis', 'living', 'bedroom', 'master', 'dining', 'office'].includes(space.type) || o.w < .8) continue;
         const nrm = mul(seg.left, roomSide), c = add(o.center, mul(nrm, seg.t / 2 + .1)), rm = roomMats(space), T = IV.T, r = space.fin.seed;
-        const fab = 'iv:fab:' + hexKey(pickN(T.curtain, r)), sheer = 'iv:sheer:' + hexKey(space.fin.paint);
+        const fab = 'iv:fab:' + hexKey(IV.pal ? IV.pal.curtain : pickN(T.curtain, r)), sheer = 'iv:sheer:' + hexKey(space.fin.paint);
         ivPiece('curtain', c.x, c.y, Math.atan2(nrm.x, nrm.y), { w: o.w + .7, d: .12, h: ceilZ - .06 }, rm, { fabric: fab, sheer, seed: 1 });
       }
     }

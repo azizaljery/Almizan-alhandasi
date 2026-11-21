@@ -76,13 +76,13 @@ export const PALETTES = Object.freeze({
   dark: [
     { id: 'd-charcoal-copper', ar: 'فحمي مع نحاسي', why: 'جدران رمادية فاتحة ٦٠٪ مع أرضية أنثراسايت (فرق لمعان كبير)، أثاث بلون الرمادي الدافئ ٣٠٪ ولمسة نحاسية ١٠٪ تدفئ الفحم؛ الأسود معدن/إطارات لا مساحات.',
       wall: '#dad9d4', wallPrivate: '#d7d6d1', wallService: '#dedcd8', wallWet: '#e0dfdc', floors: { public: 'porcelainAnthracite', private: 'woodAsh', kitchen: 'porcelainAnthracite', wet: 'porcelainAnthracite', entrance: 'marbleDark' }, wetWall: 'tileLargeDark', band: 'tileLargeDark',
-      accentWall: { preset: 'flutedDark' }, main: '#8d867b', mainAlt: '#b3ab9f', accent: '#b4703a', accent2: '#e0d7c8', woodDark: '#2c211b', woodMid: '#5a4232', woodLight: '#9b7c5a', metal: 'black', curtain: '#6b6862', rug: '#7a756c', duvet: '#d7d5cf', leather: '#2e2723' },
+      accentWall: { preset: 'flutedDark' }, cabinet: '#30343a', main: '#8d867b', mainAlt: '#b3ab9f', accent: '#b4703a', accent2: '#e0d7c8', woodDark: '#2c211b', woodMid: '#5a4232', woodLight: '#9b7c5a', metal: 'black', curtain: '#6b6862', rug: '#7a756c', duvet: '#d7d5cf', leather: '#2e2723' },
     { id: 'd-forest-brass', ar: 'أخضر غابي مع نحاسي أصفر', why: 'جدران رمادية دافئة وأرضية خشب رمادي، أثاث أخضر غابي داكن ٣٠٪ (محايد تقريبًا في اللمعان) ولمسة نحاس أصفر ١٠٪.',
       wall: '#dbdad3', wallPrivate: '#d8d7d0', wallService: '#dfddd7', wallWet: '#e0dfda', floors: { public: 'woodAsh', private: 'woodAsh', kitchen: 'porcelainAnthracite', wet: 'porcelainAnthracite', entrance: 'marbleDark' }, wetWall: 'tileLargeDark', band: 'tileLargeDark',
-      accentWall: { preset: 'flutedDark' }, main: '#35493f', mainAlt: '#b4c0b3', accent: '#c19a55', accent2: '#e2dccd', woodDark: '#2c211b', woodMid: '#5b4535', woodLight: '#9b805f', metal: 'black', curtain: '#4a5a4f', rug: '#8a8577', duvet: '#d8d8d2', leather: '#2e2723' },
+      accentWall: { preset: 'flutedDark' }, cabinet: '#2c3a33', main: '#35493f', mainAlt: '#b4c0b3', accent: '#c19a55', accent2: '#e2dccd', woodDark: '#2c211b', woodMid: '#5b4535', woodLight: '#9b805f', metal: 'black', curtain: '#4a5a4f', rug: '#8a8577', duvet: '#d8d8d2', leather: '#2e2723' },
     { id: 'd-ink-ochre', ar: 'حبري مع أوكر', why: 'درجة أزرق حبري داكن ٣٠٪ فوق جدران رمادية فاتحة وأرضية خشب جوزي؛ لمسة أوكر ١٠٪ هي المقابل الدافئ للأزرق فيبقى المشهد متزنًا.',
       wall: '#dad9d4', wallPrivate: '#d7d6d1', wallService: '#dedcd8', wallWet: '#e0dfdc', floors: { public: 'woodWalnut', private: 'woodWalnut', kitchen: 'porcelainAnthracite', wet: 'porcelainAnthracite', entrance: 'marbleDark' }, wetWall: 'tileLargeDark', band: 'tileLargeDark',
-      accentWall: { preset: 'flutedDark' }, main: '#62718c', mainAlt: '#8e99ad', accent: '#bf8a3a', accent2: '#e0d8c6', woodDark: '#2c211b', woodMid: '#5a4232', woodLight: '#9b7c5a', metal: 'black', curtain: '#566176', rug: '#7b7a76', duvet: '#d6d6d1', leather: '#2e2723' },
+      accentWall: { preset: 'flutedDark' }, cabinet: '#2d3442', main: '#62718c', mainAlt: '#8e99ad', accent: '#bf8a3a', accent2: '#e0d8c6', woodDark: '#2c211b', woodMid: '#5a4232', woodLight: '#9b7c5a', metal: 'black', curtain: '#566176', rug: '#7b7a76', duvet: '#d6d6d1', leather: '#2e2723' },
   ],
 });
 
