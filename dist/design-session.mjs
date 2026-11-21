@@ -115,6 +115,7 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
     Object.assign(req.prefs, more.prefs); Object.assign(req.extras, more.extras); Object.assign(req.areas, more.areas);
     for (const [k, v] of Object.entries(more.counts)) if (Number.isInteger(v) && (v > 0 || (v === 0 && ['majlis', 'dining'].includes(k)))) req.counts[k] = v;
     req.rules = mergeRules(req.rules || [], more.rules || []);
+    if (more.privacy?.length) { const have = new Map((req.privacy || []).map(p => [p.kind, p])); for (const p of more.privacy) have.set(p.kind, { ...have.get(p.kind), ...p, must: !!(have.get(p.kind)?.must || p.must) }); req.privacy = [...have.values()]; }
     for (const [k, v] of Object.entries(more.tweaks || {})) req.tweaks[k] = Array.isArray(v) ? [...new Set([...(req.tweaks[k] || []), ...v])] : (req.tweaks[k] || 1) * v; // preferModes قائمة أنماط تُضم، والباقي معاملات تُضرب
     if (more.unsupported?.length) req.unsupported = [...new Set([...(req.unsupported || []), ...more.unsupported])];
     req.understood = [...new Set([...(req.understood || []), ...more.understood])];

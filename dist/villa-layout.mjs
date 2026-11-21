@@ -2304,8 +2304,8 @@ export const SOFT_FAIL_COST = 45;
  * (قاعدة مكانية custom أضافتها شرعاء من الأعراف، مثل «الطعام بجوار المجلس») إخفاقه يُعلن في السجل ويؤخّر البديل فقط.
  */
 export function splitFails(ledger = [], requirements = {}) {
-  const custom = new Set((requirements.rules || []).filter(r => r.custom).map(r => r.id));
-  let hard = 0, soft = 0; for (const x of ledger) if (!x.ok) (custom.has(x.id) ? soft++ : hard++);
+  const custom = new Set([...(requirements.rules || []).filter(r => r.custom).map(r => r.id), ...(requirements.privacy || []).filter(p => !p.must).map(p => 'PV-' + p.kind)]);
+  let hard = 0, soft = 0; for (const x of ledger) if (!x.ok && !x.unverified) (custom.has(x.id) ? soft++ : hard++);
   return { hard, soft };
 }
 const MODE_OVER_FILL = 4;
