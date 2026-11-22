@@ -23,3 +23,47 @@
 .mzr-show,.mz-review .btn{min-height:44px}
 .mzr-ok summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
 @media (max-width:560px){.mz-review{padding-inline:12px}.mzr-counts{grid-template-columns:1fr 1fr 1fr}.mzr-count{font-size:13px}.mzr-show{width:100%}}
+
+/* ---- تصحيح التباين (قائم قبل المراجعة): سطح الصفحة داكن (review-theme) بينما مكونات present.css بخلفيات فاتحة ونصها موروث فاتح.
+   نثبّت حبرًا داكنًا على كل سطح فاتح، وألوانًا فاتحة على الأسطح الداكنة. القيم تُقاس في tests/design-contrast.test.mjs. ---- */
+body.mizan-review{--ink-on-light:#26251f;--ink-soft-on-light:#4a483e}
+body.mizan-review .planbar,body.mizan-review .planbar label,body.mizan-review .planbar .seg button:not(.on),body.mizan-review .planbar .tools button{color:var(--ink-on-light)}
+body.mizan-review .legend,body.mizan-review .legend span{color:var(--ink-soft-on-light)}
+body.mizan-review .scorecard .sc-why,body.mizan-review .scorecard .sc-why b,body.mizan-review .scorecard .sc-why p{color:var(--ink-on-light)}
+body.mizan-review .fixes .fixlist li,body.mizan-review .card.fit .fitlist li{color:var(--ink-on-light)}
+body.mizan-review .fixes .fixlist li .why,body.mizan-review .card.fit .fitlist li .why{color:var(--ink-soft-on-light)}
+body.mizan-review .scorecard .sc-total b{color:#7fdcc6}
+body.mizan-review .scorecard .sc-total.mid b{color:#f0c878}
+body.mizan-review .scorecard .sc-total.low b{color:#f59a88}
+body.mizan-review .card>h2,body.mizan-review .mz-review .mzr-head h2{color:#8fe3cf}
+body.mizan-review .mzr-top .pill{color:var(--mzr-ink,#f4eee5)}
+body.mizan-review .mzr-top .pill.sev.mandatory{color:var(--mzr-bad)}
+body.mizan-review .mzr-top .pill.sev.warning{color:var(--mzr-warn)}
+body.mizan-review .mzr-top .pill.st.violated{color:var(--mzr-bad)}body.mizan-review .mzr-top .pill.st.unverified{color:var(--mzr-warn)}body.mizan-review .mzr-top .pill.st.verified{color:var(--mzr-ok)}
+body.mizan-review .mz-review{--mzr-ink:#f4eee5;--mzr-soft:#c9ccd6}
+
+/* ---- الجوال: الأزرار العائمة (شرعاء وإيقاف الحركة) لا تغطي بطاقة المراجعة؛ تختفي بلطف ما دامت البطاقة ظاهرة وتعود بعدها ---- */
+.mz-review{scroll-margin-bottom:200px}
+@media (max-width:780px){
+  .mz-review{padding-bottom:calc(168px + env(safe-area-inset-bottom))}
+  body.mzr-card-visible .shp-fab,body.mzr-card-visible .ambient-motion{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .2s,visibility .2s}
+}
+body.mizan-review .cols table th,body.mizan-review .cols table tfoot td{color:var(--ink-on-light)}
+body.mizan-review .orient span,body.mizan-review .titlebar .orient{color:#f0d9a8}
+body.mizan-review ul.tick li.bad b{color:#f59a88}
+body.mizan-review ul.tick li .why{color:#c9ccd6}
+body.mizan-review ul.notes,body.mizan-review ul.notes li{color:#d6d9e2}
+body.mizan-review .regs .rg-note,body.mizan-review .regs .rg-note b,body.mizan-review #regsCard .rg-note,body.mizan-review #regsCard .rg-note b{color:#d6d9e2}
+body.mizan-review #regsCard details.fold>summary,body.mizan-review #regsCard details.rg-na>summary,body.mizan-review #regsCard .rg-note a{color:#f0c878}
+body.mizan-review #regsCard summary h2,body.mizan-review #regsCard h2{color:#8fe3cf}
+body.mizan-review .rg-mark{color:#fff;background:#6e6a5c}body.mizan-review .rg-review .rg-mark{background:#8a5a0e}body.mizan-review .rg-ok .rg-mark{background:#2f7d4f}body.mizan-review .rg-fail .rg-mark{background:#b3412e}
+/* بطاقة الشمس والتوجيه وشريط التصاميم والترويسة: نفس العيب (نص داكن موروث من تصميم فاتح على سطح داكن) */
+body.mizan-review .card.sun h3,body.mizan-review .card.sun summary,body.mizan-review .card.sun small,body.mizan-review .card.sun .sp-head span,body.mizan-review .sun-legend span,body.mizan-review .sun-ctl span,body.mizan-review .sun-ctl output,body.mizan-review .card.sun p,body.mizan-review .sun-lines{color:#d6d9e2}
+body.mizan-review .card.sun h2,body.mizan-review .card.sun summary h2,body.mizan-review .dbar .dcount{color:#8fe3cf}
+body.mizan-review .sun-figwrap .seg button,body.mizan-review .sun-figwrap svg text,body.mizan-review .sun th,body.mizan-review .sun table th{color:var(--ink-on-light);fill:var(--ink-on-light)}
+body.mizan-review .sun-figwrap .seg button.on{color:#fff}
+body.mizan-review .mz-logo small,body.mizan-review header .tabs a,body.mizan-review .topnav a{color:#c9ccd6}
+body.mizan-review .sun-figwrap .seg button.on{color:var(--ink-on-light);font-weight:700}
+body.mizan-review .card.sun p.sun-now{color:var(--ink-on-light)}
+body.mizan-review a.mz-logo small,body.mizan-review .mz-logo span small{color:#c9ccd6!important}
+body.mizan-review .mzr-top .pill{background:transparent!important;background-image:none!important}

@@ -539,6 +539,14 @@ function paint() {
 
 // ------------------------------------------------------------------------------------------ مراجعة الميزان الآلية
 // التقرير يُحسب لنسخة المخطط المعروضة فقط (planVersion)؛ أي تعديل هندسي يجعله قديمًا فيُعاد حسابه تلقائيًا.
+let reviewObserver = null;
+// الأزرار العائمة تغطي البطاقة على الجوال: نُعلّم body ما دامت البطاقة ظاهرة فيخفيها التنسيق (design-review.css).
+function watchReviewVisibility() {
+  const host = $('reviewHost'); if (!host || typeof IntersectionObserver === 'undefined') return;
+  if (reviewObserver?.host === host) return; reviewObserver?.io.disconnect();
+  const io = new IntersectionObserver(es => document.body.classList.toggle('mzr-card-visible', es.some(e => e.isIntersecting)), { threshold: 0.05 });
+  io.observe(host); reviewObserver = { io, host };
+}
 let reviewFocus = null, reviewDecided = new Set(), reviewRunning = false, reviewError = null, reviewTimer = 0;
 const reviewMemo = new Map();
 function reviewContext() { return { ...reviewCtx(session), route: session.designs[session.current]?.review?.route || null }; }
@@ -551,6 +559,7 @@ function paintReview(force = false) {
     onRerun: () => { reviewError = null; paintReview(true); },
     onFocus: f => { reviewFocus = f; const lv = f.location?.levelId; if (lv && lv !== levelId && model.levelById.has(lv)) { levelId = lv; view = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === lv)); } paint(); $('plan')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }); paintReview(); },
     onDecide: ids => { ids.forEach(id => reviewDecided.add(id)); paintReview(); } }));
+  watchReviewVisibility();
   if (!report && !reviewError && !reviewRunning) {
     reviewRunning = true; clearTimeout(reviewTimer);
     const snapshot = doc; // يُحسب بعد الرسم الأول كي لا يؤخر ظهور المخطط
