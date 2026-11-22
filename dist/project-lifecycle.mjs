@@ -6,6 +6,7 @@
 
 /** مفاتيح localStorage المرتبطة بمشروع واحد: تُحفظ في «السابقة» ثم تُمسح عند البدء من جديد. */
 export const PROJECT_KEYS = Object.freeze([
+  'mizan.client.tools.v1',
   'mizan.design.session.v1', 'mizan.home.state.v1', 'mizan.journey.reached.v1',
   'mizan.studio.doc.v1', 'mizan.studio.doc.v1.before-home', 'mizan.studio.doc.v1.before-dna', 'mizan.studio.dna.v1', 'mizan.studio.structure.v1',
   'mizan.facade.wish', 'mizan.exterior.v1', 'mizan.interior.theme.v1', 'mizan.photo.keep.v1', 'mizan.geometry.v1', 'mizan.land.geo.v1', 'mizan.mep.systems.v1', 'mizan_portal_project_v1',
@@ -33,6 +34,7 @@ const del = (store, k) => { try { store.removeItem(k); } catch { /* التخزي
 /** هل في التخزين مشروع فيه عمل فعلي (تصميم أو أرض أو مرسم)؟ */
 export function hasProject(local) {
   if (get(local, 'mizan.design.session.v1') || get(local, 'mizan.studio.doc.v1')) return true;
+  try { const t = JSON.parse(get(local, 'mizan.client.tools.v1') || 'null'); if (t && (t.mood?.items?.length || t.mood?.summary || t.products?.length || t.offers?.length || t.tasks?.length || t.imported || t.renovation)) return true; } catch { /* لا يوجد ملف أدوات قابل للقراءة */ }
   try { const h = JSON.parse(get(local, 'mizan.home.state.v1') || 'null'); return !!(h && (h.confirmedLand || h.shara)); } catch { return false; }
 }
 function summarize(snapshot, now) {

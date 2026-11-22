@@ -142,7 +142,7 @@ function render() {
     + (R.notes.length ? `<h3>ملاحظات المراجعة</h3><ul>${R.notes.map(n => `<li>${esc(n.message)}</li>`).join('')}</ul>` : '<p class="muted">لا ملاحظات من المراجعة الآلية.</p>')
     + (d.dnaAxes ? '<h3>بصمتك التصميمية</h3>' + table(['المحور', 'القيمة'], d.dnaAxes.map(a => `<tr><td>${esc(a.label)}</td><td class="num">${Math.round(a.value * 100)}%</td></tr>`)) : '')));
   parts.push(sec('intel', 'تقييم الخصوصية والمناخ والبدائل', renderIntel()));
-  parts.push(sec('next', 'ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => `<tr><td>${esc(s.title)}</td><td><span class="pill ${s.status === 'available' ? '' : 'plan'}">${s.status === 'available' ? 'متاح' : 'قادم'}</span></td><td>${esc(s.note)}</td></tr>`))));
+  parts.push(sec('next', 'ما بعد التصميم', table(['المرحلة', 'الحالة', 'ملاحظة'], NEXT_STAGES.map(s => `<tr><td>${s.href ? `<a href="${esc(s.href)}">${esc(s.title)}</a>` : esc(s.title)}</td><td><span class="pill ${s.status === 'available' ? '' : 'plan'}">${s.status === 'available' ? 'متاح' : 'قادم'}</span></td><td>${esc(s.note)}</td></tr>`))));
   parts.push(sec('consent', 'حفظ نسخة في أرشيف الميزان (اختياري)', '<div id="archiveConsent"></div>'));
   // جداول الكميات كلها مجمعة في الآخر، منفصلة عن التصاميم، بالعربية
   parts.push(sec('qty', 'جداول الكميات', quantityTables(d, { costHtml: renderCost(), mepId: 'mepQty' })));

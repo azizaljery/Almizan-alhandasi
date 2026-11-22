@@ -133,6 +133,19 @@ export function mergeFinish(cur, patch) {
   }
   for (const k of ['aluminium', 'entryDoor', 'fence', 'roof']) if (patch[k] !== undefined) out[k] = patch[k] === null ? undefined : color(patch[k], k);
   if (patch.floors) { out.floors = { ...(out.floors || {}) }; for (const [t, v] of Object.entries(patch.floors)) { if (!isRoomType(t)) fail('BAD_TYPE', 'نوع الغرفة غير معروف.'); if (v === null) delete out.floors[t]; else out.floors[t] = FINISH_ENUMS.floor.includes(v) ? v : fail('BAD_FINISH', 'نوع الأرضية غير معروف.'); } }
+  if (patch.roomProducts) {
+    if (typeof patch.roomProducts !== 'object' || Array.isArray(patch.roomProducts) || Object.keys(patch.roomProducts).length > 600) fail('BAD_FINISH', 'اختيارات الغرف غير صالحة.');
+    out.roomProducts = { ...(out.roomProducts || {}) };
+    for (const [id, product] of Object.entries(patch.roomProducts)) {
+      if (!/^[A-Za-z0-9:_-]{1,150}$/.test(id) || ['__proto__', 'constructor', 'prototype'].includes(id)) fail('BAD_FINISH', 'معرّف الغرفة غير صالح.');
+      if (product === null) { delete out.roomProducts[id]; continue; }
+      if (!product || typeof product !== 'object' || Array.isArray(product)) fail('BAD_FINISH', 'اختيار تشطيب غير صالح.');
+      const safe = {};
+      if (product.paint !== undefined) safe.paint = color(product.paint, 'لون الغرفة');
+      for (const k of ['floor', 'floorProduct', 'wallProduct', 'doorProduct', 'lightProduct', 'furnitureProduct']) if (product[k] !== undefined) { if (!/^[A-Za-z0-9:_-]{1,150}$/.test(product[k])) fail('BAD_FINISH', 'مرجع المنتج غير صالح.'); safe[k] = product[k]; }
+      out.roomProducts[id] = safe;
+    }
+  }
   return JSON.parse(JSON.stringify(out));
 }
 

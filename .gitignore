@@ -6,4 +6,5 @@ dist/client/
 dist/.openai/
 .sites-runtime/
 node_modules/
+dist/vendor/pdfjs/
 photo-live-out/

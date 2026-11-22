@@ -5,6 +5,12 @@ import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 const manifest = JSON.parse(readFileSync('.openai/hosting.json', 'utf8'));
+// PDF rendering is self-hosted: uploaded drawings never go to a public converter.
+mkdirSync('dist/vendor/pdfjs', { recursive: true });
+for (const name of ['pdf.mjs', 'pdf.worker.mjs']) cpSync('node_modules/pdfjs-dist/build/' + name, 'dist/vendor/pdfjs/' + name);
+cpSync('node_modules/pdfjs-dist/standard_fonts', 'dist/vendor/pdfjs/standard_fonts', { recursive: true });
+cpSync('node_modules/pdfjs-dist/cmaps', 'dist/vendor/pdfjs/cmaps', { recursive: true });
+cpSync('node_modules/pdfjs-dist/LICENSE', 'dist/vendor/pdfjs/LICENSE');
 assert.equal(manifest.static, undefined, 'Archive API requires a Worker deployment, not a static-only Site');
 assert.equal(manifest.d1, 'DB');
 assert.ok(readdirSync('drizzle').some(file => file.endsWith('.sql')), 'D1 schema migration must ship with the source');
@@ -57,6 +63,6 @@ assert.ok(server.includes('oai-authenticated-user-id'), 'Archive Worker must use
 assert.ok(!server.includes('identity_contract_unverified'), 'Archive Worker must not retain a local-only identity gate after official Sites auth wiring');
 console.log('Arabic app, browser imports, D1 migration and separately bundled archive Worker verified.');
 
-for (const entry of ['dist/app.mjs', 'dist/home.mjs', 'dist/design.mjs', 'dist/view3d.mjs', 'dist/final.mjs', 'dist/delivery-verify.mjs', 'dist/facade-j/facade-realism/photo/pipeline.mjs']) {
+for (const entry of ['dist/app.mjs', 'dist/home.mjs', 'dist/design.mjs', 'dist/view3d.mjs', 'dist/final.mjs', 'dist/client-tools/app.mjs', 'dist/delivery-verify.mjs', 'dist/facade-j/facade-realism/photo/pipeline.mjs']) {
   console.log(`Browser import graph verified: ${entry} — ${checkBrowserImports(entry)} modules.`);
 }
