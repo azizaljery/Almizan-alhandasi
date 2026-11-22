@@ -330,6 +330,25 @@ function runReview() {
   }
   const markers = []; for (const i of issues) { if (i.severity === 'info' || markers.length > 30) continue; const w = i.targetIds.map(locate).find(x => x && x.level === editor.levelId); if (w) markers.push({ at: w.p, severity: i.severity }); }
   editor.setMarkers(markers);
+  mizanReviewSection(box);
+}
+// مراجعة الميزان الموحّدة (مسار «يدوي»): كل تعديل على المرسم يمرّ بالبوابة نفسها، والتقرير يخص نسخة المخطط المعروضة فقط.
+let mzToken = 0, mzMemo = null, mzFocus = null;
+function studioCtx() { try { const s = JSON.parse(localStorage.getItem('mizan.design.session.v1') || 'null'); return s && s.v === 1 ? { requirements: s.input?.requirements || null, land: s.input?.land || null, locks: s.locks || [], lockedDoc: null } : {}; } catch { return {}; } }
+async function mizanReviewSection(box) {
+  const token = ++mzToken, docNow = editor.doc;
+  const host = el('div', { id: 'mzReviewHost' }); box.append(host);
+  try {
+    const [R, U] = await Promise.all([import('./design-review.mjs'), import('./design-review-ui.mjs')]);
+    if (token !== mzToken) return;
+    const ctx = studioCtx(), pv = R.planVersion(docNow, ctx).planVersion;
+    const draw = (running) => host.replaceChildren(U.reviewCard({ report: mzMemo?.planVersion === pv ? mzMemo : null, doc: docNow, ctx, running, focusId: mzFocus?.id, enforced: R.reviewEnforced(ctx.requirements),
+      onRerun: () => { mzMemo = null; runReview(); },
+      onFocus: f => { mzFocus = f; const l = f.location || {}; if (l.levelId && l.levelId !== editor.levelId) editor.setLevel(l.levelId); const ids = [...(l.roomIds || []), ...(l.wallIds || []), ...(l.openingIds || []), ...(l.stairIds || [])].filter(id => getById(editor.doc, id)); if (ids.length) editor.select(ids); const p = l.bbox ? { x: (l.bbox.x0 + l.bbox.x1) / 2, y: (l.bbox.y0 + l.bbox.y1) / 2 } : null; if (p) focusPoint(p); draw(false); },
+      onDecide: () => {} }));
+    if (mzMemo?.planVersion !== pv) { draw(true); await new Promise(r => setTimeout(r, 20)); if (token !== mzToken) return; mzMemo = R.reviewGate({ route: 'manual', doc: docNow, ctx }); }
+    draw(false);
+  } catch (e) { host.replaceChildren(el('p', { class: 'muted' }, 'تعذّرت مراجعة الميزان: ' + String(e?.message || e).slice(0, 160))); }
 }
 
 // ------------------------------------------------------------------------------------------------ assistant

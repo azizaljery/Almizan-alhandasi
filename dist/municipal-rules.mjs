@@ -306,18 +306,18 @@ export function checkMunicipal(doc, land = {}) {
 
   // الفراغات
   {
-    const V = ruleById('rooms').value, bad = [], maybe = []; let n = 0;
+    const V = ruleById('rooms').value, bad = [], maybe = [], badIds = []; let n = 0;
     const cls = r => (['living', 'dining', 'majlis'].includes(r.type) ? ['living', 'المجلس/الطعام/الصالة'] : ['bedroom', 'master'].includes(r.type) ? ['bedroom', 'غرفة نوم'] : r.type === 'kitchen' && !/تحضيري/.test(r.name) ? ['kitchen', 'المطبخ'] : r.type === 'bath' ? ['bath', 'الحمام'] : r.type === 'service' && /خادم|سائق|عامل|حارس|حراس/.test(r.name) ? ['staff', 'غرفة العاملة/السائق'] : null);
     for (const lv of model.levels) for (const r of lv.rooms) {
       if (r.unlabelled) continue; const c = cls(r); if (!c) continue; n++;
       const need0 = V[c[0]], wd = Math.min(r.rect?.l || 0, r.rect?.w || 0), okA = r.area >= need0.area - 0.05, okW = wd >= need0.width - TOL;
       if (okA && okW) continue;
       const line = `${r.name} (${lv.level.name}): ${f(r.area)} م² وعرض ${f(wd)} م؛ الحد ${need0.area} م² وعرض ${need0.width} م`;
-      if (c[0] === 'bath' && r.area >= V.wc.area - 0.05 && wd >= V.wc.width - TOL) maybe.push(line + ' — يصح إن كان مرحاضًا بلا استحمام (1.5 م² وعرض 1 م)'); else bad.push(line);
+      if (c[0] === 'bath' && r.area >= V.wc.area - 0.05 && wd >= V.wc.width - TOL) maybe.push(line + ' — يصح إن كان مرحاضًا بلا استحمام (1.5 م² وعرض 1 م)'); else { bad.push(line); badIds.push(r.id); }
     }
-    push('rooms', bad.length ? 'fail' : maybe.length ? 'review' : n ? 'ok' : 'review', { actual: n, text: bad.length ? `فراغات دون الحد الأدنى: ${bad.join('؛ ')}.` : maybe.length ? `كل الفراغات فوق الحد الأدنى عدا ما يُراجع: ${maybe.join('؛ ')}.` : n ? `${n} فراغًا (مجالس وصالات وطعام ونوم ومطابخ وحمامات) كلها فوق الحد الأدنى للمساحة والعرض. المقاسات صافية من وجه الجدار.` : 'لا فراغات مسمّاة في المخطط.', bad, maybe });
+    push('rooms', bad.length ? 'fail' : maybe.length ? 'review' : n ? 'ok' : 'review', { actual: n, text: bad.length ? `فراغات دون الحد الأدنى: ${bad.join('؛ ')}.` : maybe.length ? `كل الفراغات فوق الحد الأدنى عدا ما يُراجع: ${maybe.join('؛ ')}.` : n ? `${n} فراغًا (مجالس وصالات وطعام ونوم ومطابخ وحمامات) كلها فوق الحد الأدنى للمساحة والعرض. المقاسات صافية من وجه الجدار.` : 'لا فراغات مسمّاة في المخطط.', bad, maybe, ids: badIds });
     const cmin = ruleById('corridor').value.min, cors = model.levels.flatMap(l => l.rooms.filter(r => r.type === 'corridor').map(r => ({ r, w: Math.min(r.rect?.l || 0, r.rect?.w || 0, r.eqWidth || Infinity), lv: l.level.name }))), narrow = cors.filter(c => c.w < cmin - TOL);
-    push('corridor', !cors.length ? 'na' : narrow.length ? 'fail' : 'ok', { required: cmin, actual: cors.length ? r2(Math.min(...cors.map(c => c.w))) : null, text: !cors.length ? 'لا ممرات مسمّاة في التصميم.' : narrow.length ? `ممرات أضيق من ${cmin} م: ${narrow.map(c => `${c.r.name} (${c.lv}) ${f(c.w)} م`).join('، ')}.` : `أضيق ممر ${f(Math.min(...cors.map(c => c.w)))} م؛ الحد الأدنى ${cmin} م.` });
+    push('corridor', !cors.length ? 'na' : narrow.length ? 'fail' : 'ok', { required: cmin, actual: cors.length ? r2(Math.min(...cors.map(c => c.w))) : null, text: !cors.length ? 'لا ممرات مسمّاة في التصميم.' : narrow.length ? `ممرات أضيق من ${cmin} م: ${narrow.map(c => `${c.r.name} (${c.lv}) ${f(c.w)} م`).join('، ')}.` : `أضيق ممر ${f(Math.min(...cors.map(c => c.w)))} م؛ الحد الأدنى ${cmin} م.`, ids: narrow.map(c => c.r.id) });
     const smin = ruleById('stair').value.min, st = (doc.stairs || []).map(s => num(s.w)).filter(v => v !== null);
     push('stair', !st.length ? 'na' : Math.min(...st) >= smin - TOL ? 'ok' : 'fail', { required: smin, actual: st.length ? Math.min(...st) : null, text: !st.length ? 'لا درج في التصميم.' : `عرض الدرج ${f(Math.min(...st))} م؛ الحد الأدنى للصافي ${smin} م.` });
   }

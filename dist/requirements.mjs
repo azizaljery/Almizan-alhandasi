@@ -4,6 +4,24 @@
 // المخرجات تُمرَّر إلى مولّد الفيلا (villa-layout.mjs) وتُعرض للعميل قبل التوليد: ما فهمته، وما سيُطبَّق، وما لن يُطبَّق.
 
 import { extractRules, mergeRules, ruleText } from './rules.mjs';
+import { buildPreferenceRequests } from './preference-evidence.mjs';
+import { PRIVACY_KINDS } from './privacy-geometry.mjs';
+
+/** طلبات الخصوصية المقيسة هندسيًا (خطوط الرؤية، انكشاف غرف النوم، الممرات المظلمة) من كلام العميل وبيانات الاكتشاف.
+ * must = صيغة إلزام صريحة (يجب/لازم/شرط…)؛ النفي وحده («ما أبي») يبقى تفضيلًا مهمًا كما في requirement-tiers: يُعلن إخفاقه ويؤخّر البديل ولا يحجبه. */
+export function privacyRequests(text, discovery = null) {
+  let rows = []; try { rows = buildPreferenceRequests({ idea: text || '', discovery: discovery || {} }); } catch { rows = []; }
+  const out = [];
+  for (const r of rows) { const kind = r.value?.mizanKind; if (PRIVACY_KINDS.includes(kind) && !out.some(x => x.kind === kind)) out.push({ kind, text: r.description.replace(/؛ غير مُقيّم.*$/, ''), must: !!r.value?.mustRequirement }); }
+  // صياغات حرة لم تغطها preference-evidence: الممرات المظلمة، وانكشاف غرف النوم (تُعدّ طلبًا فقط مع نفي/تجنّب صريح، ولا يُخمَّن منها شيء)
+  const t = String(text || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064B-\u065F\u0670]/g, '');
+  const NEGW = /(?:غير|بدون|ما\s*ابي|لا\s*ابي|ما\s*ابغي|ما\s*ابغا|لا\s*ابغي|تجنب|تجنبو|لا\s*تكون|لا\s*تكن|مو|ما\s*اريد|لا\s*اريد)/, MUST = /(?:must|mandatory|required|لازم|يجب|لا\s*بد|ضروري|شرط|مطلوب)/;
+  for (const clause of t.split(/[،,؛.!؟\n]+/)) {
+    if (/ممر(?:ات)?/.test(clause) && /مظلم|معتم/.test(clause) && NEGW.test(clause) && !out.some(x => x.kind === 'avoid_dark_corridors')) out.push({ kind: 'avoid_dark_corridors', text: 'تجنّب الممرات المظلمة', must: MUST.test(clause) });
+    if (/غرف(?:\s*ال)?نوم|غرفه(?:\s*ال)?نوم/.test(clause) && /مكشوف|منكشف|تنكشف|ينكشف|تنكشف|يشوف|مكشوفه/.test(clause) && NEGW.test(clause) && !out.some(x => x.kind === 'avoid_exposed_bedrooms')) out.push({ kind: 'avoid_exposed_bedrooms', text: 'تجنّب انكشاف غرف النوم', must: MUST.test(clause) });
+  }
+  return out;
+}
 
 const AR_NUM = { 'واحد': 1, 'واحده': 1, 'اثنين': 2, 'اثنان': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'عشرين': 20, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'خمسه عشر': 15, 'خمسطعش': 15, 'عشرطعش': 15 };
 /** تطبيع عربي: حذف التشكيل والتطويل، توحيد الألف والتاء المربوطة والياء، والأرقام الهندية إلى لاتينية. */
@@ -152,7 +170,8 @@ export function extractRequirements(text, { counts = {}, discovery = null, claus
     const need = Math.min(2, c.majlis || 0) + 1 + Math.ceil((c.bedrooms - 1) / 2) + (extras.maid?.bath ? 1 : 0) + (extras.driver?.bath ? 1 : 0);
     if (!c.baths || c.baths < need) { c.baths = need; understood.push(`عدد دورات المياه ${need} (الرئيسية بحمامها، وكل غرفتين تتشاركان واحدة${c.majlis ? '، ودورة مياه للضيوف' : ''})`); }
   }
-  return { counts: c, extras, prefs, areas, rules, tweaks, understood: [...new Set(understood)], unsupported, unclear: clauses ? unclearClauses(text) : [] };
+  const privacy = privacyRequests(text, discovery);
+  return { counts: c, extras, prefs, areas, rules, tweaks, ...(privacy.length ? { privacy } : {}), understood: [...new Set(understood)], unsupported, unclear: clauses ? unclearClauses(text) : [] };
 }
 
 // كلمات لا تحمل طلبًا (طلب، تحية، حشو) وكلمات البرنامج التي تُفهم أعدادًا

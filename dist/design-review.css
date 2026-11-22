@@ -1,0 +1,69 @@
+/* بطاقة مراجعة الميزان الآلية: تتبع ألوان الصفحة (currentColor/متغيرات) وتعمل على الجوال دون تمرير أفقي */
+.mz-review{--mzr-line:var(--lx-line,var(--line,#e4eae7));--mzr-ink:var(--lx-ink,var(--ink,#213b3a));--mzr-soft:var(--lx-soft,var(--soft,#526864));--mzr-bad:#e8826f;--mzr-warn:#e0b04a;--mzr-ok:#5cc996;direction:rtl;overflow-wrap:anywhere}
+.mz-review .mzr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.mz-review .mzr-head h2{margin:0}
+.mzr-badge{font-size:14px;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid currentColor}
+.mzr-badge.bad{color:var(--mzr-bad)}.mzr-badge.warn{color:var(--mzr-warn)}.mzr-badge.ok{color:var(--mzr-ok)}
+.mzr-verdict{font-weight:700;margin:10px 0 4px;line-height:1.7}.mzr-verdict.bad{color:var(--mzr-bad)}.mzr-verdict.warn{color:var(--mzr-warn)}.mzr-verdict.ok{color:var(--mzr-ok)}
+.mzr-note{margin:8px 0;line-height:1.7}.mzr-note.warn{color:var(--mzr-warn)}.mzr-note.bad{color:var(--mzr-bad)}.mzr-note.ok{color:var(--mzr-ok)}
+.mzr-meta,.mzr-aziz,.mzr-locks,.mzr-fine{font-size:14px;color:var(--mzr-soft);margin:6px 0;line-height:1.75}
+.mzr-fine{border-top:1px dashed var(--mzr-line);padding-top:8px;margin-top:12px}
+.mzr-counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0}
+.mzr-count{border:1px solid var(--mzr-line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;font-size:14px}
+.mzr-count .v{color:var(--mzr-bad)}.mzr-count .u{color:var(--mzr-warn)}.mzr-count .k{color:var(--mzr-ok)}
+.mzr-decide{border:1px solid var(--mzr-warn);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px;line-height:1.7}
+.mzr-list{list-style:none;margin:10px 0;padding:0;display:grid;gap:8px}
+.mzr-item{border:1px solid var(--mzr-line);border-inline-start:5px solid var(--mzr-soft);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.75}
+.mzr-item.mandatory.violated{border-inline-start-color:var(--mzr-bad)}.mzr-item.mandatory.unverified,.mzr-item.warning{border-inline-start-color:var(--mzr-warn)}.mzr-item.verified{border-inline-start-color:var(--mzr-ok)}
+.mzr-item.on{outline:2px solid var(--mzr-bad);outline-offset:1px}
+.mzr-top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mzr-top .pill{font-size:12.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--mzr-line);white-space:nowrap}
+.pill.sev.mandatory{color:var(--mzr-bad);border-color:var(--mzr-bad)}.pill.st.violated{color:var(--mzr-bad)}.pill.st.unverified{color:var(--mzr-warn)}.pill.st.verified{color:var(--mzr-ok)}
+.mzr-why{margin:4px 0}.mzr-where{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;color:var(--mzr-soft)}
+.mzr-show,.mz-review .btn{min-height:44px}
+.mzr-ok summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+@media (max-width:560px){.mz-review{padding-inline:12px}.mzr-counts{grid-template-columns:1fr 1fr 1fr}.mzr-count{font-size:13px}.mzr-show{width:100%}}
+
+/* ---- تصحيح التباين (قائم قبل المراجعة): سطح الصفحة داكن (review-theme) بينما مكونات present.css بخلفيات فاتحة ونصها موروث فاتح.
+   نثبّت حبرًا داكنًا على كل سطح فاتح، وألوانًا فاتحة على الأسطح الداكنة. القيم تُقاس في tests/design-contrast.test.mjs. ---- */
+body.mizan-review{--ink-on-light:#26251f;--ink-soft-on-light:#4a483e}
+body.mizan-review .planbar,body.mizan-review .planbar label,body.mizan-review .planbar .seg button:not(.on),body.mizan-review .planbar .tools button{color:var(--ink-on-light)}
+body.mizan-review .legend,body.mizan-review .legend span{color:var(--ink-soft-on-light)}
+body.mizan-review .scorecard .sc-why,body.mizan-review .scorecard .sc-why b,body.mizan-review .scorecard .sc-why p{color:var(--ink-on-light)}
+body.mizan-review .fixes .fixlist li,body.mizan-review .card.fit .fitlist li{color:var(--ink-on-light)}
+body.mizan-review .fixes .fixlist li .why,body.mizan-review .card.fit .fitlist li .why{color:var(--ink-soft-on-light)}
+body.mizan-review .scorecard .sc-total b{color:#7fdcc6}
+body.mizan-review .scorecard .sc-total.mid b{color:#f0c878}
+body.mizan-review .scorecard .sc-total.low b{color:#f59a88}
+body.mizan-review .card>h2,body.mizan-review .mz-review .mzr-head h2{color:#8fe3cf}
+body.mizan-review .mzr-top .pill{color:var(--mzr-ink,#f4eee5)}
+body.mizan-review .mzr-top .pill.sev.mandatory{color:var(--mzr-bad)}
+body.mizan-review .mzr-top .pill.sev.warning{color:var(--mzr-warn)}
+body.mizan-review .mzr-top .pill.st.violated{color:var(--mzr-bad)}body.mizan-review .mzr-top .pill.st.unverified{color:var(--mzr-warn)}body.mizan-review .mzr-top .pill.st.verified{color:var(--mzr-ok)}
+body.mizan-review .mz-review{--mzr-ink:#f4eee5;--mzr-soft:#c9ccd6}
+
+/* ---- الجوال: الأزرار العائمة (شرعاء وإيقاف الحركة) لا تغطي بطاقة المراجعة؛ تختفي بلطف ما دامت البطاقة ظاهرة وتعود بعدها ---- */
+.mz-review{scroll-margin-bottom:200px}
+@media (max-width:780px){
+  .mz-review{padding-bottom:calc(168px + env(safe-area-inset-bottom))}
+  body.mzr-card-visible .shp-fab,body.mzr-card-visible .ambient-motion{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:opacity .2s,visibility .2s}
+}
+body.mizan-review .cols table th,body.mizan-review .cols table tfoot td{color:var(--ink-on-light)}
+body.mizan-review .orient span,body.mizan-review .titlebar .orient{color:#f0d9a8}
+body.mizan-review ul.tick li.bad b{color:#f59a88}
+body.mizan-review ul.tick li .why{color:#c9ccd6}
+body.mizan-review ul.notes,body.mizan-review ul.notes li{color:#d6d9e2}
+body.mizan-review .regs .rg-note,body.mizan-review .regs .rg-note b,body.mizan-review #regsCard .rg-note,body.mizan-review #regsCard .rg-note b{color:#d6d9e2}
+body.mizan-review #regsCard details.fold>summary,body.mizan-review #regsCard details.rg-na>summary,body.mizan-review #regsCard .rg-note a{color:#f0c878}
+body.mizan-review #regsCard summary h2,body.mizan-review #regsCard h2{color:#8fe3cf}
+body.mizan-review .rg-mark{color:#fff;background:#6e6a5c}body.mizan-review .rg-review .rg-mark{background:#8a5a0e}body.mizan-review .rg-ok .rg-mark{background:#2f7d4f}body.mizan-review .rg-fail .rg-mark{background:#b3412e}
+/* بطاقة الشمس والتوجيه وشريط التصاميم والترويسة: نفس العيب (نص داكن موروث من تصميم فاتح على سطح داكن) */
+body.mizan-review .card.sun h3,body.mizan-review .card.sun summary,body.mizan-review .card.sun small,body.mizan-review .card.sun .sp-head span,body.mizan-review .sun-legend span,body.mizan-review .sun-ctl span,body.mizan-review .sun-ctl output,body.mizan-review .card.sun p,body.mizan-review .sun-lines{color:#d6d9e2}
+body.mizan-review .card.sun h2,body.mizan-review .card.sun summary h2,body.mizan-review .dbar .dcount{color:#8fe3cf}
+body.mizan-review .sun-figwrap .seg button,body.mizan-review .sun-figwrap svg text,body.mizan-review .sun th,body.mizan-review .sun table th{color:var(--ink-on-light);fill:var(--ink-on-light)}
+body.mizan-review .sun-figwrap .seg button.on{color:#fff}
+body.mizan-review .mz-logo small,body.mizan-review header .tabs a,body.mizan-review .topnav a{color:#c9ccd6}
+body.mizan-review .sun-figwrap .seg button.on{color:var(--ink-on-light);font-weight:700}
+body.mizan-review .card.sun p.sun-now{color:var(--ink-on-light)}
+body.mizan-review a.mz-logo small,body.mizan-review .mz-logo span small{color:#c9ccd6!important}
+body.mizan-review .mzr-top .pill{background:transparent!important;background-image:none!important}
