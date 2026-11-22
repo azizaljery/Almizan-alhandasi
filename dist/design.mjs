@@ -3,9 +3,11 @@ import { REVIEW_PLAN_THEME } from './review-plan-theme.mjs';
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
 import { deliveryClientKey, deliveryRequest } from './delivery-ui.mjs';
-import { loadSession, saveSession, redesign, mergeDesigns, approve, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
+import { loadSession, saveSession, redesign, mergeDesigns, approve, approveReviewed, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
+import { reviewDesign, planVersion as reviewPlanVersion, ctxOfSession as reviewCtx, reviewEnforced } from './design-review.mjs';
+import { reviewCard, drawFindingOverlay } from './design-review-ui.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
@@ -187,10 +189,10 @@ function show(index) {
     nav,
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     ...(fitCard ? [fitCard] : []),
-    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard)),
+    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }))),
     ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
-  legend(); bindPlan(); paint();
+  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview();
 }
 
 /** بطاقة «درجة المطابقة»: الدرجة، «لماذا؟» بجملتين من القياسات نفسها، وأشرطة المؤشرات السبعة (كل مؤشر يشرح نفسه عند المرور عليه). */
@@ -532,6 +534,32 @@ function paint() {
     flags: { grid: false, dims: true, areas: true, fixtures: true, underlay: false, roomDims: true, scaleBarRight: W < 560 },
     roomFill: focus ? rm => (focus.names.has(rm.label?.name) ? '#e2b27e' : '#f3efe8') : zonesOn ? rm => ZONES[zoneOf(rm.label)].color : null,
   });
+  if (reviewFocus) drawFindingOverlay(ctx, reviewFocus, { view, W, H, levelId, toScreen });
+}
+
+// ------------------------------------------------------------------------------------------ مراجعة الميزان الآلية
+// التقرير يُحسب لنسخة المخطط المعروضة فقط (planVersion)؛ أي تعديل هندسي يجعله قديمًا فيُعاد حسابه تلقائيًا.
+let reviewFocus = null, reviewDecided = new Set(), reviewRunning = false, reviewError = null, reviewTimer = 0;
+const reviewMemo = new Map();
+function reviewContext() { return { ...reviewCtx(session), route: session.designs[session.current]?.review?.route || null }; }
+function paintReview(force = false) {
+  const host = $('reviewHost'); if (!host || !doc) return;
+  const ctx = reviewContext(); let pv = null; try { pv = reviewPlanVersion(doc, ctx).planVersion; } catch { /* يظهر خطأ المراجعة أدناه */ }
+  if (force && pv) reviewMemo.delete(pv);
+  const report = pv ? reviewMemo.get(pv) : null, enforced = reviewEnforced(session.input?.requirements);
+  host.replaceChildren(reviewCard({ report, doc, ctx, running: reviewRunning || !report, error: reviewError, enforced, focusId: reviewFocus?.id, decided: reviewDecided,
+    onRerun: () => { reviewError = null; paintReview(true); },
+    onFocus: f => { reviewFocus = f; const lv = f.location?.levelId; if (lv && lv !== levelId && model.levelById.has(lv)) { levelId = lv; view = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === lv)); } paint(); $('plan')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }); paintReview(); },
+    onDecide: ids => { ids.forEach(id => reviewDecided.add(id)); paintReview(); } }));
+  if (!report && !reviewError && !reviewRunning) {
+    reviewRunning = true; clearTimeout(reviewTimer);
+    const snapshot = doc; // يُحسب بعد الرسم الأول كي لا يؤخر ظهور المخطط
+    reviewTimer = setTimeout(() => {
+      try { const r = reviewDesign(snapshot, ctx); reviewMemo.set(r.planVersion, r); reviewError = null; }
+      catch (e) { reviewError = String(e?.message || e).slice(0, 200); }
+      reviewRunning = false; if (doc === snapshot) paintReview();
+    }, 30);
+  }
 }
 
 // ------------------------------------------------------------------------------------------ الأفعال
@@ -545,7 +573,9 @@ async function onApprove() {
   try {
     await deliveryRequest(northDoc(), deliveryClientKey(localStorage, session.createdAt));
     if (serialize(northDoc()) !== expected) throw Error('تغيّر المخطط أثناء الفحص؛ راجعه وأعد الاختيار.');
-    session = approve(session); saveSession(localStorage, session); storeForStudio(); openExterior();
+    const gate = approveReviewed(session, { decisions: [...reviewDecided] });
+    if (gate.status === 'refused') { paintReview(); $('reviewCard')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }); toast('الاعتماد موقوف: ' + gate.result.reasons.map(r => r.message || r.code).join('؛ ')); return; }
+    session = gate.session; saveSession(localStorage, session); storeForStudio(); openExterior();
   } catch (e) {
     if (e.code === 'design_reserved') { toast(e.message + ' اضغط «تصميم آخر» أو عدّل توزيع الغرف.'); }
     else { toast('تعذر فحص سجل التسليم الآن. يمكنك معاينة 3D؛ لن يُؤكَّد حجز التسليم حتى يعود السجل.'); storeForStudio(); openExterior(); }

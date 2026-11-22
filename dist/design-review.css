@@ -1,5 +1,5 @@
 /* بطاقة مراجعة الميزان الآلية: تتبع ألوان الصفحة (currentColor/متغيرات) وتعمل على الجوال دون تمرير أفقي */
-.mz-review{--mzr-line:var(--lx-line,var(--line,#e4eae7));--mzr-ink:var(--lx-ink,var(--ink,#213b3a));--mzr-soft:var(--lx-soft,var(--soft,#526864));--mzr-bad:#b3321f;--mzr-warn:#8a5a00;--mzr-ok:#1c7a4f;direction:rtl;overflow-wrap:anywhere}
+.mz-review{--mzr-line:var(--lx-line,var(--line,#e4eae7));--mzr-ink:var(--lx-ink,var(--ink,#213b3a));--mzr-soft:var(--lx-soft,var(--soft,#526864));--mzr-bad:#e8826f;--mzr-warn:#e0b04a;--mzr-ok:#5cc996;direction:rtl;overflow-wrap:anywhere}
 .mz-review .mzr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .mz-review .mzr-head h2{margin:0}
 .mzr-badge{font-size:14px;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid currentColor}
