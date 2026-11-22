@@ -110,6 +110,10 @@ try {
   check('five mobile navigation links occupy one row', await mobile.locator('.mz-review-nav a').evaluateAll(links => Math.max(...links.map(a => a.getBoundingClientRect().top)) - Math.min(...links.map(a => a.getBoundingClientRect().top)) < 2));
   await mobile.screenshot({ path: OUT + '/mood-mobile.png', fullPage: true });
   for (const id of ['finishes', 'import', 'renovation', 'tenders', 'execution']) { await mobile.click('#tab-' + id); await mobile.waitForTimeout(100); check('mobile layout does not overflow: ' + id, await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); if (id === 'execution') await mobile.screenshot({ path: OUT + '/execution-mobile.png', fullPage: true }); }
+  await mobile.evaluate(() => localStorage.setItem('mizan.client.tools.v1', '{broken')); await mobile.reload();
+  await mobile.waitForSelector('#tab-mood[disabled]'); check('corrupted local data is preserved rather than silently overwritten', await mobile.evaluate(() => localStorage.getItem('mizan.client.tools.v1') === '{broken'));
+  mobile.once('dialog', d => d.accept()); await mobile.setInputFiles('#import-backup', backupPath); await mobile.waitForSelector('#tab-mood:not([disabled])');
+  check('a valid backup can recover a previously unreadable workspace', (await workspace(mobile)).payments.length === 1 && (await workspace(mobile)).mood.items.length === 1);
   check('no unhandled errors in real desktop/mobile flows', errors.length === 0);
 } catch (e) { console.log('PAGE_MESSAGE', await page.locator('#tools-message').textContent().catch(() => 'unavailable')); await page.screenshot({ path: OUT + '/failure.png', fullPage: true }).catch(() => {}); await writeFile(OUT + '/failure-state.json', JSON.stringify(await workspace(page).catch(() => null), null, 2)); throw e; }
 finally { await browser.close(); await writeFile(OUT + '/browser-results.json', JSON.stringify({ results, errors }, null, 2)); }

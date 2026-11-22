@@ -239,13 +239,17 @@ $('import-backup').onchange = e => run(async () => {
   const file = e.target.files[0]; if (!file || file.size > 80_000_000) throw Error('اختر نسخة احتياطية حتى 80 ميغابايت.');
   const raw = JSON.parse(await file.text()); if (raw.schema !== 'mizan-tools-backup/1' || !Array.isArray(raw.assets) || raw.assets.length > 500) throw Error('ملف النسخة الاحتياطية غير معروف.');
   const workspace = validateWorkspace(raw.workspace), doc = raw.document ? parseDoc(raw.document) : null;
-  const assets = new Map(); for (const item of raw.assets) { if (!item || typeof item.id !== 'string' || typeof item.data !== 'string' || item.data.length > 30_000_000 || !/^data:(image\/(png|jpeg|webp)|application\/pdf);base64,[A-Za-z0-9+/]+=*$/.test(item.data)) throw Error('مرفق غير صالح في النسخة الاحتياطية.'); assets.set(item.id, await (await fetch(item.data)).blob()); }
+  const assets = new Map(); for (const item of raw.assets) { if (!item || typeof item.id !== 'string' || !/^[A-Za-z0-9_-]{1,100}$/.test(item.id) || assets.has(item.id) || typeof item.data !== 'string' || item.data.length > 30_000_000 || !/^data:(image\/(png|jpeg|webp)|application\/pdf);base64,[A-Za-z0-9+/]+=*$/.test(item.data)) throw Error('مرفق غير صالح في النسخة الاحتياطية.'); assets.set(item.id, await (await fetch(item.data)).blob()); }
   if (assetIds(workspace).some(id => !assets.has(id))) throw Error('النسخة لا تشمل كل المرفقات.');
   if (!confirmDialog('استعادة ملف الأدوات والمخطط المرفق؟ يُحفظ المشروع الحالي في مشاريعي السابقة أولًا.')) return;
-  const before = state; if (currentDoc && !archiveCurrent(localStorage)) throw Error('تعذر حفظ المشروع الحالي.');
+  const before = state, wasFatal = fatal; if (currentDoc && !archiveCurrent(localStorage)) throw Error('تعذر حفظ المشروع الحالي.');
   const ids = new Map(); for (const [id, blob] of assets) { const next = uid(); await putFile(next, blob); ids.set(id, next); }
-  let text = JSON.stringify(workspace); for (const [a, b] of ids) text = text.replaceAll(a, b); state = validateWorkspace(JSON.parse(text)); state.id = uid();
-  try { if (doc) writeDoc(doc, true); else save(); } catch (e) { state = before; throw e; }
+  for (const image of workspace.mood.items) image.blobId = ids.get(image.blobId);
+  for (const task of workspace.tasks) for (const image of task.photos) image.blobId = ids.get(image.blobId);
+  if (workspace.imported) { workspace.imported.blobId = ids.get(workspace.imported.blobId); workspace.imported.sourceBlobId = ids.get(workspace.imported.sourceBlobId); }
+  state = validateWorkspace(workspace); state.id = uid(); fatal = false;
+  try { if (doc) writeDoc(doc, true); else save(); } catch (e) { state = before; fatal = wasFatal; throw e; }
+  for (const b of $('tools-tabs').children) b.disabled = false;
   updateProjectStrip(); render(); message('استُعيدت الأدوات ومرفقاتها.');
 });
 $('print-workspace').onclick = () => print();
