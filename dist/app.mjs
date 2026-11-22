@@ -497,6 +497,19 @@ function setStudioMode(mode) {
   else viewer?.setVisible(false);
   requestAnimationFrame(() => { if (mode !== '3d') viewport?.fit(); else viewer?.resize?.(); });
 }
+// بوابة المراجعة الموحّدة لمسار التعديل اليدوي في المحرر الهندسي: كل تعديل يُراجَع، والنتيجة تخص النموذج الحالي فقط.
+let manualReviewToken = 0;
+async function reviewManualEdit(model) {
+  const token = ++manualReviewToken;
+  try {
+    const { reviewLegacyModel } = await import('./design-review.mjs');
+    const report = reviewLegacyModel(model, {}, 'manual');
+    if (token !== manualReviewToken || model !== state.model) return;
+    state.manualReview = report;
+    const c = report.summary.counts.mandatory;
+    if (c.violated) toast(`مراجعة الميزان الآلية: ${c.violated} مخالفة لشرط إلزامي بعد هذا التعديل. المراجعة أولية ولا تغني عن المهندس.`);
+  } catch { /* المراجعة لا تعطّل المحرر؛ تظهر في المرسم */ }
+}
 function editPlanAtPoint(action) {
   if (!state.model) return;
   if (action.tool === 'select') { if (action.room) selectRoom(action.room); return; }
@@ -507,7 +520,7 @@ function editPlanAtPoint(action) {
     state.model = next;
     const index = state.alternatives.indexOf(before); if (index >= 0) state.alternatives[index] = next;
     state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey); state.engineeringSignature = engineeringSignature();
-    showResults('geometry-edit');
+    showResults('geometry-edit'); reviewManualEdit(state.model);
     toast(action.tool === 'erase' ? 'حُذفت الفتحة المحددة.' : action.tool === 'door' ? 'أُضيف الباب إلى المخطط.' : 'أُضيفت النافذة إلى المخطط.');
   } catch (error) { toast(error.message); }
 }
@@ -546,7 +559,7 @@ function applyGeometryState(result) {
   state.traceContext = null; state.multiEngine = null; state.manualEdits = true;
   state.signature = workspaceSignature(rawPlot(), state.program, state.modelLandSurvey);
   state.engineeringSignature = engineeringSignature();
-  renderRows(); showResults('geometry-edit');
+  renderRows(); showResults('geometry-edit'); reviewManualEdit(state.model);
 }
 function showResults(reason = 'selection') {
   if (renderedModel !== state.model) { modelEpoch++; renderedModel = state.model; }
