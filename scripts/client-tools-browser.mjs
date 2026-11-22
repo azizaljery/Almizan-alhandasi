@@ -97,7 +97,7 @@ try {
   const other = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, locale: 'ar-SA' }), mobile = await other.newPage(); mobile.on('pageerror', e => errors.push(e.message)); await mobile.goto(BASE + '/tools.html'); await mobile.waitForSelector('#mood-notes'); mobile.once('dialog', d => d.accept()); await mobile.setInputFiles('#import-backup', backupPath);
   await mobile.waitForFunction(() => JSON.parse(localStorage.getItem('mizan.client.tools.v1')).payments.length === 1);
   check('backup restores on a separate browser with remapped attachments and drawing', (await workspace(mobile)).mood.items.length === 1 && (await workspace(mobile)).tasks[0].photos.length === 1);
-  await mobile.waitForSelector('.mood-image img'); check('restored photo data is readable', await mobile.locator('.mood-image img').evaluate(i => i.complete && i.naturalWidth > 0));
+  await mobile.waitForSelector('.mood-image img'); await mobile.waitForFunction(() => { const i = document.querySelector('.mood-image img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 15000 }).catch(() => {}); check('restored photo data is readable', await mobile.locator('.mood-image img').evaluate(i => i.complete && i.naturalWidth > 0));
   for (const phase of [.12, .45, .9]) {
     const ratios = await mobile.evaluate(async phase => {
       const { ambientCycle, contrast } = await import('/ambient-cycle.mjs'); const c = ambientCycle(); c.pause(); c.seek(phase);
