@@ -110,6 +110,9 @@ try {
   check('five mobile navigation links occupy one row', await mobile.locator('.mz-review-nav a').evaluateAll(links => Math.max(...links.map(a => a.getBoundingClientRect().top)) - Math.min(...links.map(a => a.getBoundingClientRect().top)) < 2));
   await mobile.screenshot({ path: OUT + '/mood-mobile.png', fullPage: true });
   for (const id of ['finishes', 'import', 'renovation', 'tenders', 'execution']) { await mobile.click('#tab-' + id); await mobile.waitForTimeout(100); check('mobile layout does not overflow: ' + id, await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)); if (id === 'execution') await mobile.screenshot({ path: OUT + '/execution-mobile.png', fullPage: true }); }
+  await mobile.emulateMedia({ media: 'print' });
+  check('printing from night mode uses white paper and includes acceptance notes', await mobile.evaluate(() => getComputedStyle(document.body).backgroundColor === 'rgb(255, 255, 255)' && [...document.querySelectorAll('.print-only')].some(p => getComputedStyle(p).display !== 'none' && p.textContent.includes('فُحصت'))));
+  await mobile.pdf({ path: OUT + '/execution-report.pdf', format: 'A4', printBackground: true }); await mobile.emulateMedia({ media: 'screen' });
   await mobile.evaluate(() => localStorage.setItem('mizan.client.tools.v1', '{broken')); await mobile.reload();
   await mobile.waitForSelector('#tab-mood[disabled]'); check('corrupted local data is preserved rather than silently overwritten', await mobile.evaluate(() => localStorage.getItem('mizan.client.tools.v1') === '{broken'));
   mobile.once('dialog', d => d.accept()); await mobile.setInputFiles('#import-backup', backupPath); await mobile.waitForSelector('#tab-mood:not([disabled])');

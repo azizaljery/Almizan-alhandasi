@@ -3,6 +3,8 @@ import { analyzeDoc } from '../draw/digest.mjs';
 import { computeDocQuantities } from '../draw/quantities-doc.mjs';
 import { FLOOR_PRESETS } from '../draw/interior-themes.mjs';
 import { validateVisionResult } from './vision-schema.mjs';
+import { reviewGate, ctxOfSession } from '../design-review.mjs';
+import { sessionForDocument } from '../project-context.mjs';
 
 export const TOOLS_KEY = 'mizan.client.tools.v1';
 export const SCHEMA = 'mizan-client-tools/1';
@@ -28,7 +30,7 @@ export function validateWorkspace(raw) {
   out.mood = { items: raw.mood.items.slice(0, 40).map(i => ({ id: bounded(i.id, 100), blobId: bounded(i.blobId, 100), name: bounded(i.name), note: bounded(i.note, 1500), colors: (i.colors || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 8) })), summary: bounded(raw.mood.summary, 4000), notes: bounded(raw.mood.notes, 4000), palette: (raw.mood.palette || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 12) };
   for (const k of ['products', 'selections', 'boq', 'offers', 'tasks', 'payments']) if (!Array.isArray(raw[k]) || raw[k].length > 500) throw Error('حجم ملف الأدوات أكبر من المسموح.');
   out.products = raw.products.map(validateProduct);
-  out.selections = raw.selections.map(s => ({ id: bounded(s.id, 100), roomKey: bounded(s.roomKey, 150), productId: bounded(s.productId, 100), waste: number(s.waste, { max: 50 }), quantity: number(s.quantity), basis: bounded(s.basis, 300) }));
+  out.selections = raw.selections.map(s => ({ id: bounded(s.id, 100), roomKey: bounded(s.roomKey, 150), productId: bounded(s.productId, 100), waste: number(s.waste, { max: 50 }), quantity: number(s.quantity), mode: ['manual', 'room-floor', 'room-wall'].includes(s.mode) ? s.mode : String(s.basis || '').startsWith('تقدير:') ? 'room-wall' : 'manual', basis: bounded(s.basis, 300) }));
   out.boq = raw.boq.map(validateBoqItem);
   out.offers = raw.offers.map(o => ({ id: bounded(o.id, 100), name: bounded(o.name), notes: bounded(o.notes, 2000), items: (o.items || []).slice(0, 500).map(validateBoqItem) }));
   out.tasks = raw.tasks.map(t => validateTask(t));
@@ -64,6 +66,12 @@ export function readCurrentDoc(storage) {
   const s = JSON.parse(storage.getItem('mizan.design.session.v1') || 'null');
   return s?.designs?.[s.current ?? 0]?.doc ? parseDoc(s.designs[s.current ?? 0].doc) : null;
 }
+export function reviewToolsDocument(doc, { sourceDoc = doc, session = null } = {}) {
+  // Bind a brief only to the exact drawing it belongs to. An imported plan
+  // must never inherit another customer's requirements left in this browser.
+  const bound = sessionForDocument(sourceDoc, session);
+  return reviewGate({ route: 'manual', doc, ctx: bound ? ctxOfSession(bound) : {} });
+}
 export function roomsForDoc(doc) {
   if (!doc) return [];
   return analyzeDoc(doc).levels.flatMap(l => l.rooms.filter(r => !r.unlabelled).map(r => ({ key: l.level.id + ':' + r.id, spaceKey: l.level.id + ':' + r.spaceId, labelId: r.label?.id, level: l.level.id, name: r.name, type: r.type, area: money(r.area), perimeter: r.perimeter, height: l.level.height })));
@@ -90,7 +98,8 @@ export function shoppingList(state, doc) {
   for (const s of state.selections) {
     const p = state.products.find(p => p.id === s.productId); if (!p) continue;
     const room = rooms.find(r => r.key === s.roomKey);
-    const takeoff = productTakeoff(p, room, { quantity: s.quantity, waste: s.waste });
+    const autoWall = s.mode === 'room-wall' || (!s.mode && String(s.basis || '').startsWith('تقدير:'));
+    const takeoff = productTakeoff(p, room, { quantity: autoWall && room ? null : s.quantity, waste: s.waste });
     lines.push({ ...takeoff, ...p, room: room?.name || s.roomKey || 'المشروع', stale: !!s.roomKey && !room });
   }
   return { lines, total: money(lines.reduce((s, l) => s + l.total, 0)) };
@@ -139,14 +148,30 @@ export function quantityReference(doc) {
 }
 export function renovationDiff(baseline, proposed) {
   const a = parseDoc(baseline), b = parseDoc(proposed);
-  const same = (x, y) => JSON.stringify([x.level, x.a, x.b, x.t, x.h]) === JSON.stringify([y.level, y.a, y.b, y.t, y.h]);
-  const removed = a.walls.filter(w => !b.walls.some(v => v.id === w.id && same(w, v)));
-  const added = b.walls.filter(w => !a.walls.some(v => v.id === w.id && same(w, v)));
+  const tolerance = .005, height = (doc, w) => w.h || doc.levels.find(l => l.id === w.level)?.height || 3.2;
+  function uncovered(doc, wall, otherDoc) {
+    const dx = wall.b.x - wall.a.x, dy = wall.b.y - wall.a.y, length = Math.hypot(dx, dy), ux = dx / length, uy = dy / length;
+    const along = p => (p.x - wall.a.x) * ux + (p.y - wall.a.y) * uy;
+    const cross = p => Math.abs((p.x - wall.a.x) * uy - (p.y - wall.a.y) * ux);
+    const covered = [];
+    for (const other of otherDoc.walls) {
+      if (wall.level !== other.level || Math.abs(wall.t - other.t) > .001 || Math.abs(height(doc, wall) - height(otherDoc, other)) > .001 || wall.kind !== other.kind || cross(other.a) > tolerance || cross(other.b) > tolerance) continue;
+      const from = Math.max(0, Math.min(along(other.a), along(other.b))), to = Math.min(length, Math.max(along(other.a), along(other.b)));
+      if (to - from > tolerance) covered.push([from, to]);
+    }
+    covered.sort((x, y) => x[0] - y[0]);
+    const pieces = [], push = (from, to) => { if (to - from > tolerance) pieces.push({ ...wall, a: { x: wall.a.x + ux * from, y: wall.a.y + uy * from }, b: { x: wall.a.x + ux * to, y: wall.a.y + uy * to }, from, to }); };
+    let cursor = 0; for (const [from, to] of covered) { if (from > cursor) push(cursor, from); cursor = Math.max(cursor, to); } push(cursor, length);
+    return pieces;
+  }
+  // Compare physical coverage, not editor IDs. Splitting or reversing a wall
+  // without changing its geometry is not demolition and reconstruction.
+  const removed = a.walls.flatMap(w => uncovered(a, w, b)), added = b.walls.flatMap(w => uncovered(b, w, a));
   const area = (doc, walls) => walls.reduce((n, w) => {
-    const h = w.h || doc.levels.find(l => l.id === w.level)?.height || 3;
-    return n + Math.max(0, Math.hypot(w.a.x - w.b.x, w.a.y - w.b.y) * h - doc.openings.filter(o => o.wall === w.id).reduce((s, o) => s + o.w * o.h, 0));
+    const openings = doc.openings.filter(o => o.wall === w.id).reduce((s, o) => s + Math.max(0, Math.min(w.to, o.at + o.w / 2) - Math.max(w.from, o.at - o.w / 2)) * o.h, 0);
+    return n + Math.max(0, (w.to - w.from) * height(doc, w) - openings);
   }, 0);
-  return { removed, added, kept: a.walls.length - removed.length, demolitionArea: money(area(a, removed)), newWallArea: money(area(b, added)) };
+  return { removed, added, kept: a.walls.filter(w => !removed.some(part => part.id === w.id)).length, demolitionArea: money(area(a, removed)), newWallArea: money(area(b, added)) };
 }
 export function parseCsv(source) {
   if (source.length > 2_000_000) throw Error('ملف CSV كبير جدًا.');

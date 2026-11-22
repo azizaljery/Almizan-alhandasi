@@ -5,6 +5,8 @@ import { newWorkspace, validateWorkspace, validateProduct, productTakeoff, shopp
 import { validateVisionResult } from '../dist/client-tools/vision-schema.mjs';
 import { createClientToolsWorker } from '../worker/client-tools.mjs';
 import { hasProject, archiveCurrent, clearProject, restorePast } from '../dist/project-lifecycle.mjs';
+import { reviewToolsDocument } from '../dist/client-tools/model.mjs';
+import { gateLogReset, gateLog } from '../dist/design-review.mjs';
 
 function document() {
   let doc = createDoc({ title: 'اختبار الأدوات' });
@@ -27,11 +29,25 @@ test('product choice changes presentation only and remains attached to the actua
   assert.throws(() => mergeFinish({}, { roomProducts: JSON.parse('{"__proto__":{"paint":"#ffffff"}}') }), /غير صالح/);
   assert.throws(() => mergeFinish({}, { roomProducts: { r1: { paint: 'url(javascript:bad)' } } }), /لون غير صالح/);
 });
+test('tools use the current shared review gate without changing geometry or borrowing a foreign brief', () => {
+  const doc = document(), before = serialize(doc), room = roomsForDoc(doc)[0], styled = applyProduct(doc, product({}), room.key);
+  gateLogReset(); const original = reviewToolsDocument(doc), result = reviewToolsDocument(styled, { sourceDoc: doc });
+  assert.equal(result.geometryHash, original.geometryHash); assert.deepEqual(gateLog().map(r => r.route), ['manual', 'manual']); assert.equal(serialize(doc), before);
+  const foreign = document(); foreign.title = 'عميل آخر'; foreign.walls[0].a.x = -1;
+  const noInheritance = reviewToolsDocument(doc, { session: { current: 0, input: { idea: 'طلب خاص لا يخص هذا الرسم', requirements: { prefs: { elevator: true } } }, designs: [{ doc: serialize(foreign) }] } });
+  assert.equal(noInheritance.planVersion, original.planVersion);
+});
 test('shopping retains missing-room evidence and imported product links cannot execute code', () => {
   const s = newWorkspace(), p = product({}); s.products.push(p); s.selections.push({ id: 's', roomKey: 'deleted', productId: p.id, waste: 0, quantity: 10, basis: '' });
   assert.equal(shoppingList(s, document()).lines[0].stale, true);
   assert.throws(() => product({ source: 'javascript:alert(1)' }), /رابط ويب/);
   assert.equal(validateWorkspace(JSON.parse(JSON.stringify(s))).products[0].id, p.id);
+});
+test('automatic wall estimates follow current room geometry while manual quantities remain explicit', () => {
+  const doc = document(), room = roomsForDoc(doc)[0], s = newWorkspace(), p = product({ category: 'wall', unit: 'م²' }); s.products.push(p);
+  s.selections.push({ id: 'selection', roomKey: room.key, productId: p.id, quantity: 1, mode: 'room-wall', waste: 0, basis: 'تقدير: محيط الغرفة' });
+  assert.equal(shoppingList(s, doc).lines[0].quantity, Math.round(room.perimeter * room.height * 100) / 100);
+  s.selections[0].mode = 'manual'; assert.equal(shoppingList(s, doc).lines[0].quantity, 1);
 });
 test('a tools-only project is preserved when starting a new project and can be restored', () => {
   const map = new Map(), store = { getItem: k => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)), removeItem: k => map.delete(k) };
@@ -49,6 +65,13 @@ test('calibration uses original image dimensions and vector import creates edita
 test('renovation keeps a literal baseline and separates removed/new walls including changed same-ID geometry', () => {
   const a = document(), before = serialize(a), b = structuredClone(a); b.walls[0].a.y += .5;
   const diff = renovationDiff(a, b); assert.equal(diff.removed.length, 1); assert.equal(diff.added.length, 1); assert.equal(diff.kept, 3); assert.ok(diff.demolitionArea > 0); assert.equal(serialize(a), before);
+});
+test('renovation ignores purely administrative wall splits and counts only physical extensions', () => {
+  const a = document(), b = structuredClone(a), old = b.walls.shift(), middle = { x: (old.a.x + old.b.x) / 2, y: (old.a.y + old.b.y) / 2 };
+  b.walls.push({ ...old, b: middle }, { ...old, id: 'w99', a: old.b, b: middle }); b.counters.walls = 99;
+  const split = renovationDiff(a, b); assert.equal(split.demolitionArea, 0); assert.equal(split.newWallArea, 0); assert.equal(split.kept, 4);
+  const extended = structuredClone(a); extended.walls[0].b.x += 1;
+  const difference = renovationDiff(a, extended); assert.equal(difference.demolitionArea, 0); assert.equal(difference.newWallArea, a.levels[0].height);
 });
 test('manual traces snap close endpoints so cursor rounding does not leave invisible open-room gaps', () => {
   const plan = { walls: [{ a: { x: .1, y: .1 }, b: { x: .9, y: .1 } }], openings: [], rooms: [{ name: 'صالة', type: 'living', center: { x: .5, y: .5 } }] };
