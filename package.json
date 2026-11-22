@@ -12,6 +12,10 @@
   "devDependencies": {
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.4",
-    "esbuild": "^0.25.12"
+    "esbuild": "^0.25.12",
+    "playwright": "1.49.1"
+  },
+  "dependencies": {
+    "pdfjs-dist": "4.10.38"
   }
 }

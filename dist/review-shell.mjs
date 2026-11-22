@@ -3,7 +3,7 @@ import { ambientCycle } from './ambient-cycle.mjs';
 const body=document.body;
 if(body.classList.contains('mizan-review')&&!document.querySelector('.mz-review-sidebar')){
  const current=location.pathname.split('/').pop().replace(/\.html$/,'')||'home';
- const pages=[['home','الرئيسية','M3 11 12 3l9 8M5 10v11h14V10M10 21v-7h4v7'],['design','المخطط','M3 3h18v18H3zM3 11h18M11 3v18M11 16h10'],['view3d','ثلاثي الأبعاد','m12 2 10 5v10l-10 5-10-5V7zM2 7l10 5 10-5M12 12v10'],['final','المخرجات','M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h8']];
+ const pages=[['home','الرئيسية','M3 11 12 3l9 8M5 10v11h14V10M10 21v-7h4v7'],['design','المخطط','M3 3h18v18H3zM3 11h18M11 3v18M11 16h10'],['view3d','ثلاثي الأبعاد','m12 2 10 5v10l-10 5-10-5V7zM2 7l10 5 10-5M12 12v10'],['final','المخرجات','M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h8'],['tools','أدوات المشروع','M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z']];
  const side=document.createElement('aside');side.className='mz-review-sidebar';side.setAttribute('aria-label','مراحل مشروع الميزان الهندسي');
  const brand=document.createElement('a');brand.className='mz-review-brand';brand.href='./home.html';
  const logo=document.createElement('img');logo.src='./assets/mizan-logo.svg';logo.alt='';

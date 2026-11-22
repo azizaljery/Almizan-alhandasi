@@ -12,10 +12,12 @@ import admin from './admin.mjs';
 import clientArchive from './client-archive.mjs';
 import { readSettings, effectiveEnv } from './site-settings.mjs';
 import delivery from './delivery-registry.mjs';
+import clientTools from './client-tools.mjs';
 
 export default {
   async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
+    if (pathname.startsWith('/api/client-tools/')) return clientTools.fetch(request, env);
     if (pathname.startsWith('/api/delivery/')) return delivery.fetch(request, env);
     if (pathname === '/admin' || pathname === '/admin/' || pathname === '/admin.html' || pathname === '/api/admin' || pathname.startsWith('/api/admin/')) return admin.fetch(request, env);
     if (pathname === '/api/archive-consent' || pathname.startsWith('/api/archive-consent/')) return clientArchive.fetch(request, env);

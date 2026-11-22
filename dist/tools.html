@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أدوات مشروعك — الميزان الهندسي</title>
+<meta name="description" content="لوحة إلهام منزلك، تشطيبات وقائمة مشتريات، استيراد المخططات، الترميم، مقارنة المقاولين ومتابعة التنفيذ.">
+<link rel="icon" href="./assets/mizan-logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./brand.css"><link rel="stylesheet" href="./review-theme.css"><link rel="stylesheet" href="./client-tools/tools.css">
+</head>
+<body class="mizan-review" data-stage="tools">
+<main class="tools-main">
+  <header class="tools-hero"><div><p class="eyebrow">الميزان الهندسي / مساحة العمل</p><h1>أدوات مشروعك</h1><p class="hero-copy">ذوقك، اختياراتك، وخطوات تنفيذ منزلك في مكان واحد.</p></div><a href="./studio.html" class="button secondary">افتح المرسم</a></header>
+  <section class="project-strip" aria-label="المشروع الحالي"><div><span class="status-orb"></span><strong id="project-name">مشروعك الحالي</strong><span id="project-detail"></span></div><span class="save-state" id="save-state">الحفظ في هذا المتصفح</span></section>
+  <div class="workspace-actions"><button id="export-backup" class="link-button">تنزيل نسخة احتياطية بالملفات</button><label class="link-button file-label">استعادة نسخة<input id="import-backup" type="file" accept="application/json,.json" hidden></label><button id="print-workspace" class="link-button">طباعة التقرير</button></div>
+  <p id="tools-message" class="notice" role="status" aria-live="polite" hidden></p>
+  <nav id="tools-tabs" class="tools-tabs" role="tablist" aria-label="أدوات المشروع"></nav>
+  <section id="tool-panel" role="tabpanel" tabindex="-1"></section>
+  <footer class="tools-footer">الملفات محفوظة على جهازك. نزّل النسخة الاحتياطية لنقلها إلى جهاز آخر. تحليل الصور يرسل الصور التي تختارها فقط إلى خدمة الذكاء الحالية عند الضغط على «تحليل».</footer>
+</main>
+<script type="module" src="./client-tools/app.mjs"></script><script type="module" src="./site-notice.mjs"></script><script type="module" src="./review-shell.mjs"></script>
+</body></html>

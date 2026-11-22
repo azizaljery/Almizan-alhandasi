@@ -17,7 +17,7 @@ import { stairLayout, emitStair, stairHeightAt } from './stairs3d.mjs';
 import { emitOpening, archProfile } from './openings3d.mjs';
 import { buildSite } from './site3d.mjs';
 import { attachInterior } from './interior-materials.mjs';
-import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, shade, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS } from './interior-themes.mjs';
+import { resolveInteriorTheme, resolveInteriorPalette, roomFinish, furniturePalette, shade, safeDesignHash, INTERIOR_THEMES, WALL_PRESETS, FLOOR_PRESETS } from './interior-themes.mjs';
 import { hexLinear } from './interior-textures.mjs';
 import { buildPiece } from './interior-pieces.mjs';
 import { buildRichFixture, isRichKind } from './interior-furniture.mjs';
@@ -92,7 +92,13 @@ export function buildBuildingScene(doc, THREE, options = {}) {
       const label = labels.find(l => inSpace(l.seed, s)) || null;
       const type = label?.type || 'other', def = ROOM_TYPES[type] || ROOM_TYPES.other;
       const sp = Object.assign(s, { key: L.id + ':' + s.id, levelId: L.id, label, type, name: label?.name || roomTypeName(type), floorKind: def.floor, open: !!def.open, tint: tintOf(type), levelIndex: L.i });
-      if (IV) { sp.fin = roomFinish(IV.id, type, sp.key, IV.seed, { area: sp.area, palette: IV.pal }); IV.rooms.set(sp.key, sp.fin); }
+      if (IV) {
+        sp.fin = roomFinish(IV.id, type, sp.key, IV.seed, { area: sp.area, palette: IV.pal });
+        const choice = doc.finish?.roomProducts?.[label?.id || sp.key];
+        if (choice?.floor && Object.hasOwn(FLOOR_PRESETS, choice.floor)) sp.fin.floor = choice.floor;
+        if (choice?.paint && /^#[0-9a-f]{6}$/i.test(choice.paint)) { sp.fin.paint = choice.paint; sp.fin.accent = null; sp.fin.band = null; sp.fin.full = null; }
+        IV.rooms.set(sp.key, sp.fin);
+      }
       return sp;
     });
     const next = lvData[L.i + 1];

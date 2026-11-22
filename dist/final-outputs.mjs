@@ -107,8 +107,8 @@ export function designReasons(data) {
 export const NEXT_STAGES = Object.freeze([
   { id: 'book', title: 'كتاب المشروع', status: 'available', note: 'متاح الآن: ملف واحد بكل ما سبق (يُحفظ ويُطبع).' },
   { id: 'cost', title: 'التكلفة بأسعارك', status: 'available', note: 'متاح الآن: تُدخل سعر الوحدة فتظهر التكلفة الجزئية أو الكاملة.' },
-  { id: 'tender', title: 'العطاءات ومقارنة المقاولين', status: 'planned', note: 'لم تُبنَ بعد.' },
-  { id: 'build', title: 'التنفيذ والمتابعة والاستلام', status: 'planned', note: 'لم تُبنَ بعد.' },
+  { id: 'tender', title: 'العطاءات ومقارنة المقاولين', status: 'available', href: './tools.html#tenders', note: 'مقارنة ملفات CSV على كميات مرجعية موحدة وكشف البنود الناقصة وفروق الوحدات والكميات.' },
+  { id: 'build', title: 'التنفيذ والمتابعة والاستلام', status: 'available', href: './tools.html#execution', note: 'مهام وصور وفحص واستلام وسجل دفعات مرتبط بالأعمال المستلمة؛ محفوظة في متصفحك.' },
   { id: 'maintain', title: 'الضمان والصيانة ودورة حياة المبنى', status: 'planned', note: 'لم تُبنَ بعد.' },
 ]);
 
