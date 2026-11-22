@@ -10,6 +10,7 @@ import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, ali
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
+import { stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
 export { scorePlan, rankByScore };
 
 export const SESSION_KEY = 'mizan.design.session.v1';
@@ -61,7 +62,7 @@ export function wantsAlternative(text = '') {
 export function createSession({ land, counts, requirements, discovery, idea = '', result }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
-  return ensureScores({
+  const created = ensureScores({
     v: 1, input: { land, discovery, idea, requirements: req },
     designs: [entry(result, null)], current: 0, approved: null, createdAt: Date.now(),
     dna: result.dna ? clone(result.dna) : null,
@@ -70,6 +71,8 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
     seenMacro: [macroSig(parseDoc(serialize(result.doc)))].filter(Boolean),
     alternatives: (result.alternatives || []).slice(0, 5).map(a => ({ index: a.index, strategy: String(a.strategy || ''), doc: serialize(a.doc) })),
   });
+  stampDesign(created, 0, 'first'); // بوابة المراجعة: التوليد الأول
+  return created;
 }
 function entry(result, feedback) {
   return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null, fit: result.fit || null };
@@ -164,6 +167,8 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   ensureScores(s);
+  // بوابة المراجعة: تعديل بملاحظة/خيار (محادثة) أو بديل مختلف (توزيع آخر/إكمال تلقائي)
+  stampDesign(s, s.current, !auto && (picks.some(id => id !== 'layout') || (more && (more.understood.length || more.unsupported.length))) ? 'chat' : 'alternative');
   return { session: s, changes, reply };
 }
 
@@ -240,6 +245,7 @@ export async function mergeDesigns(session, a, b, { generate = generateInitialDe
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
   ensureScores(s);
+  stampDesign(s, s.current, 'merge'); // بوابة المراجعة: الدمج
   return { session: s, changes, reply };
 }
 
@@ -251,6 +257,26 @@ export function fitFor(session, doc = currentDoc(session)) {
 }
 
 export function approve(session) { const s = clone(session); s.approved = s.current; return s; }
+/** قرارات العميل الصريحة على شروط إلزامية غير متحقق منها: تُحفظ مربوطة بنسخة المخطط، وأي تعديل هندسي لاحق يُسقطها. */
+export function recordReviewDecisions(session, ids) {
+  const s = clone(session), pv = planVersion(currentDoc(s), ctxOfSession(s)).planVersion, prev = s.reviewDecisions?.planVersion === pv ? s.reviewDecisions.ids : [];
+  s.reviewDecisions = { planVersion: pv, ids: [...new Set([...prev, ...ids])] };
+  return s;
+}
+/**
+ * الاعتماد بعد المراجعة. مع مفتاح الإلزام (مطفأ افتراضيًا): يُرفض الاعتماد إن وُجدت مخالفة إلزامية أو كان التقرير قديمًا أو بقي شرط إلزامي
+ * غير متحقق منه بلا قرار صريح. بدون المفتاح: يُعتمد دائمًا لكن يُسجَّل في التصميم أن المراجعة كانت إرشادية (advisory) وبأي أسباب.
+ * يعيد { session, status: 'approved'|'refused', enforced, advisory, result }. التصميم نفسه لا يتغير.
+ */
+export function approveReviewed(session, { decisions = null, enforce = null } = {}) {
+  const cur = session.designs[session.current], doc = currentDoc(session), ctx = ctxOfSession(session), enforced = enforce ?? reviewEnforced(session.input?.requirements);
+  const pv = planVersion(doc, ctx).planVersion, dec = decisions ?? (session.reviewDecisions?.planVersion === pv ? session.reviewDecisions.ids : []);
+  const result = approveDesign(doc, { ...ctx, route: cur.review?.route || null }, { report: cur.review || null, decisions: dec });
+  if (result.refused && enforced) return { session, status: 'refused', enforced, advisory: false, result };
+  const s = approve(session);
+  s.designs[s.current].approval = result.refused ? { advisory: true, planVersion: result.report.planVersion, reasons: result.reasons.map(r => r.code), disclaimer: REVIEW_DISCLAIMER } : result.approval;
+  return { session: s, status: 'approved', enforced, advisory: result.refused, result };
+}
 
 export function saveSession(store, s) { try { store.setItem(SESSION_KEY, JSON.stringify(s)); return true; } catch { return false; } }
 export function loadSession(store) {
@@ -264,7 +290,7 @@ export function ledgerFor(session, doc = currentDoc(session)) {
   try { return verifyRequest(doc, req, { entry }); } catch { return session.designs[session.current]?.ledger || []; }
 }
 
-export default { SESSION_KEY, FEEDBACK, createSession, redesign, extendSession, mergeDesigns, approve, saveSession, loadSession, currentDoc, ledgerFor, mergeRules, carryOver, sameLand };
+export default { SESSION_KEY, FEEDBACK, createSession, redesign, extendSession, mergeDesigns, approve, approveReviewed, recordReviewDecisions, saveSession, loadSession, currentDoc, ledgerFor, mergeRules, carryOver, sameLand };
 
 // ------------------------------------------------------------------------------------------ العرض
 import { analyzeDoc } from './draw/digest.mjs';

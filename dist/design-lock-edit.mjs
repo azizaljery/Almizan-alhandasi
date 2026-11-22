@@ -16,6 +16,7 @@ import { fixWindowJunctions } from './villa-layout.mjs';
 import { swingSectors, sectorPoints, fixtureRect, penetration } from './draw/review.mjs';
 import { ensureScores } from './design-session.mjs';
 import { visualSig } from './villa-layout.mjs';
+import { stampDesign } from './design-review.mjs';
 
 export const EDIT_VERSION = 'design-lock-edit/1';
 /** حدود تصميمية (افتراضات الميزان؛ ليست اشتراطات نظامية): أصغر غرفة نوم صافية، وأصغر ضلع، وحمام ملحق، وثخانة القاطع. */
@@ -351,6 +352,7 @@ function stampSession(session, index, cand, change, report, { applied }) {
   s.designs.push(e); s.seen ||= []; try { s.seen.push(visualSig(parseDoc(e.doc))); } catch { /* بلا بصمة */ }
   s.current = s.designs.length - 1; delete s.designs[s.current].score; ensureScores(s);
   s.lockLog = [...(s.lockLog || []), { op: applied ? 'edit-applied' : 'edit', type: change.type, design: s.current }];
+  stampDesign(s, s.current, change.type === 'commands' ? 'manual' : 'chat'); // بوابة المراجعة: تعديل بأوامر الرسم = يدوي، وما سواه بالمحادثة
   return s;
 }
 function lockViolationsOf(res) { return res.violated.reduce((n, r) => n + r.violations.length, 0); }
@@ -422,6 +424,7 @@ export async function proposeChange(session, change, { index = session.current, 
 }
 function withLocks(freshSession, prev, c, report, change) {
   const s = clone(freshSession); s.locks = clone(prev.locks || []); s.lockLog = [...(prev.lockLog || []), { op: 'edit-applied', type: change.type, design: s.designs.length - 1 }];
+  stampDesign(s, s.designs.length - 1, 'chat'); // بوابة المراجعة: إعادة توليد بملاحظة مع حفظ الأقفال
   const e = s.designs.at(-1); e.feedback = { ...(e.feedback || {}), reply: { ...(e.feedback?.reply || {}), lockEdit: { change: { type: change.type }, verdict: report.verdict, lock: { ok: report.lock.ok, checked: report.lock.checked }, summary: report.summary } } };
   return s;
 }
@@ -448,6 +451,7 @@ export function approveProposal(session, result, { accept = 'all', index = sessi
   }
   s.locks = [...keep, ...(relock ? createLocks(doc, moved) : [])];
   s.lockLog = [...(s.lockLog || []), { op: 'approved', keys: ok, relock }];
+  stampDesign(s, s.current, result.change?.type === 'commands' ? 'manual' : 'chat'); // الأقفال تغيّرت بعد الموافقة: يُعاد الختم بها
   return s;
 }
 

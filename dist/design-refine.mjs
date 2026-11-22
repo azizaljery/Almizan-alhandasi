@@ -15,6 +15,7 @@ import { verifyRequest } from './rules.mjs';
 import { scorePlan, SCORE_LIMITS } from './plan-score.mjs';
 import { ensureScores } from './design-session.mjs';
 import { solarSite } from './geo-land.mjs';
+import { stampDesign } from './design-review.mjs';
 
 /** حدود الاستمثال المعلنة. */
 export const REFINE_LIMITS = Object.freeze({
@@ -296,6 +297,7 @@ export function applyRefinement(session, index, res, { maxDesigns = 30 } = {}) {
   if (s.designs.length > maxDesigns) s.designs.splice(0, s.designs.length - maxDesigns);
   s.current = s.designs.length - 1;
   ensureScores(s);
+  stampDesign(s, s.current, 'manual'); // بوابة المراجعة: تحسين بأدوات هندسية
   return s;
 }
 

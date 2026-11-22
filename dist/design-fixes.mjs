@@ -8,6 +8,7 @@ import { generateInitialDesign } from './home-flow.mjs';
 import { visualSig, visualSim, checkDoc } from './villa-layout.mjs';
 import { fitStatement, applyDecision, KEY_LABEL } from './fit-ladder.mjs';
 import { hintOf } from './design-session.mjs';
+import { stampDesign } from './design-review.mjs';
 
 const clone = v => JSON.parse(JSON.stringify(v));
 const MAX_DESIGNS = 12;
@@ -107,6 +108,7 @@ export async function applyFix(session, id = 'all', { generate = generateInitial
   try { s.seen = [...(s.seen || []), visualSig(doc)]; } catch { /* البصمة اختيارية */ }
   if (s.designs.length > MAX_DESIGNS) s.designs.splice(0, s.designs.length - MAX_DESIGNS);
   s.current = s.designs.length - 1;
+  stampDesign(s, s.current, 'chat'); // بوابة المراجعة: إصلاح مقترح من شرعاء
   return { session: s, changed: true, reply };
 }
 
@@ -145,6 +147,7 @@ export async function applyFitDecision(session, id, { generate = generateInitial
   s.designs[s.current].feedback = { picks: [], text: '', changes: ['قرارك: ' + label], reply };
   try { s.seen = [...(s.seen || []), visualSig(out.doc)]; } catch { /* البصمة اختيارية */ }
   if (s.designs.length > MAX_DESIGNS) { s.designs.splice(0, s.designs.length - MAX_DESIGNS); s.current = s.designs.length - 1; }
+  stampDesign(s, s.current, 'chat'); // بوابة المراجعة: قرار العميل في بيان الاتساع
   return { session: s, changed: true, reply };
 }
 
