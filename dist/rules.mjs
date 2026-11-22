@@ -3,6 +3,7 @@
 // ثلاث وظائف: extractRules (نص مطبَّع ← قواعد)، rulePenalty (تقييم في الإطار القانوني للمولّد)،
 // verifyRules (تحقق هندسي من المستند الناتج: نُفّذ/لم يُنفَّذ مع السبب). نقي: لا DOM ولا شبكة.
 import { analyzeDoc } from './draw/digest.mjs';
+import { evaluatePrivacyKind } from './privacy-geometry.mjs';
 
 const AR = '\\u0600-\\u06FF';
 const PRE = `(?<![${AR}])(?:[وفبك]?(?:ال|لل)|[وفبكل])?`; // أدوات ملتصقة: و، ب، ل، ال، بال، لل...
@@ -403,12 +404,24 @@ export function attachWhere(items, doc, req = {}) {
       else { const r = rule(it.id); if (r) list = [...pick(r.a), ...(ROOM_OF[r.b] || r.b === 'hall' ? pick(r.b) : [])]; }
     } catch { list = []; }
     const seen = new Set();
+    if (/^PV-/.test(it.id)) continue;
     it.where = list.filter(r => { const k = r.level + '|' + r.name; if (seen.has(k)) return false; seen.add(k); return true; }).map(r => ({ name: r.name, level: r.level }));
   }
   return items;
 }
+/** بنود الخصوصية المقيسة: كل بند { id:'PV-<kind>', ok, why, where, marks, must }؛ «غير مُقيّم» لا يُحتسب متحققًا ولا فاشلًا (ok:null → لا يدخل السجل). */
+function privacyItems(doc, req) {
+  const out = [];
+  for (const p of req.privacy || []) {
+    const g = evaluatePrivacyKind(doc, p.kind);
+    if (g.status === 'NOT_EVALUATED') { out.push({ id: 'PV-' + p.kind, kind: 'privacy', text: p.text, ok: false, unverified: true, why: 'غير متحقق: ' + g.detail.replace(/^غير مُقيّم:\s*/, ''), must: !!p.must, where: [], marks: [] }); continue; }
+    out.push({ id: 'PV-' + p.kind, kind: 'privacy', text: p.text, ok: g.status === 'PASS', why: g.status === 'PASS' ? '' : g.detail, must: !!p.must, where: g.where, marks: g.marks, evidence: g.status === 'PASS' ? g.detail : undefined });
+  }
+  return out;
+}
 function verifyRequestItems(doc, req = {}, { entry = 's' } = {}) {
   const out = verifyRules(doc, req.rules || [], { entry });
+  if (req.privacy?.length) out.push(...privacyItems(doc, req));
   const { rooms } = docRooms(doc), sel = id => rooms.filter(r => ROOM_OF[id]?.(r));
   for (const [k, [ar, id]] of Object.entries(EXTRA_AR)) if (req.extras?.[k]) {
     const got = sel(id).length > 0; out.push({ id: 'X-' + k, kind: 'extra', text: ar, ok: got, why: got ? '' : `«${ar}» لم تتسع في هذا التصميم.` });

@@ -93,7 +93,7 @@ function sidesOf(model, w) {
   return { n, plus: [...out.plus], minus: [...out.minus] };
 }
 /** يزيح جدارًا فاصلًا بمقدار delta على عموده، ويمدّ/يقصّر الجدران الملاصقة له، ويحرّك ما التصق به من قطع. يعيد false إن لم يصلح. يعدّل doc. */
-function shiftWall(doc, wid, delta) {
+export function shiftWall(doc, wid, delta) {
   const w = doc.walls.find(x => x.id === wid); if (!w || !(vert(w) || horiz(w))) return false;
   const n = vert(w) ? { x: 1, y: 0 } : { x: 0, y: 1 }, mv = p => ({ x: r3(p.x + n.x * delta), y: r3(p.y + n.y * delta) });
   const along = v => (vert(w) ? vert(v) : horiz(v)); // موازٍ لـw

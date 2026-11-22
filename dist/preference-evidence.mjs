@@ -1,4 +1,5 @@
 import { circulationNetwork } from './circulation.mjs';
+import { evaluatePrivacyKind } from './privacy-geometry.mjs';
 
 const lower = value => String(value ?? '').toLowerCase();
 const normalizeText = value => lower(value)
@@ -336,6 +337,11 @@ function evaluateOne(model, pref) {
   if (kind === 'avoid_shared_guest_family_corridors' || kind === 'avoid_bedroom_guest_shared_corridors') return sharedCorridorPreference(model, pref, circulationNetwork(model));
   if (kind === 'avoid_bedroom_guest_proximity') return bedroomGuestProximity(model, pref);
   if (kind === 'require_open_living_kitchen' || kind === 'prefer_dining_access_all_majlis' || kind === 'prefer_dining_far_from_majlis' || kind === 'prefer_kitchen_dining_route' || kind === 'prefer_guest_bath_dining_route') return pathPreference(model, pref, circulationNetwork(model));
+  // خطوط الرؤية والانكشاف والممرات المظلمة تُقاس على مستند الرسم حين يحمله النموذج (model.sourceDoc)؛ بدونه تبقى «غير مُقيّم» كما كانت.
+  if (model.sourceDoc && ['avoid_bedroom_kitchen_sightline', 'avoid_exposed_bedrooms', 'avoid_dark_corridors'].includes(kind)) {
+    const g = evaluatePrivacyKind(model.sourceDoc, kind);
+    return { id: pref.id, kind, label: pref.description, status: g.status, score: g.score, objective: null, direction: null, detail: g.detail, data: g.data, where: g.where, marks: g.marks };
+  }
   if (kind === 'avoid_bedroom_kitchen_sightline' || kind === 'prefer_bedroom_kitchen_sightline' || kind === 'unresolved_bedroom_kitchen_facing') return notEvaluated(pref,
     'غير مُقيّم: لا توجد هندسة خطّ رؤية بين فتحات الغرف. لن نحوّل «عدم المواجهة» إلى «عدم المجاورة» ولا نزعم تحقق الخصوصية.');
   if (kind === 'avoid_exposed_bedrooms') return notEvaluated(pref, 'غير مُقيّم: لا توجد هندسة خطوط رؤية من الخارج/المدخل إلى أبواب ونوافذ غرف النوم؛ القرب من المجالس مؤشر منفصل ولا يثبت الانكشاف.');
