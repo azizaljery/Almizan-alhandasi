@@ -549,7 +549,8 @@ function watchReviewVisibility() {
   const hosts = [$('reviewHost'), $('azizHost')].filter(Boolean); if (!hosts.length || typeof IntersectionObserver === 'undefined') return;
   if (reviewObserver && hosts.every((h, i) => reviewObserver.hosts[i] === h) && reviewObserver.hosts.length === hosts.length) return; reviewObserver?.io.disconnect();
   // الزران العائمان («إيقاف الحركة» و«اسأل شرعاء») يُخفيان تلقائيًا ما دامت بطاقة المراجعة أو لوحة عزيز ظاهرة فلا يغطيان نصًا
-  const seen = new Set(), io = new IntersectionObserver(es => { for (const e of es) (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)); document.body.classList.toggle('mzr-card-visible', seen.size > 0); }, { threshold: 0.05 });
+  // لوحة عزيز طويلة وتظهر أعلى الصفحة: لا يُخفيان إلا حين يظهر معظمها (نصف الشاشة أو 80٪ منها إن كانت أقصر) (فيغطيانها فعلًا)؛ أما بطاقة المراجعة فعند ظهورها
+  const seen = new Set(), thr = Array.from({ length: 51 }, (_, i) => i / 50), io = new IntersectionObserver(es => { for (const e of es) { const big = e.target.id === 'azizHost' ? e.intersectionRect.height >= Math.min(innerHeight * 0.5, e.boundingClientRect.height * 0.8) : e.isIntersecting; if (big) seen.add(e.target); else seen.delete(e.target); } document.body.classList.toggle('mzr-card-visible', seen.size > 0); }, { threshold: thr });
   document.body.classList.remove('mzr-card-visible'); hosts.forEach(h => io.observe(h)); reviewObserver = { io, hosts };
 }
 let reviewFocus = null, reviewDecided = new Set(), reviewRunning = false, reviewError = null, reviewTimer = 0;
