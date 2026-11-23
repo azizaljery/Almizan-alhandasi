@@ -24,6 +24,7 @@ import { azizReviewLevels } from './integration/aziz-levels.mjs';
 import { sha256 } from './integration/browser-crypto.mjs';
 import { pointInPolygon } from './draw/geom.mjs';
 import { ROOM_TYPES } from './draw/catalog.mjs';
+import { analyzeDailyLife } from './daily-life.mjs';
 
 export const REVIEW_VERSION = 'design-review/1';
 export const DISCLAIMER = 'مراجعة آلية أولية؛ الاعتماد التنفيذي يحتاج المهندس المختص. لا يشمل الأحمال والأساسات والتسليح.';
@@ -31,7 +32,7 @@ export const SEVERITY = Object.freeze({ MANDATORY: 'mandatory', WARNING: 'warnin
 export const STATE = Object.freeze({ VIOLATED: 'violated', VERIFIED: 'verified', UNVERIFIED: 'unverified' });
 export const SEVERITY_AR = Object.freeze({ mandatory: 'إلزامي', warning: 'تحذير', info: 'معلومة' });
 export const STATE_AR = Object.freeze({ violated: 'مخالف', verified: 'متحقق', unverified: 'غير متحقق' });
-export const SOURCE_AR = Object.freeze({ geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', review: 'المراجعة' });
+export const SOURCE_AR = Object.freeze({ geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', daily: 'الحياة اليومية', review: 'المراجعة' });
 /** مسارات التصميم الخمسة التي يجب أن تمرّ كلها عبر البوابة. */
 export const ROUTES = Object.freeze(['first', 'alternative', 'merge', 'manual', 'chat']);
 export const ROUTE_AR = Object.freeze({ first: 'التوليد الأول', alternative: 'بديل', merge: 'دمج', manual: 'تعديل يدوي', chat: 'تعديل بالمحادثة' });
@@ -320,6 +321,18 @@ export function reviewDesign(doc, ctx = {}) {
       }
     });
     guard('levels', 'العلاقات بين الأدوار', SEVERITY.WARNING, () => reviewLevelRelations(doc, model, L, add, planLoc));
+
+    // 12) الحياة اليومية (daily-life): مسارات الضيف والأسرة والطعام والحمامات والأثاث والانكشاف. تحذير/معلومة فقط؛ لا شرط إلزامي جديد.
+    guard('daily', 'الحياة اليومية', SEVERITY.INFO, () => {
+      const dl = analyzeDailyLife(doc, { model });
+      for (const it of dl.items) {
+        const severity = it.severity === 'warning' ? SEVERITY.WARNING : SEVERITY.INFO;
+        const state = it.state === 'violated' ? STATE.VIOLATED : it.state === 'verified' ? STATE.VERIFIED : STATE.UNVERIFIED;
+        const lc = it.loc || {}, ids = (lc.roomIds || []).filter(id => model.roomIndex.has(id));
+        const location = ids.length || (lc.segments || []).length || (lc.points || []).length ? L.loc({ roomIds: ids, segments: lc.segments || [], points: lc.points || [], label: lc.label || it.title }) : planLoc(lc.label || it.title);
+        add('daily', it.code, severity, state, it.title, it.reason, it.evidence, location);
+      }
+    });
   }
 
   // ------------------------------------------------------------------------------------------ الملخص
