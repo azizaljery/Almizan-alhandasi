@@ -196,7 +196,7 @@ function show(index) {
     ...(fitCard ? [fitCard] : []),
     ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
-  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview(); paintLocks(); paintAziz();
+  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview(); paintLocks(); paintAziz(); watchReviewVisibility();
 }
 
 /** بطاقة «درجة المطابقة»: الدرجة، «لماذا؟» بجملتين من القياسات نفسها، وأشرطة المؤشرات السبعة (كل مؤشر يشرح نفسه عند المرور عليه). */
@@ -546,10 +546,11 @@ function paint() {
 let reviewObserver = null;
 // الأزرار العائمة تغطي البطاقة على الجوال: نُعلّم body ما دامت البطاقة ظاهرة فيخفيها التنسيق (design-review.css).
 function watchReviewVisibility() {
-  const host = $('reviewHost'); if (!host || typeof IntersectionObserver === 'undefined') return;
-  if (reviewObserver?.host === host) return; reviewObserver?.io.disconnect();
-  const io = new IntersectionObserver(es => document.body.classList.toggle('mzr-card-visible', es.some(e => e.isIntersecting)), { threshold: 0.05 });
-  io.observe(host); reviewObserver = { io, host };
+  const hosts = [$('reviewHost'), $('azizHost')].filter(Boolean); if (!hosts.length || typeof IntersectionObserver === 'undefined') return;
+  if (reviewObserver && hosts.every((h, i) => reviewObserver.hosts[i] === h) && reviewObserver.hosts.length === hosts.length) return; reviewObserver?.io.disconnect();
+  // الزران العائمان («إيقاف الحركة» و«اسأل شرعاء») يُخفيان تلقائيًا ما دامت بطاقة المراجعة أو لوحة عزيز ظاهرة فلا يغطيان نصًا
+  const seen = new Set(), io = new IntersectionObserver(es => { for (const e of es) (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)); document.body.classList.toggle('mzr-card-visible', seen.size > 0); }, { threshold: 0.05 });
+  document.body.classList.remove('mzr-card-visible'); hosts.forEach(h => io.observe(h)); reviewObserver = { io, hosts };
 }
 let reviewFocus = null, reviewDecided = new Set(), reviewRunning = false, reviewError = null, reviewTimer = 0;
 const reviewMemo = new Map();

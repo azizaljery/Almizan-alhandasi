@@ -9,7 +9,7 @@ export const AZIZ_PANEL_VERSION = 'aziz-panel/1';
 export const PANEL_TITLE = 'قرار المراجعة — محرك عزيز';
 export const PANEL_DISCLAIMER = 'مراجعة آلية أولية؛ الاعتماد التنفيذي يحتاج المهندس المختص';
 export const WHO_AZIZ = Object.freeze([
-  'عزيز محرك فحص محلي في الميزان؛ يتحقق لكل دور من القيود الهندسية الصلبة: سلامة مضلعات الغرف، وعدم تراكب غرفتين، وبقاء كل غرفة داخل حدود المبنى.',
+  'عزيز محرك فحص داخل الميزان؛ يتحقق لكل دور من القيود الهندسية الصلبة: أن رسم كل غرفة سليم، وأن غرفتين لا تتراكبان، وأن كل غرفة داخل حدود المبنى.',
   'فحصه أولي وآلي؛ أما مطابقة طلبك وأعداد الغرف ومقاساتها فيفحصها مدقق الميزان، ويبيّنها الجدول أدناه، ولا تُنسب إلى عزيز.',
 ]);
 const ROUTE = { first: 'التوليد الأول', alternative: 'بديل', merge: 'دمج', manual: 'تعديل يدوي', chat: 'تعديل بالمحادثة' };
@@ -23,15 +23,15 @@ const short = t => { const x = String(t || '').trim(); const i = x.search(/[؛:]
 function requestTable(doc, req, st, fit) {
   const rooms = docRooms(doc).rooms, sel = id => rooms.filter(r => ROOM_OF[id]?.(r)), c = req.counts || {}, ex = req.extras || {};
   const rows = [], byKey = new Map(st.items.map(i => [i.key, i]));
-  const facts = st.facts, avail = facts ? `المتاح للبناء ${facts.W} × ${facts.D} م (${facts.area} م² للدور)` : '';
-  const need = st.need ? `والبرنامج المطلوب يحتاج نحو ${st.need} م²` : '';
+  const facts = st.facts, avail = facts ? `المساحة المتاحة للبناء بعد الارتدادات ${facts.area} م² للدور (${facts.W} × ${facts.D} م)` : '';
+  const need = st.need ? `وبرنامجك كما طلبته يحتاج نحو ${st.need} م²` : '';
   const shrinkTried = (fit?.trace || []).some(t => t.kind === 'shrink');
-  const lead = shrinkTried ? 'جرّبتُ تصغير المقاسات أولًا إلى حدودها الدنيا المعلنة فلم يتسع ' : '';
+  const lead = shrinkTried ? 'حاولتُ أولًا تصغير مقاسات الغرف إلى أصغر حجم مناسب، ومع ذلك لم يتسع ' : '';
   const push = (key, what, asked, got, unit, itemKey = key) => {
     const it = byKey.get(itemKey);
     if (!asked) return;
     if (got >= asked && !it) rows.push({ key, what, asked, got, unit, status: 'ok', statusAr: 'تحقق', reason: 'موجود في التصميم كما طلبت.' });
-    else rows.push({ key, what, asked, got, unit, status: 'cut', statusAr: 'قُلّص', reason: [lead && it?.byLadder ? lead + 'البرنامج كاملًا.' : '', avail && need ? `${avail}، ${need}.` : '', it?.why && !/^لم أجد توزيعًا سليمًا يضمّه/.test(it.why) ? it.why : '', it?.byLadder && it?.asked === false ? 'لم تطلبه صراحة فكان أول ما خُفّف.' : ''].filter(Boolean).join(' ') || 'لم يجد المولّد له موضعًا سليمًا.' });
+    else rows.push({ key, what, asked, got, unit, status: 'cut', statusAr: 'قُلّص', reason: [lead && it?.byLadder ? lead + 'برنامجك كاملًا.' : '', avail && need ? `${avail}، ${need}.` : '', it?.why && !/^لم أجد توزيعًا سليمًا يضمّه/.test(it.why) ? it.why : '', it?.byLadder && it?.asked === false ? 'لم تطلبه صراحة فكان أول ما خُفّف.' : ''].filter(Boolean).join(' ') || 'لم يجد المولّد له موضعًا سليمًا.' });
   };
   push('bedrooms', 'غرف النوم', int(c.bedrooms), sel('bedrooms').length, 'غرفة');
   push('baths', 'دورات المياه', int(c.baths), rooms.filter(r => r.type === 'bath').length, 'دورة');
@@ -53,18 +53,35 @@ function requestTable(doc, req, st, fit) {
   return rows;
 }
 
+/** يستخرج أرقام ضيق المساحة من رسالة المولّد: المتاح (م²) والمطلوب. */
+function spaceOf(raw) { const a = /=\s*(\d+(?:\.\d+)?)\s*م²/.exec(raw), n = /يحتاج نحو\s*(\d+(?:\.\d+)?)/.exec(raw); return a && n ? { avail: +a[1], need: +n[1] } : null; }
+const plainSpace = sp => `هذه الغرف لا تتسع في المساحة المتاحة من الأرض (${sp.avail} م²)؛ تحتاج نحو ${sp.need} م².`;
+/** تجميع المحاولات المتشابهة بالسبب: ضيق المساحة معًا (بالمتاح والمطلوب)، وغيرها بنصه. أمثلة مختصرة والباقي قابل للطي. */
+function summarize(list) {
+  if (!list.length) return null;
+  const space = list.filter(a => a.space), other = list.filter(a => !a.space), lines = [];
+  if (space.length) {
+    const av = [...new Set(space.map(a => a.space.avail))], needs = space.map(a => a.space.need), lo = Math.min(...needs), hi = Math.max(...needs);
+    lines.push(`${space.length} محاولة لضيق المساحة: المتاح ${av.join(' أو ')} م²${lo === hi ? ` والمطلوب ${hi} م²` : `، والمطلوب من ${lo} إلى ${hi} م² (ينقص كلما خُفّف البرنامج)`}.`);
+  }
+  const by = new Map(); for (const a of other) by.set(a.reason, (by.get(a.reason) || 0) + 1);
+  for (const [r, n] of by) lines.push(`${n} ${n === 1 ? 'محاولة' : 'محاولات'}: ${r}`);
+  return { lines, examples: [list[0], list.length > 1 ? list[list.length - 1] : null].filter(Boolean) };
+}
 /** سجل المرشحين: ما بحث عنه المولّد وما رُفض وسببه، ومقارنة المختار بأقرب مرفوض. عدد غير معروف يُكتب «غير متاح» لا رقمًا مخترعًا. */
 function candidatesBlock(search, fit) {
   const trace = fit?.trace || [];
-  const attempts = { total: trace.filter(t => t.kind !== 'restore').length, rejected: trace.filter(t => !t.ok).map(t => ({ n: t.n, steps: t.steps.filter((x, i, a) => a.indexOf(x) === i), last: t.steps[t.steps.length - 1] || null, floors: t.floors, reason: short(t.reason) || 'لم يُنتج المولّد تصميمًا سليمًا لهذا البرنامج.' })) };
+  const attempts = { total: trace.filter(t => t.kind !== 'restore').length, rejected: trace.filter(t => !t.ok).map(t => ({ n: t.n, raw: String(t.reason || ''), steps: t.steps.filter((x, i, a) => a.indexOf(x) === i), last: t.steps[t.steps.length - 1] || null, floors: t.floors, reason: short(t.reason) || 'لم يُنتج المولّد تصميمًا سليمًا لهذا البرنامج.' })) };
+  attempts.rejected.forEach(a => { const sp = spaceOf(a.raw); a.space = sp; if (sp) a.reason = plainSpace(sp); });
+  attempts.summary = summarize(attempts.rejected);
   const s = search || null;
   const out = { engineSource: 'مولّد الميزان (ليس عزيزًا)', available: !!s, attempts,
-    built: s ? s.built : null, skippedSimilar: s?.skippedSimilar ?? null, hardFailed: s ? s.hardFailed : null, rejected: (s?.rejected || []).map((d, i) => ({ n: i + 1, mode: modeName(d.mode), fails: d.fails, soft: d.softFails, why: d.why?.length ? d.why : [d.fails ? 'خالف بندًا إلزاميًا في سجل التنفيذ.' : 'لم يُختر لأن غيره أقل كلفة أو أكثر تنوعًا عمّا عُرض.'] })), chosen: s?.chosen ? { mode: modeName(s.chosen.mode), fails: s.chosen.fails, soft: s.chosen.softFails, quality: s.chosen.quality } : null, compare: [] };
+    built: s ? s.built : null, skippedSimilar: s?.skippedSimilar ?? null, hardFailed: s ? s.hardFailed : null, rejected: (s?.rejected || []).map((d, i) => ({ n: i + 1, mode: modeName(d.mode), fails: d.fails, soft: d.softFails, why: d.why?.length ? d.why : [d.fails ? 'خالف شرطًا أساسيًا من طلبك.' : 'لم يُختر لأن غيره أفضل منه أو أكثر اختلافًا عمّا عُرض عليك.'] })), chosen: s?.chosen ? { mode: modeName(s.chosen.mode), fails: s.chosen.fails, soft: s.chosen.softFails, quality: s.chosen.quality } : null, compare: [] };
   const near = s?.rejected?.[0], ch = s?.chosen;
   if (ch && near) {
-    out.compare.push(`المختار (${modeName(ch.mode)}) بلا مخالفات إلزامية ${ch.fails ? 'عدا ' + ch.fails : '(0)'} مقابل ${near.fails} في أقرب مرفوض (${modeName(near.mode)}).`);
-    if (typeof ch.quality === 'number' && typeof near.quality === 'number') out.compare.push(`كلفة الجودة ${ch.quality} للمختار مقابل ${near.quality} للمرفوض (الأقل أفضل).`);
-    if ((ch.softFails || 0) !== (near.softFails || 0)) out.compare.push(`المخالفات غير الإلزامية: ${ch.softFails || 0} للمختار مقابل ${near.softFails || 0}.`);
+    out.compare.push(`شروطك الأساسية المخالفة: ${ch.fails} في المختار (${modeName(ch.mode)}) مقابل ${near.fails} في أقرب توزيع مرفوض (${modeName(near.mode)}).`);
+    if (typeof ch.quality === 'number' && typeof near.quality === 'number') out.compare.push(`درجة العيوب ${Math.round(ch.quality)} للمختار مقابل ${Math.round(near.quality)} للمرفوض (الأقل أفضل).`);
+    if ((ch.softFails || 0) !== (near.softFails || 0)) out.compare.push(`ملاحظات ثانوية: ${ch.softFails || 0} في المختار مقابل ${near.softFails || 0}.`);
   }
   return out;
 }
@@ -80,8 +97,8 @@ export function azizPanelModel(session, doc, { report = null, currentPv = null }
   if (!report) aziz = { status: 'pending', line: 'عزيز: لم يكتمل الفحص بعد.' };
   else if (!az || az.status === 'unavailable') aziz = { status: 'unavailable', line: 'عزيز: غير متاح', reason: az?.reason || '' };
   else {
-    const f = (report.findings || []).filter(x => x.source === 'aziz'), bad = f.filter(x => x.state === 'violated');
-    aziz = { status: 'ran', line: bad.length ? `عزيز فحص ${report.levels?.length || 0} دور/أدوار ووجد ${bad.length} مخالفة هندسية.` : `عزيز فحص ${report.levels?.length || 0} دور/أدوار ولم يجد مخالفة في القيود الصلبة.`, violations: bad.map(x => x.title) };
+    const nl = report.levels?.length || 0, lv = nl === 1 ? 'دورًا واحدًا' : nl === 2 ? 'دورين' : nl + ' أدوار', f = (report.findings || []).filter(x => x.source === 'aziz'), bad = f.filter(x => x.state === 'violated');
+    aziz = { status: 'ran', line: bad.length ? `عزيز فحص ${lv} ووجد ${bad.length} مخالفة هندسية.` : `عزيز فحص ${lv} ولم يجد مخالفة في القيود الهندسية الصلبة.`, violations: bad.map(x => x.title) };
   }
   const checker = report ? { status: 'ran', line: `مدقق الميزان: ${report.summary.verdictAr}.` } : { status: 'pending', line: 'مدقق الميزان: لم يكتمل الفحص بعد.' };
   const unverified = report ? (report.findings || []).filter(x => x.state === 'unverified').sort((a, b) => (a.severity === 'mandatory' ? 0 : 1) - (b.severity === 'mandatory' ? 0 : 1)).map(x => ({ id: x.id, severity: x.severity, title: x.title })) : null;
@@ -92,7 +109,7 @@ export function azizPanelModel(session, doc, { report = null, currentPv = null }
   const headline = changed.length ? `صمّمت لك أفضل ما يلائم طلبك على أرضك، وقلّصت ${changed.length} ${changed.length === 1 ? 'بندًا' : 'بنود'} مما طلبت، والتفصيل في الجدول.` : 'التصميم يحقق كل ما طلبت من أعداد ومقاسات، ولم أقلّص شيئًا.';
   return { version: AZIZ_PANEL_VERSION, title: PANEL_TITLE, planVersion: stamp?.planVersion || null, currentPv, stale, route: stamp?.route || null, routeAr,
     staleNote: stale ? `تغيّر المخطط بعد قرار المراجعة${routeAr ? ' (' + routeAr + ')' : ''}؛ قسم المرشحين أدناه عن النسخة السابقة، أما الجدول فمقيس من المخطط الحالي.` : null,
-    sources: [{ id: 'aziz', ...aziz }, { id: 'checker', ...checker }, { id: 'generator', line: cand.available ? `مولّد الميزان: ${cand.built} مرشحًا بُني لهذا الطلب.` : 'مولّد الميزان: عدد المرشحين غير متاح لهذا المحرك.', status: cand.available ? 'ran' : 'na' }],
+    sources: [{ id: 'aziz', ...aziz }, { id: 'checker', ...checker }, { id: 'generator', line: cand.available ? `مولّد الميزان: جرّب ${cand.built} توزيعًا لهذا الطلب.` : 'مولّد الميزان: عدد التوزيعات التي جرّبها غير متاح لهذا المحرك.', status: cand.available ? 'ran' : 'na' }],
     who: WHO_AZIZ, headline, changed: changed.length, rows, candidates: cand, unverified, fit: { floors: fit?.floors || null, facts: st.facts, need: st.need }, disclaimer: PANEL_DISCLAIMER };
 }
 
@@ -114,10 +131,12 @@ export function azizPanelCard(m, el, { wide = (typeof matchMedia === 'function' 
     det('azTable', `طلبك ↔ ما تحقق (${m.changed ? m.changed + ' بنود تغيّرت' : 'كل البنود تحققت'})`, m.rows.length ? el('ul', { class: 'az-rows' }, m.rows.map(rowCard)) : el('p', { class: 'sub' }, 'لا بنود أعداد أو مقاسات محددة في طلبك للمقارنة.')),
     det('azCand', 'ما الذي فُحص ورُفض ولماذا',
       el('p', { class: 'sub' }, `المصدر: ${c.engineSource}.`),
-      c.available ? el('p', {}, `بُني ${c.built} مرشحًا${c.skippedSimilar != null ? `، واستُبعد ${c.skippedSimilar} لتشابهه مع ما عُرض` : ''}؛ ${c.hardFailed} منها خالف بندًا إلزاميًا في سجل التنفيذ.`) : el('p', {}, 'عدد المرشحين المبنية والمرفوضة: غير متاح لهذا المحرك.'),
-      c.attempts.total ? el('p', {}, `جرّبتُ ${c.attempts.total} صيغة لبرنامجك على هذه الأرض؛ ${c.attempts.rejected.length} منها لم تنتج تصميمًا سليمًا:`) : null,
-      c.attempts.rejected.length ? el('ol', { class: 'az-rej' }, c.attempts.rejected.slice(0, 6).map(a => li(`${a.last ? 'بإضافة «' + a.last + '» إلى ما سبق' : 'الطلب كاملًا'}${a.floors ? ` (${a.floors === 2 ? 'دوران' : 'دور واحد'})` : ''} — ${a.reason}`))) : null,
-      c.attempts.rejected.length > 6 ? el('p', { class: 'sub' }, `وبقية الصيغ المرفوضة (${c.attempts.rejected.length - 6}) من النوع نفسه.`) : null,
+      c.available ? el('p', {}, `جرّب المولّد ${c.built} توزيعًا${c.skippedSimilar != null ? `؛ استُبعد ${c.skippedSimilar} منها لأنه يشبه ما عُرض عليك` : ''}، وخالف ${c.hardFailed} منها شرطًا أساسيًا من طلبك.`) : el('p', {}, 'عدد التوزيعات التي جُرّبت وما رُفض منها: غير متاح لهذا المحرك.'),
+      c.attempts.total ? el('p', {}, `جرّبتُ ${c.attempts.total} صيغة لبرنامجك على هذه الأرض، ولم تنتج ${c.attempts.rejected.length} منها تصميمًا سليمًا:`) : null,
+      c.attempts.summary ? el('ul', { class: 'az-rej-sum' }, c.attempts.summary.lines.map(t => li(t))) : null,
+      c.attempts.summary ? el('p', { class: 'sub' }, 'مثالان:') : null,
+      c.attempts.summary ? el('ol', { class: 'az-rej' }, c.attempts.summary.examples.map(a => li(`${a.last ? 'بإضافة «' + a.last + '» إلى ما سبق' : 'الطلب كاملًا'}${a.floors ? ` (${a.floors === 2 ? 'دوران' : 'دور واحد'})` : ''} — ${a.reason}`))) : null,
+      c.attempts.rejected.length > 2 ? el('details', { class: 'az-fold', id: 'azAllAttempts' }, el('summary', {}, `كل المحاولات المرفوضة (${c.attempts.rejected.length})`), el('ol', { class: 'az-rej' }, c.attempts.rejected.map(a => li(`${a.last ? 'بإضافة «' + a.last + '» إلى ما سبق' : 'الطلب كاملًا'}${a.floors ? ` (${a.floors === 2 ? 'دوران' : 'دور واحد'})` : ''} — ${a.reason}`)))) : null,
       c.rejected.length ? el('div', {}, el('h4', {}, 'أقرب المرشحين غير المختارة'), el('ol', { class: 'az-rej' }, c.rejected.map(r => li(`${r.mode}: ${r.why.join('؛ ')}`)))) : null,
       c.chosen ? el('div', { class: 'az-chosen' }, el('h4', {}, `المختار: ${c.chosen.mode}`), c.compare.length ? el('ul', {}, c.compare.map(t => li(t))) : null) : null),
     det('azUnver', 'غير متحقق منه',

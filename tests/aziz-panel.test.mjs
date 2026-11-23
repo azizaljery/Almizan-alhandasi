@@ -25,11 +25,17 @@ const row = (m, k) => m.rows.find(r => r.key === k);
 test('D4: 6 غرف نوم تُخفَّض إلى 2 على 12.5×25: اللوحة تعلن التخفيض بسببه بالأرقام ولا تصمت', { timeout: 120000 }, async () => {
   const { session, doc } = await build(C('x12.5x25-f1-b6j')), m = azizPanelModel(session, doc, {}), r = row(m, 'bedrooms');
   assert.ok(r, 'صف غرف النوم'); assert.equal(r.asked, 6); assert.equal(r.got, 2); assert.equal(r.status, 'cut'); assert.match(r.statusAr, /قُلّص/);
-  assert.match(r.reason, /\d+ م²/, 'السبب بالأرقام: المتاح مقابل المطلوب'); assert.match(r.reason, /جرّبتُ تصغير المقاسات/, 'جُرّب التصغير أولًا');
+  assert.match(r.reason, /\d+ م²/, 'السبب بالأرقام: المتاح مقابل المطلوب'); assert.match(r.reason, /حاولتُ أولًا تصغير مقاسات الغرف/, 'جُرّب التصغير أولًا');
   assert.match(m.headline, /قلّصت/); assert.ok(m.changed >= 1);
   const baths = row(m, 'baths'); assert.ok(baths && baths.got < baths.asked);
   assert.ok(m.candidates.attempts.total > 0 && m.candidates.attempts.rejected.length > 0, 'محاولات مرفوضة بأسبابها');
   for (const a of m.candidates.attempts.rejected) assert.ok(a.reason.length > 0);
+  // التجميع: المحاولات المتشابهة بالسبب في سطر واحد بالأرقام، مثالان فقط، والتفاصيل الكاملة محفوظة للطي
+  const A = m.candidates.attempts, sm = A.summary;
+  assert.ok(A.rejected.length > 6 && sm.lines.length <= 3, 'تجميع بدل قائمة طويلة');
+  assert.match(sm.lines[0], /^\d+ محاولة لضيق المساحة: المتاح 186 م²، والمطلوب من \d+ إلى \d+ م²/); assert.equal(sm.examples.length, 2);
+  assert.ok(A.rejected.filter(a => a.space).every(a => /لا تتسع في المساحة المتاحة من الأرض \(186 م²\)؛ تحتاج نحو \d+ م²/.test(a.reason)), 'عربية مبسطة بالأرقام');
+  assert.ok(A.rejected.every(a => a.raw !== undefined), 'النص الأصلي محفوظ');
 });
 test('D4: أرض 10×22 بغرفتي نوم: دورات المياه 3→2 معلنة بسببها', { timeout: 120000 }, async () => {
   const { session, doc } = await build(C('n10x22-f1-b2')), m = azizPanelModel(session, doc, {}), r = row(m, 'baths');
@@ -92,8 +98,15 @@ test('المتصفح: اللوحة يسار المخطط عند 1280 وفوقه 
       await page.waitForSelector('#azizPanel [data-az-row="bedrooms"]', { state: 'attached' });
       const g = await page.evaluate(() => { const p = document.getElementById('azizPanel').getBoundingClientRect(), pl = document.querySelector('.plancard').getBoundingClientRect(); const d = document.getElementById('azizPanel'); return { p: { l: p.left, r: p.right, t: p.top }, pl: { l: pl.left, r: pl.right, t: pl.top }, hs: document.documentElement.scrollWidth <= innerWidth, title: d.querySelector('h2').textContent, text: d.textContent, disc: document.getElementById('azDisc').textContent }; });
       assert.ok(g.hs, `بلا تمرير أفقي ${scheme} ${width}`);
-      assert.equal(g.title, 'قرار المراجعة — محرك عزيز'); assert.match(g.text, /غرف النوم/); assert.match(g.text, /قُلّص/); assert.match(g.text, /عزيز محرك فحص محلي/); assert.equal(g.disc, 'مراجعة آلية أولية؛ الاعتماد التنفيذي يحتاج المهندس المختص');
+      assert.equal(g.title, 'قرار المراجعة — محرك عزيز'); assert.match(g.text, /غرف النوم/); assert.match(g.text, /قُلّص/); assert.match(g.text, /عزيز محرك فحص داخل الميزان/); assert.equal(g.disc, 'مراجعة آلية أولية؛ الاعتماد التنفيذي يحتاج المهندس المختص');
       if (width === 1280) assert.ok(g.p.r <= g.pl.l + 1, 'اللوحة على يسار المخطط'); else assert.ok(g.p.t < g.pl.t, 'اللوحة فوق المخطط على الجوال');
+      const fold = await page.evaluate(() => { const f = document.getElementById('azAllAttempts'); return f ? { open: f.open, items: f.querySelectorAll('li').length, shown: document.querySelectorAll('#azCand ol.az-rej')[0]?.children.length } : null; });
+      assert.ok(fold && fold.open === false && fold.items > 6 && fold.shown === 2, 'التفاصيل الكاملة مطوية ومثالان ظاهران');
+      if (width === 390) {
+        await page.evaluate(() => document.getElementById('azizPanel').scrollIntoView({ block: 'start' })); await page.waitForTimeout(500);
+        const fab = await page.evaluate(() => ({ cls: document.body.classList.contains('mzr-card-visible'), hidden: [...document.querySelectorAll('.shp-fab,.ambient-motion')].every(e => getComputedStyle(e).visibility === 'hidden') }));
+        assert.ok(fab.cls && fab.hidden, 'الزران العائمان يُخفيان أثناء ظهور لوحة عزيز على الجوال');
+      }
       if (width === 390) await page.evaluate(() => document.querySelectorAll('#azizPanel details').forEach(d => { d.open = true; }));
       const bad = await page.evaluate(AUDIT); assert.deepEqual(bad, [], `تباين اللوحة ${scheme} ${width}: ` + JSON.stringify(bad.slice(0, 4)));
       await page.context().close();
