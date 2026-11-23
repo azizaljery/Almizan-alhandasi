@@ -1745,7 +1745,7 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
   for (const d of picked) d.doc = settleDoors(d.doc);
   applyElevators(picked, requirements);
   applyGardens(picked, requirements);
-  return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION };
+  return { designs: picked, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, search: searchStats(designs, picked, visSkips) };
 }
 /**
  * ترتيب البناء بالتناوب بين الأنماط (الأفضل من كل نمط أولًا، مع بقاء ترتيب الكلفة داخل النمط): حتى لا تمتلئ حصة البناء
@@ -1972,7 +1972,7 @@ function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 
   for (const d of picked2) d.doc = settleDoors(d.doc);
   applyElevators(picked2, requirements);
   applyGardens(picked2, requirements);
-  return { designs: picked2, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2 };
+  return { designs: picked2, program, W: r2(W), D: r2(D), engine: VILLA_ENGINE_VERSION, floors: 2, search: searchStats(designs, picked2, null) };
 }
 /**
  * المصعد (requirements.prefs.elevator): بئر متراصّ في الصالة على الدورين بعد اختيار البدائل (فلا يؤثر في ترتيبها).
@@ -2571,6 +2571,13 @@ export function referenceKit() {
 
 // ------------------------------------------------------------------------------------------ مفتاح المحرك المرجعي (الافتراضي: القديم وحده)
 import { generateReferenceDesigns, engineMode } from './villa-reference.mjs';
+/** حصيلة بحث المولّد (تُقرأ لعرض قرار المراجعة): ما بُني وما استُبعد للتشابه وما لم يُختر وسبب كل منها من سجل التنفيذ. أرقام فعلية لا تقديرات. */
+function searchStats(designs, picked, skipped) {
+  const why = d => (d.ledger || []).filter(x => !x.ok && !/^G-/.test(x.id)).slice(0, 3).map(x => String(x.text || x.label || x.id).slice(0, 90));
+  const row = d => ({ mode: d.mode, idea: d.idea || null, fails: d.fails || 0, softFails: d.softFails || 0, quality: d.quality, why: why(d) });
+  const chosen = picked[0] ? row(picked[0]) : null;
+  return { source: 'legacy', built: designs.length, skippedSimilar: skipped, hardFailed: designs.filter(d => (d.fails || 0) > 0).length, chosen, rejected: designs.filter(d => !picked.includes(d)).slice(0, 6).map(row) };
+}
 function viaReference(args, floors, legacy) {
   const mode = engineMode(args.requirements);
   if (mode === 'legacy') return legacy(args);

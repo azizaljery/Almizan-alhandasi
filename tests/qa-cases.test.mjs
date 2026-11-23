@@ -8,6 +8,8 @@ import { normalizeLand, generateInitialDesign, diagnoseFit } from '../dist/home-
 import { generateVillaDesigns, generateVillaTwoFloors } from '../dist/villa-layout.mjs';
 import { reviewDesign } from '../dist/design-review.mjs';
 import { parseDoc } from '../dist/draw/doc.mjs';
+import { azizPanelModel } from '../dist/aziz-panel.mjs';
+import { createSession } from '../dist/design-session.mjs';
 
 const fx = JSON.parse(readFileSync(new URL('./fixtures/qa-cases.json', import.meta.url), 'utf8')), C = id => fx.cases.find(c => c.id === id);
 const gen = (c, engine = 'legacy') => { const b = buildBrief(c.text, { land: c.land }), a = { land: c.land, counts: b.counts, requirements: { ...b.requirements, tweaks: { engine } }, keep: 3 }; return { b, out: c.land.floors === 2 ? generateVillaTwoFloors(a) : generateVillaDesigns(a) }; };
@@ -55,10 +57,14 @@ test('الموقع في الحالة المتعارضة: يعيد بيان ما 
 
 // --- عيوب مكتشفة (docs/qa-30-cases.md): السلوك المرغوب فيه، todo حتى تُعالج ---
 test('D1 طبقة المحرك تنتج تصميمًا لأرض 12.5×25 بدور واحد و3 غرف نوم', { todo: 'D1: VILLA_NO_FIT في المحركات الثلاثة' }, () => { assert.ok(gen(C('n12.5x25-f1-b3')).out.designs.length >= 1); });
-test('D4 الموقع لا يخفض 6 غرف نوم إلى أقل بصمت قبل قرار العميل', { todo: 'D4: السلّم يخفض 6→2 تلقائيًا', timeout: 120000 }, async () => {
+test('D4 الموقع لا يخفض 6 غرف نوم بصمت: التخفيض يُعلن للعميل بسببه بالأرقام (قرار المالك: شفافية لا موافقة مسبقة)', { timeout: 120000 }, async () => {
   const c = C('x12.5x25-f1-b6j'), b = buildBrief(c.text, { land: c.land });
   const r = await generateInitialDesign({ land: c.land, rooms: [], discovery: b.discovery, idea: c.text, counts: b.counts, requirements: b.requirements });
-  assert.equal(r.doc.labels.filter(l => l.type === 'bedroom' || l.type === 'master').length, 6);
+  const beds = r.doc.labels.filter(l => l.type === 'bedroom' || l.type === 'master').length;
+  assert.ok(beds < 6, 'الأرض لا تتسع لستٍّ: يُخفَّض العدد');
+  const m = azizPanelModel(createSession({ land: c.land, counts: b.counts, requirements: b.requirements, discovery: b.discovery, idea: c.text, result: r }), parseDoc(JSON.stringify(r.doc)), {});
+  const row = m.rows.find(x => x.key === 'bedrooms');
+  assert.ok(row && row.asked === 6 && row.got === beds && row.status === 'cut' && /\d+ م²/.test(row.reason), 'لوحة عزيز تعلن التخفيض بالأرقام');
 });
 test('D5 تشخيص الحالة المتعارضة يقدّم خيارًا واحدًا على الأقل ينجح فعلًا', { todo: 'D5: كل الخيارات لا تنجح', timeout: 300000 }, async () => {
   const c = C('x15x25-f1-b6jmp'), b = buildBrief(c.text, { land: c.land }), dg = await diagnoseFit({ land: c.land, counts: b.counts, discovery: b.discovery, idea: c.text });

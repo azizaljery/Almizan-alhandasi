@@ -53,11 +53,14 @@ function normalizeBaths(req) {
   return req;
 }
 const SOFT = { hall: .86, bedroom: .9, kitchen: .9, majlis: .9 }, HARD = { hall: .74, bedroom: .82, kitchen: .82, majlis: .8 };
+// الحد الأدنى المهني المعلن لتصغير المقاس الافتراضي (نسبة من المقاس التصميمي): دونه لا يُصغَّر الفراغ، بل يُخفَّف العدد. أدنى غرفة نوم صالحة في المولّد 3.0 × 2.6 م صافية.
+export const SHRINK_MIN = Object.freeze({ hall: .62, bedroom: .7, kitchen: .72, majlis: .7 });
+const LEVELS = { soft: SOFT, hard: HARD, min: SHRINK_MIN };
 const explicitKinds = req => { const a = req.areas || {}, p = req.prefs || {}; return { hall: !!(a.hall || p.big_hall), bedroom: !!(a.bedroom || a.master || p.big_master), kitchen: !!(a.kitchen || a.dining || p.big_kitchen), majlis: !!(a.majlis || p.big_majlis) }; };
 /** تصغير المقاسات الافتراضية (لا يمسّ فراغًا حدّد العميل مقاسه): الدرجة الخفيفة ثم الشديدة (تحل محلها، لا تُضرب فيها). */
-function scale(req, hard) {
+function scale(req, level) {
   const ex = explicitKinds(req), tw = (req.tweaks ||= {}), done = (tw.__fit ||= {});
-  for (const k of Object.keys(SOFT)) { if (ex[k]) continue; const f = hard ? HARD[k] / (done[k] ? SOFT[k] : 1) : SOFT[k]; tw[k + 'Scale'] = (tw[k + 'Scale'] || 1) * f; done[k] = true; }
+  for (const k of Object.keys(SOFT)) { if (ex[k]) continue; const f = LEVELS[level][k] / (done[k] || 1); tw[k + 'Scale'] = (tw[k + 'Scale'] || 1) * f; done[k] = LEVELS[level][k]; }
   return req;
 }
 
@@ -65,7 +68,7 @@ function scale(req, hard) {
  * درجات السلّم لهذا الطلب بالترتيب. كل درجة: { id, key, tier, kind: 'shrink'|'drop'|'merge', label, can(req), apply(req) }.
  * ما ثبّته العميل (requirements.fit.keep) لا يُمسّ.
  */
-export function ladderSteps(req0) {
+export function ladderSteps(req0, { shrinkFirst = true } = {}) {
   const keep = new Set(req0.fit?.keep || []), out = [];
   const add = (id, key, tier, kind, can, apply, label = KEY_LABEL[key]) => { if (!keep.has(key)) out.push({ id, key, tier, kind, label, asked: key !== 'shrink' && isAsked(req0, key), can, apply: r => normalizeBaths(apply(r) || r) }); };
   const drop = (key, kind, can, apply) => ({ key, kind, can, apply });
@@ -81,15 +84,18 @@ export function ladderSteps(req0) {
     drop('ensuite', 'merge', r => !!r.prefs?.allEnsuite && int(r.counts.bedrooms) >= 3, r => { r.prefs.allEnsuite = false; r.prefs.sharedBaths = true; }),
   ];
   // (ب) تصغير المقاسات الافتراضية أولًا
-  add('shrink:soft', 'shrink', 'unasked', 'shrink', r => Object.values(explicitKinds(r)).some(x => !x), r => scale(r, false));
+  add('shrink:soft', 'shrink', 'unasked', 'shrink', r => Object.values(explicitKinds(r)).some(x => !x), r => scale(r, 'soft'));
   // (ج-1) ما لم يطلبه العميل صراحة
   for (const it of [...ITEMS, ...CORE]) if (!isAsked(req0, it.key)) add(it.key, it.key, 'unasked', it.kind, it.can, it.apply);
   if (!isAsked(req0, 'majlis')) add('majlis', 'majlis', 'unasked', 'drop', r => int(r.counts.majlis) >= 1, r => { r.counts.majlis = Math.max(0, int(r.counts.majlis) - 1); if (r.areas) delete r.areas.majlis; });
   // المقاسات التي حددها العميل: إلى المقاس المعتاد (تصغير لا استبعاد)
   for (const k of ['hall', 'kitchen', 'dining', 'bedroom', 'master', 'majlis']) add('size:' + k, 'size:' + k, 'size', 'shrink', r => !!(r.areas?.[k] || r.prefs?.['big_' + k]), r => { if (r.areas) delete r.areas[k]; if (r.prefs) delete r.prefs['big_' + k]; });
+  // تصغير المقاسات إلى الحد الأدنى المهني المعلن قبل أي استبعاد لما طلبه العميل (يبقى العدد كما طلب ويُصغَّر المقاس)
+  const hardShrink = () => { add('shrink:hard', 'shrink', 'luxury', 'shrink', r => Object.values(explicitKinds(r)).some(x => !x), r => scale(r, 'hard')); if (shrinkFirst) add('shrink:min', 'shrink', 'luxury', 'shrink', r => Object.values(explicitKinds(r)).some(x => !x), r => scale(r, 'min')); };
+  if (shrinkFirst) hardShrink();
   // (ج-2) الخدمة والكماليات التي طلبها
   for (const it of ITEMS) if (isAsked(req0, it.key)) add(it.key, it.key, 'luxury', it.kind, it.can, it.apply);
-  add('shrink:hard', 'shrink', 'luxury', 'shrink', r => Object.values(explicitKinds(r)).some(x => !x), r => scale(r, true));
+  if (!shrinkFirst) hardShrink();
   // (ج-3) الأساسيات: مجلس النساء (يُدمج)، الحمامات الخاصة، غرف النوم واحدة واحدة، ثم المجلس، ثم غرفة النوم الثانية
   for (const it of CORE) if (isAsked(req0, it.key)) add(it.key, it.key, 'core', it.kind, it.can, it.apply);
   const N = int(req0.counts?.bedrooms);
@@ -119,17 +125,20 @@ export function floorsAsked(land, req) {
  * attempt(req, { floors, probe }) → نتيجة التوليد أو null (لم يجد). يعيد { out, applied, floors, auto } أو null إن لم ينجح شيء.
  * hint: درجات مجرّبة سابقًا لهذا الطلب نفسه (تُجرَّب مباشرة بلا مشي ولا ردّ).
  */
-export async function climb(req0, land, attempt, { hint = null, budgetMs = 4500, now = () => Date.now() } = {}) {
-  const fa = floorsAsked(land, req0), steps = ladderSteps(req0);
-  if (hint?.ids) { const out = await attempt(applySteps(req0, hint.ids, { floors: hint.floors }), { floors: hint.floors, probe: false }); if (out) return { out, applied: steps.filter(s => hint.ids.includes(s.id)).map(s => ({ ...s, tried: false })), floors: hint.floors, asked: fa }; }
+export async function climb(req0, land, attempt, { hint = null, budgetMs = 4500, now = () => Date.now(), reasonOf = null } = {}) {
+  const fa = floorsAsked(land, req0), steps0 = ladderSteps(req0), trace = [];
+  // سجل المحاولات: كل محاولة تجربة فعلية على المولّد (ما طُبّق، والنتيجة، وسبب الرفض إن أعطاه المولّد)
+  const tryIt = async (ids, floors, probe, label) => { const out = await attempt(applySteps(req0, ids, { floors }), { floors, probe }); if (!probe || !out) trace.push({ n: trace.length + 1, kind: label, floors, steps: ids.map(i => steps0.find(s => s.id === i)?.label || i), stepIds: [...ids], ok: !!out, reason: out ? '' : (reasonOf?.() || '') }); return out; };
+  if (hint?.ids) { const out = await attempt(applySteps(req0, hint.ids, { floors: hint.floors }), { floors: hint.floors, probe: false }); if (out) return { out, applied: steps0.filter(s => hint.ids.includes(s.id)).map(s => ({ ...s, tried: false })), floors: hint.floors, asked: fa }; }
   // الفروع: الأدوار كما طُلبت أولًا؛ بلا تحديد يُجرَّب الدوران قبل أي تخفيف؛ مخالفة عدد أدوار محدد آخر الحلول (وتُعلن)
   const branches = fa.specified ? [fa.floors, fa.floors === 2 ? 1 : 2] : [2, 1];
+  const walk = async steps => {
   for (const floors of branches) {
-    const ids = []; let out = floors !== fa.floors ? await attempt(applySteps(req0, ids, { floors }), { floors, probe: false }) : null;
+    const ids = []; let out = floors !== fa.floors ? await tryIt(ids, floors, false, 'floors') : null;
     for (const st of steps) {
       if (out) break;
       const before = applySteps(req0, ids, { floors }); if (!st.can(before)) continue;
-      ids.push(st.id); out = await attempt(applySteps(req0, ids, { floors }), { floors, probe: false });
+      ids.push(st.id); out = await tryIt(ids, floors, false, st.kind === 'shrink' ? 'shrink' : 'reduce');
     }
     if (!out) continue;
     // الردّ: نحاول إعادة كل ما خُفّف، الأهم (آخر ما مُسّ) أولًا، ما دام التصميم يبقى سليمًا
@@ -137,12 +146,21 @@ export async function climb(req0, land, attempt, { hint = null, budgetMs = 4500,
     for (const id of [...ids].reverse()) {
       if (now() - t0 > budgetMs) break;
       const less = ids.filter(x => x !== id); tried.add(id);
-      if (await attempt(applySteps(req0, less, { floors }), { floors, probe: true })) { ids.splice(ids.indexOf(id), 1); restored = true; }
+      if (await attempt(applySteps(req0, less, { floors }), { floors, probe: true })) { ids.splice(ids.indexOf(id), 1); restored = true; trace.push({ n: trace.length + 1, kind: 'restore', floors, steps: [steps.find(s => s.id === id)?.label || id], stepIds: [id], ok: true, reason: '' }); }
     }
     if (restored) out = (await attempt(applySteps(req0, ids, { floors }), { floors, probe: false })) || out;
-    return { out, applied: steps.filter(s => ids.includes(s.id)).map(s => ({ id: s.id, key: s.key, tier: s.tier, kind: s.kind, label: s.label, asked: s.asked, tried: tried.has(s.id) })), floors, asked: fa };
+    return { out, applied: steps.filter(s => ids.includes(s.id)).map(s => ({ id: s.id, key: s.key, tier: s.tier, kind: s.kind, label: s.label, asked: s.asked, tried: tried.has(s.id) })), floors, asked: fa, trace };
   }
   return null;
+  };
+  // المشي الأول: التصغير إلى الحد الأدنى المهني قبل أي استبعاد. التصغير قد يضرّ في بعض الحالات (غير رتيب)، فإن بقي استبعاد من الأساسيات جُرّب الترتيب السابق واختير الأقل خسارة.
+  const coreLoss = r => r ? r.applied.filter(x => x.tier === 'core' && x.kind === 'drop').length : 99;
+  const A = await walk(steps0);
+  if (A && coreLoss(A) > 0) {
+    const B = await walk(ladderSteps(req0, { shrinkFirst: false }));
+    if (B && (coreLoss(B) < coreLoss(A) || (coreLoss(B) === coreLoss(A) && B.applied.length < A.applied.length))) return B;
+  }
+  return A;
 }
 
 // ------------------------------------------------------------------------------------------ البيان (مقيس من المخطط)

@@ -75,7 +75,7 @@ export function createSession({ land, counts, requirements, discovery, idea = ''
   return created;
 }
 function entry(result, feedback) {
-  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null, fit: result.fit || null };
+  return { doc: serialize(result.doc), pat: result.pat || null, summary: result.summary || '', notes: result.notes || [], floors: result.floors || 1, feedback, engine: result.engine || result.strategy || '', ledger: result.ledger || null, mirror: result.mirror ?? null, fit: result.fit || null, search: result.search || null };
 }
 export const currentDoc = s => parseDoc(s.designs[s.current].doc);
 

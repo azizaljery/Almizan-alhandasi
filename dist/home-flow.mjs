@@ -304,7 +304,7 @@ export async function generateInitialDesign(args) {
     try { return await generateExact({ ...a, rooms: safeRooms(req.counts), counts: req.counts, requirements: req, engine: 'villa', keep: probe ? 1 : undefined }); }
     catch (err) { if (PASS_CODES.includes(err.code)) throw err; last = err; return null; }
   };
-  const got = await climb(req0, a.land, attempt, { hint: fitHint });
+  const got = await climb(req0, a.land, attempt, { hint: fitHint, reasonOf: () => String(last?.message || '').slice(0, 160) });
   if (!got) {
     if (fitHint) return generateInitialDesign({ ...a, strict: false });
     let f = null; try { f = fitFacts(a.land); } catch { /* بلا حقائق */ }
@@ -312,7 +312,7 @@ export async function generateInitialDesign(args) {
     err.code = 'FIT_IMPOSSIBLE'; err.cause = last; throw err;
   }
   const out = got.out, f = (() => { try { return fitFacts(a.land); } catch { return null; } })();
-  out.fit = { applied: got.applied, floors: got.floors, floorsAsked: got.asked, facts: f, need: programNeed(req0), firstError: String(first?.message || '').slice(0, 300) };
+  out.fit = { applied: got.applied, trace: got.trace || [], floors: got.floors, floorsAsked: got.asked, facts: f, need: programNeed(req0), firstError: String(first?.message || '').slice(0, 300) };
   if (got.applied.length || got.floors !== got.asked.floors) out.notes = ['لم أجد توزيعًا سليمًا للبرنامج كاملًا على هذه الأرض؛ صمّمت أقرب ما يتسع، والتفاصيل في «بيان ما تغيّر عن طلبك» مع خيارات تقررها أنت.', ...(out.notes || [])];
   for (const alt of out.alternatives || []) alt.fit = out.fit;
   return out;
@@ -373,14 +373,14 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
     dna.geometryFingerprint = geometryFingerprint(best.doc);
     try { dna.openingAware = compareOpeningAware({ models, selectedIndex: 0 }); } catch { dna.openingAware = null; }
   } catch (err) { notes.push('تعذّر حساب بصمة التصميم: ' + (err.message || err)); }
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes, dna, alternatives, alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa-' + best.mode, engine: out.engine, search: out.search || null, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
 }
 
 /** المولّد المهني لدورين: البدائل مستندات بمستويين؛ بصمة التصميم المقارنة تُعرض لدور واحد فقط كما سبق. */
 function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], shownMacro = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
   const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, shownMacro, blend });
   const best = out.designs[0];
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, search: out.search || null, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
 }
 
 /** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */

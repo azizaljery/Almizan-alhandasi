@@ -3,6 +3,7 @@ import { REVIEW_PLAN_THEME } from './review-plan-theme.mjs';
 // ثم: اعتماد ← العرض ثلاثي الأبعاد، أو «اطلب تصميمًا آخر» (شرعاء تسأل عمّا لم يعجبه)، أو التعديل في المرسم.
 import './visit-touch.mjs';
 import { deliveryClientKey, deliveryRequest } from './delivery-ui.mjs';
+import { azizPanelModel, azizPanelCard, PANEL_TITLE, PANEL_DISCLAIMER } from './aziz-panel.mjs';
 import { loadSession, saveSession, redesign, mergeDesigns, approve, approveReviewed, FEEDBACK, ZONES, zoneOf, summarizeDoc, currentDoc, ledgerFor, fitFor, scoreDesign, rankedIndexes, MAX_DESIGNS, exhaustedMessage, cappedMessage, softEndMessage } from './design-session.mjs';
 import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInWorker, warm as warmGenerator, ticking, pending } from './design-client.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
@@ -191,11 +192,11 @@ function show(index) {
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine)),
     nav,
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
+    el('div', { class: 'grid' }, plan, el('div', { id: 'azizHost', class: 'az-host' }), el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }), el('div', { id: 'lockHost' }))),
     ...(fitCard ? [fitCard] : []),
-    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }), el('div', { id: 'lockHost' }))),
     ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
-  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview(); paintLocks();
+  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview(); paintLocks(); paintAziz();
 }
 
 /** بطاقة «درجة المطابقة»: الدرجة، «لماذا؟» بجملتين من القياسات نفسها، وأشرطة المؤشرات السبعة (كل مؤشر يشرح نفسه عند المرور عليه). */
@@ -553,6 +554,13 @@ function watchReviewVisibility() {
 let reviewFocus = null, reviewDecided = new Set(), reviewRunning = false, reviewError = null, reviewTimer = 0;
 const reviewMemo = new Map();
 function reviewContext() { return { ...reviewCtx(session), route: session.designs[session.current]?.review?.route || null }; }
+/** لوحة «قرار المراجعة — محرك عزيز»: تُرسم من الجلسة والمستند المعروض وتقرير المراجعة المحفوظ لنسخة المخطط نفسها، فتتجدد مع كل تغيير. */
+function paintAziz() {
+  const host = $('azizHost'); if (!host || !doc) return;
+  let pv = null, report = null; try { pv = reviewPlanVersion(doc, reviewContext()).planVersion; report = pv ? reviewMemo.get(pv) || null : null; } catch { /* تبقى اللوحة بلا تقرير */ }
+  try { host.replaceChildren(azizPanelCard(azizPanelModel(session, doc, { report, currentPv: pv }), el)); }
+  catch (e) { host.replaceChildren(el('aside', { class: 'card mz-aziz', id: 'azizPanel' }, el('h2', {}, PANEL_TITLE), el('p', {}, 'تعذّر بناء لوحة القرار: ' + String(e?.message || e).slice(0, 120)), el('p', { class: 'az-disc' }, PANEL_DISCLAIMER))); }
+}
 function paintReview(force = false) {
   const host = $('reviewHost'); if (!host || !doc) return;
   const ctx = reviewContext(); let pv = null; try { pv = reviewPlanVersion(doc, ctx).planVersion; } catch { /* يظهر خطأ المراجعة أدناه */ }
@@ -569,7 +577,7 @@ function paintReview(force = false) {
     reviewTimer = setTimeout(() => {
       try { const r = reviewDesign(snapshot, ctx); reviewMemo.set(r.planVersion, r); reviewError = null; }
       catch (e) { reviewError = String(e?.message || e).slice(0, 200); }
-      reviewRunning = false; if (doc === snapshot) paintReview();
+      reviewRunning = false; if (doc === snapshot) { paintReview(); paintAziz(); }
     }, 30);
   }
 }
