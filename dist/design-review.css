@@ -67,3 +67,28 @@ body.mizan-review .sun-figwrap .seg button.on{color:var(--ink-on-light);font-wei
 body.mizan-review .card.sun p.sun-now{color:var(--ink-on-light)}
 body.mizan-review a.mz-logo small,body.mizan-review .mz-logo span small{color:#c9ccd6!important}
 body.mizan-review .mzr-top .pill{background:transparent!important;background-image:none!important}
+
+/* ---- قفل الأجزاء وتقرير الأثر (design-lock-ui.mjs): RTL، أهداف لمس 44px، بلا تمرير أفقي، ألوان البطاقة نفسها (AA) ---- */
+.mz-lock .mzl-groups{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.mz-lock .mzl-group,.mz-lock .mzl-edit .btn,.mz-impact .btn,.mz-lock .mzl-select{min-height:44px}
+.mz-lock .mzl-room.locked{border-inline-start-color:var(--mzr-ok)}.mz-lock .mzl-room.stale{border-inline-start-color:var(--mzr-warn)}
+.mz-lock .mzl-edit{border-top:1px dashed var(--mzr-line);margin-top:12px;padding-top:10px}
+.mz-lock .mzl-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+.mz-lock .mzl-lab{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--mzr-ink)}
+.mz-lock .mzl-select{max-width:100%;padding:0 10px;color:#26251f;background:#f4f1e8;border:1px solid #6e6a5c;border-radius:8px;font:inherit}
+.mz-impact .mzi-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.mz-impact .mzi-wrap{max-width:100%}
+.mz-impact .mzi-table{width:100%;border-collapse:collapse;font-size:14px;color:var(--mzr-ink)}
+.mz-impact .mzi-table th{text-align:start;padding:8px;border-bottom:1px solid var(--mzr-line);color:var(--mzr-ink)}
+.mz-impact .mzi-table td{padding:8px;border-bottom:1px solid var(--mzr-line);vertical-align:top;overflow-wrap:anywhere;color:var(--mzr-ink)}
+.mz-impact .mzi-tier,.mz-impact .mzi-ev{color:var(--mzr-soft)}
+.mz-impact .mzi-row.regressed td:first-child,.mz-impact .mzi-row.new_fail td:first-child{border-inline-start:4px solid var(--mzr-bad)}
+.mz-impact .mzi-table .pill{font-size:12.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--mzr-line);color:var(--mzr-ink);white-space:nowrap}
+.mz-impact .mzi-table .pill.st.violated{color:var(--mzr-bad)}.mz-impact .mzi-table .pill.st.verified{color:var(--mzr-ok)}
+/* العمود الجانبي ضيّق على الشاشات الكبيرة أيضًا: كل صف بطاقة بحقول معنونة في كل العروض */
+.mz-impact .mzi-table,.mz-impact .mzi-table tbody,.mz-impact .mzi-table tr,.mz-impact .mzi-table td{display:block;width:100%}
+.mz-impact .mzi-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.mz-impact .mzi-table tr{border:1px solid var(--mzr-line);border-radius:10px;margin:8px 0;padding:4px 8px}
+.mz-impact .mzi-table td{border:0;display:flex;gap:8px;justify-content:space-between;padding:4px 0}
+.mz-impact .mzi-table td::before{content:attr(data-label);color:var(--mzr-soft);flex:0 0 auto}
+@media (max-width:640px){.mz-lock .mzl-actions>*{width:100%}.mz-lock .mzl-group{flex:1 1 140px}}

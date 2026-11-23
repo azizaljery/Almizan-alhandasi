@@ -8,6 +8,9 @@ import { redesignInWorker, fixInWorker, mergeInWorker, extendInWorker, refineInW
 import { analyzeDoc } from './draw/digest.mjs';
 import { reviewDesign, planVersion as reviewPlanVersion, ctxOfSession as reviewCtx, reviewEnforced } from './design-review.mjs';
 import { reviewCard, drawFindingOverlay } from './design-review-ui.mjs';
+import { lockCard, impactCard } from './design-lock-ui.mjs';
+import { lockParts, unlockPart, proposeChange, approveProposal } from './design-lock-edit.mjs';
+import { impactReport } from './design-impact.mjs';
 import { renderPlan, fitView, docBounds, toScreen } from './draw/editor/render2d.mjs';
 import { exteriorWallIds } from './draw/topology.mjs';
 import { writeHandoff, STUDIO_KEY } from './draw/handoff.mjs';
@@ -189,10 +192,10 @@ function show(index) {
     nav,
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     ...(fitCard ? [fitCard] : []),
-    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }))),
+    el('div', { class: 'grid' }, plan, el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }), el('div', { id: 'lockHost' }))),
     ...(sunBox ? [sunBox] : []), ...(regsCard ? [regsCard] : []),
     el('div', { class: 'cols' }, el('div', { class: 'card' }, el('h2', {}, 'جدول الفراغات'), table), notes));
-  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview();
+  legend(); bindPlan(); paint(); reviewFocus = null; reviewDecided = new Set(); paintReview(); paintLocks();
 }
 
 /** بطاقة «درجة المطابقة»: الدرجة، «لماذا؟» بجملتين من القياسات نفسها، وأشرطة المؤشرات السبعة (كل مؤشر يشرح نفسه عند المرور عليه). */
@@ -276,7 +279,7 @@ async function onRefine() {
     }
     st.replaceWith(...refineBody(res), el('p', { class: 'sub hint' }, `الاعتماد يضيف التحسين تصميمًا جديدًا (رقم ${session.designs.length + 1}) إلى قائمتك؛ الأصل (رقم ${idx + 1}) لا يُستبدل ولا يُمسّ.`),
       el('div', { class: 'row' },
-        el('button', { type: 'button', class: 'btn gold', id: 'refineApply', onclick: () => { session = applyRefinement(session, idx, res, { maxDesigns: MAX_DESIGNS }); saveSession(localStorage, session); show(session.current); toast('أُضيف التصميم المحسَّن — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' }); } }, 'اعتمد التحسين'),
+        el('button', { type: 'button', class: 'btn gold', id: 'refineApply', onclick: () => { const before = parseDoc(session.designs[idx].doc); session = applyRefinement(session, idx, res, { maxDesigns: MAX_DESIGNS }); saveSession(localStorage, session); try { lastImpact = { design: session.current, result: { status: 'applied', report: impactReport(before, parseDoc(session.designs[session.current].doc), { requirementsBefore: session.input.requirements || {}, land: session.input.land || {}, locks: session.locks || [] }) } }; } catch { lastImpact = null; } show(session.current); toast('أُضيف التصميم المحسَّن — التفاصيل أعلى الصفحة'); scrollTo({ top: 0, behavior: 'smooth' }); } }, 'اعتمد التحسين'),
         el('button', { type: 'button', class: 'btn ghost', id: 'refineKeep', onclick: () => card.remove() }, 'أبقِ الأصل')));
   } catch (e) { done(); st.textContent = 'تعذّر التحسين: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر تصميمك.'; }
 }
@@ -569,6 +572,35 @@ function paintReview(force = false) {
       reviewRunning = false; if (doc === snapshot) paintReview();
     }, 30);
   }
+}
+
+// ------------------------------------------------------------------------------------------ قفل الأجزاء وتقرير الأثر (design-lock-ui.mjs)
+// القفل يحفظ الغرفة حرفيًا؛ التعديل يمرّ بـ proposeChange فيقيس الأثر، والمساس بمقفل لا يُطبَّق إلا بموافقة صريحة.
+let lockBusy = false, lockMsg = '', lastImpact = null; // lastImpact: { design, result }
+const saveSessionQuiet = () => saveSession(localStorage, session);
+function paintLocks() {
+  const host = $('lockHost'); if (!host || !doc) return;
+  const kids = [lockCard({ session, doc, busy: lockBusy, message: lockMsg,
+    onLockGroup: g => { session = lockParts(session, g.ids); saveSessionQuiet(); lockMsg = `قُفلت ${g.label}.`; paintLocks(); paintReview(); },
+    onToggle: r => { session = r.state === 'locked' || r.state === 'stale' ? unlockPart(session, r.key) : lockParts(session, [r.id]); saveSessionQuiet(); lockMsg = r.state === 'locked' || r.state === 'stale' ? 'فُكّ القفل.' : `قُفلت «${r.name}».`; paintLocks(); paintReview(); },
+    onEdit: change => runLockEdit(change) })];
+  if (lastImpact && lastImpact.design === session.current) kids.push(impactCard({ result: lastImpact.result,
+    onApprove: () => approveLockEdit(), onReject: () => { lastImpact = null; lockMsg = 'رفضتَ التعديل؛ لم يتغيّر شيء.'; paintLocks(); }, onClose: () => { lastImpact = null; paintLocks(); } }));
+  host.replaceChildren(...kids);
+}
+async function runLockEdit(change) {
+  if (lockBusy) return; lockBusy = true; lockMsg = ''; paintLocks();
+  try {
+    const res = await proposeChange(session, change);
+    if (res.status === 'applied') { session = res.session; saveSessionQuiet(); lastImpact = { design: session.current, result: res }; lockBusy = false; lockMsg = ''; show(session.current); return; }
+    lastImpact = { design: session.current, result: res };
+  } catch (e) { lastImpact = { design: session.current, result: { status: 'failed', reason: String(e?.message || e).slice(0, 200) } }; }
+  lockBusy = false; paintLocks(); $('impactCard')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+}
+function approveLockEdit() {
+  const res = lastImpact?.result; if (!res || res.status !== 'needsApproval') return;
+  try { session = approveProposal(session, res); saveSessionQuiet(); lastImpact = { design: session.current, result: { ...res, status: 'applied' } }; show(session.current); }
+  catch (e) { lockMsg = 'تعذّرت الموافقة: ' + (e.message || e); paintLocks(); }
 }
 
 // ------------------------------------------------------------------------------------------ الأفعال
