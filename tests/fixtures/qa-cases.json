@@ -1,0 +1,1271 @@
+{
+ "version": "qa-cases/1",
+ "note": "مدخلات ثابتة للمقارنة؛ الأعداد الصريحة counts/extras يجب أن تطابق ما تفهمه الجملة text. الحالات من نوع conflict متعارضة عمدًا.",
+ "cases": [
+  {
+   "id": "n10x22-f1-b2",
+   "group": "narrow",
+   "desc": "أرض ضيقة جدًا 10×22 دور واحد، غرفتا نوم",
+   "land": {
+    "width": 10,
+    "length": 22,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "2 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 2,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "2 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n10x22-f2-b3",
+   "group": "narrow",
+   "desc": "أرض ضيقة جدًا 10×22 دوران، 3 غرف نوم",
+   "land": {
+    "width": 10,
+    "length": 22,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x25-f1-b3",
+   "group": "narrow",
+   "desc": "12.5×25 دور واحد، 3 غرف نوم",
+   "land": {
+    "width": 12.5,
+    "length": 25,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x25-f2-b4m",
+   "group": "narrow",
+   "desc": "12.5×25 دوران، 4 غرف نوم وخادمة",
+   "land": {
+    "width": 12.5,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x25-f2-b3w",
+   "group": "narrow",
+   "desc": "12.5×25 دوران، مجلس رجال ونساء بمدخل مستقل",
+   "land": {
+    "width": 12.5,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": true,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x30-f1-b3",
+   "group": "narrow",
+   "desc": "12.5×30 دور واحد، 3 غرف نوم",
+   "land": {
+    "width": 12.5,
+    "length": 30,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x30-f2-b4m",
+   "group": "narrow",
+   "desc": "12.5×30 دوران، 4 غرف نوم وخادمة",
+   "land": {
+    "width": 12.5,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "n12.5x30-f2-b5p",
+   "group": "narrow",
+   "desc": "12.5×30 دوران، 5 غرف نوم ومطبخ تحضيري",
+   "land": {
+    "width": 12.5,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومطبخ ومطبخ تحضيري وصالة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 1,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "مجلس رجال",
+    "مطبخ تحضيري",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r15x25-f1-b3",
+   "group": "normal",
+   "desc": "15×25 دور واحد، 3 غرف نوم",
+   "land": {
+    "width": 15,
+    "length": 25,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r15x25-f2-b4w",
+   "group": "normal",
+   "desc": "15×25 دوران، 4 غرف نوم ومجلس نساء بمدخل مستقل",
+   "land": {
+    "width": 15,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": true,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r15x25-f2-b5md",
+   "group": "normal",
+   "desc": "15×25 دوران، 5 غرف نوم وخادمة وسائق",
+   "land": {
+    "width": 15,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة وغرفة سائق",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": true,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "غرفة سائق",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r20x20-f1-b3",
+   "group": "normal",
+   "desc": "20×20 دور واحد، 3 غرف نوم",
+   "land": {
+    "width": 20,
+    "length": 20,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r20x20-f2-b4m",
+   "group": "normal",
+   "desc": "20×20 دوران، 4 غرف نوم وخادمة",
+   "land": {
+    "width": 20,
+    "length": 20,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r20x30-f1-b4m",
+   "group": "normal",
+   "desc": "20×30 دور واحد، 4 غرف نوم وخادمة",
+   "land": {
+    "width": 20,
+    "length": 30,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r20x30-f2-b5mp",
+   "group": "normal",
+   "desc": "20×30 دوران، 5 غرف نوم وخادمة ومطبخ تحضيري",
+   "land": {
+    "width": 20,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 1,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "مجلس رجال",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r20x30-f2-b6j",
+   "group": "normal",
+   "desc": "20×30 دوران، 6 غرف نوم ومجلسان وخادمة وسائق",
+   "land": {
+    "width": 20,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلسين ومطبخ وصالة وغرفة خادمة وغرفة سائق",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": true,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "2 مجلسان",
+    "غرفة خادمة",
+    "غرفة سائق",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r25x30-f1-b4w",
+   "group": "normal",
+   "desc": "25×30 دور واحد، 4 غرف نوم ومجلس نساء بمدخل مستقل",
+   "land": {
+    "width": 25,
+    "length": 30,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": true,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r25x30-f2-b5m",
+   "group": "normal",
+   "desc": "25×30 دوران، 5 غرف نوم وخادمة",
+   "land": {
+    "width": 25,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "r25x30-f2-b6mp",
+   "group": "normal",
+   "desc": "25×30 دوران، 6 غرف نوم وخادمة ومطبخ تحضيري",
+   "land": {
+    "width": 25,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلس رجال ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 1,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "مجلس رجال",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "l30x30-f1-b5",
+   "group": "large",
+   "desc": "أرض كبيرة 30×30 دور واحد، 5 غرف نوم",
+   "land": {
+    "width": 30,
+    "length": 30,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": true,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "l30x30-f2-b6mdp",
+   "group": "large",
+   "desc": "30×30 دوران، 6 غرف نوم وخادمة وسائق ومطبخ تحضيري",
+   "land": {
+    "width": 30,
+    "length": 30,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة وغرفة سائق",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 2,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": true,
+    "womenEntrance": true,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "غرفة سائق",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "c20x25-f1-b3",
+   "group": "corner",
+   "desc": "أرض زاوية بشارعين (جنوب وشرق) والمدخل جنوبًا، دور واحد",
+   "land": {
+    "width": 20,
+    "length": 25,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s",
+     "e"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "c20x25-f2-b4we",
+   "group": "corner",
+   "desc": "أرض زاوية بشارعين (جنوب وغرب) والمدخل غربًا، دوران، مجلس نساء بمدخل مستقل",
+   "land": {
+    "width": 20,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s",
+     "w"
+    ],
+    "entries": [
+     "w"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومجلس نساء بمدخل مستقل ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": true,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "2 مجلسان",
+    "مدخل مستقل لمجلس النساء",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "c25x25-f2-b5m",
+   "group": "corner",
+   "desc": "أرض زاوية 25×25 شارعان (شمال وشرق) والمدخل شمالًا، دوران، خادمة",
+   "land": {
+    "width": 25,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "n",
+     "e"
+    ],
+    "entries": [
+     "n"
+    ]
+   },
+   "text": "5 غرف نوم ومجلس رجال ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "مجلس رجال",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "s22x24-f1-b3",
+   "group": "semisq",
+   "desc": "شبه مربعة 22×24 دور واحد",
+   "land": {
+    "width": 22,
+    "length": 24,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "3 غرف نوم ومجلس رجال ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 3,
+    "majlis": 1,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "3 غرف نوم",
+    "مجلس رجال",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "s22x24-f2-b4mp",
+   "group": "semisq",
+   "desc": "شبه مربعة 22×24 دوران، خادمة ومطبخ تحضيري",
+   "land": {
+    "width": 22,
+    "length": 24,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "4 غرف نوم ومجلس رجال ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 4,
+    "majlis": 1,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "4 غرف نوم",
+    "مجلس رجال",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [
+    "غرف النوم بعيدة عن المجلس",
+    "الطعام بجوار المطبخ"
+   ],
+   "conflict": null
+  },
+  {
+   "id": "x12.5x25-f1-b6j",
+   "group": "conflict",
+   "desc": "متعارضة عمدًا: 6 غرف نوم ومجلسان على 12.5×25 دور واحد",
+   "land": {
+    "width": 12.5,
+    "length": 25,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلسين ومطبخ وصالة",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": false,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "2 مجلسان",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [],
+   "conflict": {
+    "expected": true,
+    "why": "برنامج أكبر من مسطح 12.5×25 بدور واحد"
+   }
+  },
+  {
+   "id": "x10x22-f1-b5mj",
+   "group": "conflict",
+   "desc": "متعارضة عمدًا: 5 غرف نوم ومجلسان وخادمة على 10×22 دور واحد",
+   "land": {
+    "width": 10,
+    "length": 22,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "5 غرف نوم ومجلسين ومطبخ وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 5,
+    "majlis": 2,
+    "kitchens": 1,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": false
+   },
+   "mandatory": [
+    "5 غرف نوم",
+    "2 مجلسان",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [],
+   "conflict": {
+    "expected": true,
+    "why": "برنامج أكبر من مسطح 10×22 بدور واحد"
+   }
+  },
+  {
+   "id": "x12.5x25-f2-b6mdj",
+   "group": "conflict",
+   "desc": "متعارضة عمدًا: 6 غرف نوم ومجلسان وخادمة وسائق ومطبخ تحضيري على 12.5×25 دوران",
+   "land": {
+    "width": 12.5,
+    "length": 25,
+    "floors": 2,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلسين ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة وغرفة سائق",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 2,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": true,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "2 مجلسان",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "غرفة سائق",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [],
+   "conflict": {
+    "expected": true,
+    "why": "برنامج كامل على عرض 12.5 م بدورين"
+   }
+  },
+  {
+   "id": "x15x25-f1-b6jmp",
+   "group": "conflict",
+   "desc": "متعارضة عمدًا: 6 غرف نوم ومجلسان وخادمة ومطبخ تحضيري على 15×25 دور واحد",
+   "land": {
+    "width": 15,
+    "length": 25,
+    "floors": 1,
+    "floorsExplicit": true,
+    "streets": [
+     "s"
+    ],
+    "entries": [
+     "s"
+    ]
+   },
+   "text": "6 غرف نوم ومجلسين ومطبخ ومطبخ تحضيري وصالة وغرفة خادمة",
+   "counts": {
+    "bedrooms": 6,
+    "majlis": 2,
+    "kitchens": 2,
+    "halls": 1
+   },
+   "extras": {
+    "maid": true,
+    "driver": false,
+    "womenEntrance": false,
+    "prepKitchen": true
+   },
+   "mandatory": [
+    "6 غرف نوم",
+    "2 مجلسان",
+    "مطبخ تحضيري",
+    "غرفة خادمة",
+    "صالة",
+    "مطبخ"
+   ],
+   "preferences": [],
+   "conflict": {
+    "expected": true,
+    "why": "برنامج أكبر من مسطح 15×25 بدور واحد"
+   }
+  }
+ ]
+}
