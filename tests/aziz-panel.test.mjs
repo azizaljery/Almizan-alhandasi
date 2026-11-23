@@ -89,7 +89,8 @@ test('المتصفح: اللوحة يسار المخطط عند 1280 وفوقه 
   const server = http.createServer((req, res) => { const f = normalize(join(root, decodeURIComponent(new URL(req.url, 'http://x').pathname))); if (!f.startsWith(root) || !existsSync(f) || extname(f) === '') { res.writeHead(404); res.end(); return; } res.writeHead(200, { 'content-type': MIME[extname(f)] || 'application/octet-stream' }); res.end(readFileSync(f)); });
   await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://127.0.0.1:${server.address().port}`;
   let chromium; try { ({ chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs')); } catch { try { ({ chromium } = await import('playwright')); } catch { server.close(); return t.skip('Playwright غير متاح'); } }
-  const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox'] });
+  const lArgs = ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox']; let browser;
+  try { browser = await chromium.launch({ args: lArgs }); } catch { try { browser = await chromium.launch({ args: lArgs, executablePath: '/opt/pw-browsers/chromium' }); } catch { server.close(); return t.skip('تعذّر تشغيل Chromium'); } }
   try {
     for (const scheme of ['light', 'dark']) for (const width of [390, 1280]) {
       const page = await (await browser.newContext({ viewport: { width, height: 900 }, colorScheme: scheme })).newPage();
