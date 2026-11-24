@@ -68,7 +68,7 @@ function thumbHTML(d) {
 }
 function navStatusText() {
   const n = session.designs.length;
-  if (session.exhausted) return exhaustedMessage(n, session.exhausted.twoFloors);
+  if (session.exhausted) return exhaustedMessage(n, session.exhausted.twoFloors, session.exhausted);
   if (n >= MAX_DESIGNS) return cappedMessage(n);
   if (session.softEnd) return softEndMessage(n, session.softEnd.count);
   return '';
@@ -102,7 +102,7 @@ async function withBg(fn) { return fn(); }
 async function onNext() {
   const i = session.current;
   if (i + 1 < session.designs.length) { show(i + 1); scrollTo({ top: 0, behavior: 'smooth' }); return; }
-  if (session.exhausted || session.designs.length >= MAX_DESIGNS) { const n = $('dStatus'); if (n) { n.textContent = session.exhausted ? exhaustedMessage(session.designs.length, session.exhausted.twoFloors) : cappedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
+  if (session.exhausted || session.designs.length >= MAX_DESIGNS) { const n = $('dStatus'); if (n) { n.textContent = session.exhausted ? exhaustedMessage(session.designs.length, session.exhausted.twoFloors, session.exhausted) : cappedMessage(session.designs.length); n.classList.add('end'); n.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); } return; }
   const st = $('dStatus'), done = busy(true, st, 'أبحث لك عن توزيع مختلف عمّا عُرض…');
   try {
     let out = await extendInWorker(session, session.designs.length + 1, !!session.softEnd);

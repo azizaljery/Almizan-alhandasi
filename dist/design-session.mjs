@@ -6,7 +6,7 @@ import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
-import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails } from './villa-layout.mjs';
+import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails, designsAr } from './villa-layout.mjs';
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
@@ -137,7 +137,9 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
   const prefer = different ? null : { pat: cur.pat, mirror: cur.mirror ?? null };
   const shown = different ? s.seen : [], shownMacro = different ? s.seenMacro : [];
   // الطلب لم يتغيّر (توزيع آخر فقط) والتصميم المعروض مرّ بسلّم الاتساع: تُعاد درجاته نفسها مباشرة بلا مشي السلّم من أوله
-  const fitHint = !more && !picks.length ? hintOf(cur) : null;
+  // «توزيع مختلف» الصريح (الخيار أو «تصميم آخر» نصًا) لا يغيّر الطلب أيضًا: تُعاد درجات السلّم نفسها، وإلا ضاعت (كان الطلب الأصلي الذي لا يتسع يُرمى «نفادًا» قبل أن يمشي السلّم)
+  const plainAlt = different && picks.every(id => id === 'layout') && (!more || (!more.understood.length && !more.unsupported.length));
+  const fitHint = (!more && !picks.length) || plainAlt ? hintOf(cur) : null;
   // «تصميم آخر» لا يخفق في بنود من طلب العميل أكثر مما أخفق أفضل تصميم عُرض (يخفق بنودًا أقل: يُقبل): مختلف لا معيب
   const maxFails = different && !more && !picks.length ? Math.min(...s.designs.map(d => Array.isArray(d.ledger) ? splitFails(d.ledger, req).hard : 99)) : null;
   const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, shownMacro, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
@@ -190,7 +192,7 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
   } catch (e) {
     if (e.code === 'VILLA_EXHAUSTED') {
       const s = clone(session);
-      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now() }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; delete s.softEnd; return { session: s, added: false, exhausted: true }; }
+      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now(), ...(e.stats ? { stats: e.stats } : {}) }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; if (s.designs.length < 5) { const sg = await probeEdits(s, generate); if (sg.length) s.exhausted.suggest = sg; } delete s.softEnd; return { session: s, added: false, exhausted: true }; }
       s.softEnd = { count: s.designs.length, at: Date.now() };
       return { session: s, added: false, exhausted: false, softEnd: true };
     }
@@ -201,7 +203,12 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
 export const cappedMessage = n => `عرضتُ عليك ${n} تصميمًا مختلفًا، وهذا أقصى ما تحفظه الجلسة؛ اعتمد أقربها إلى ذوقك أو اطلب تعديلًا (شكلًا أو عددًا أو مقاسًا) لأبدأ بحثًا جديدًا.`;
 /** بعد التصاميم المختلفة هيكليًا (≤ 50٪ تشابهًا): الأقرب منها (حتى 70٪) ما زال ممكنًا بطلب العميل ومعلنًا. */
 export const softEndMessage = (n, clear = n) => (n > clear ? `أول ${clear} تصميمًا مختلفة جذريًا في الهيكل (موضع الصالة والسلّم والمجالس والمطبخ) عن بعضها، وما بعدها أقرب هيكلًا لما عُرض (حتى ${Math.round(MACRO_LIMIT.relaxed * 100)}٪ تشابهًا) ويُبيَّن ذلك في ملاحظات كل منها. اضغط «تصميم آخر» لأبحث لك عن غيرها.` : `هذه ${n} تصميمًا مختلفة جذريًا في الهيكل (موضع الصالة والسلّم والمجالس والمطبخ). اضغط «تصميم آخر» إن أردت توزيعات أقرب هيكلًا لما عُرض (حتى ${Math.round(MACRO_LIMIT.relaxed * 100)}٪ تشابهًا) وسأبيّن لك ذلك في ملاحظات كل تصميم.`);
-export const exhaustedMessage = (n, twoFloors = null) => `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
+export const exhaustedMessage = (n, twoFloors = null, ex = null) => {
+  const ideasAr = k => (k === 1 ? 'لفكرة تنظيمية واحدة' : k === 2 ? 'لفكرتين تنظيميتين' : `لـ${k} أفكار تنظيمية`), layoutsAr = k => (k === 1 ? 'توزيعًا واحدًا' : k === 2 ? 'توزيعين' : k <= 10 ? `${k} توزيعات` : `${k} توزيعًا`), st = ex?.stats || null;
+  const gates = st?.gate ? (st.gate.visual || 0) + (st.gate.macro || 0) + (st.gate.ideaAgain || 0) : 0;
+  const why = st ? ` عرضتُ عليك فعليًا ${designsAr(n)}. مساحة البناء الصافية لأرضك ${st.W} × ${st.D} م${st.floors === 2 ? ' للدور' : ''} تتسع ${ideasAr(st.ideas)} فقط لبرنامجك${st.layouts ? ` (جرّبتُ ${layoutsAr(st.layouts)}${gates ? `، وسقط ${gates} منها لأنها تشبه ما عُرض فوق حدّ التشابه المعتمد` : ''})` : ''}، وليس لقلّة البحث: الحدود لم تُخفَّف.` : '';
+  return `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${why}${ex?.suggest?.length ? ' خطوات قِسْتُها لتوسيع الخيارات: ' + ex.suggest.map(x => `${x.label} (يعطي ${x.k === 2 ? 'تصميمين مختلفين' : x.k + ' تصاميم مختلفة'})`).join('؛ ') + '.' : st ? ' قِسْتُ ما ينطبق على طلبك من (تقليل غرفة نوم، الاستغناء عن غرفة الطعام أو الخادمة، دمج المجلسين) فلم يزد أيٌّ منها التصاميم المختلفة دون تغيير عدد الأدوار؛ ويبقى دمج تصميمين أو تغيير عدد الأدوار إن لم تكن حدّدته.' : ''}${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
+};
 /** أرض بدور واحد مصرَّح انتهت قبل العشرين: يُقاس ما يعطيه الدوران (أول دفعة) ليقترحهما الإعلان بعدد حقيقي لا بتخمين. null إن لم يزد العدد أو تعذّر القياس. */
 const PROBE_MAX = 8;
 async function probeTwoFloors(s, generate) {
@@ -217,6 +224,34 @@ async function probeTwoFloors(s, generate) {
     const k = probe.designs.length;
     return k > s.designs.length ? k : null;
   } catch { return null; }
+}
+
+/**
+ * خطوات تعديل محددة تزيد عدد التصاميم المختلفة، مقيسة فعلًا (لا مخمَّنة): كل تعديل يُجرَّب على المولّد نفسه بالبوابات نفسها ويُعدّ ما ينتجه.
+ * تُجرى عند النفاد المبكر فقط (أقل من 5 تصاميم) وبميزانية زمن؛ ما لا يزيد العدد لا يُقترح. null/[] إن لم يوجد.
+ */
+const EDITS = [
+  { id: 'bedrooms', can: r => (r.counts?.bedrooms | 0) >= 3, apply: r => { r.counts.bedrooms -= 1; }, label: r => `تقليل غرف النوم من ${r.counts.bedrooms} إلى ${r.counts.bedrooms - 1}` },
+  { id: 'dining', can: r => (r.counts?.dining | 0) >= 1, apply: r => { r.counts.dining = 0; }, label: () => 'الاستغناء عن غرفة الطعام المستقلة (يؤكل في الصالة أو المطبخ)' },
+  { id: 'maid', can: r => !!r.extras?.maid, apply: r => { delete r.extras.maid; }, label: () => 'الاستغناء عن غرفة الخادمة' },
+  { id: 'majlis_w', can: r => (r.counts?.majlis | 0) >= 2, apply: r => { r.counts.majlis = 1; r.prefs.womenSeparate = false; }, label: () => 'دمج مجلس النساء في مجلس واحد' },
+];
+async function probeEdits(s, generate, { budgetMs = 2500, now = () => Date.now() } = {}) {
+  const req = s.input.requirements, floors = req.prefs?.floors ?? s.input.land?.floors ?? 1, t0 = now(), found = [];
+  for (const ed of EDITS) {
+    if (now() - t0 > budgetMs || found.length >= 2) break;
+    const r2 = clone(req); r2.prefs ||= {}; r2.extras ||= {}; r2.counts ||= {}; r2.tweaks ||= {};
+    if (!ed.can(r2)) continue;
+    const label = ed.label(r2); ed.apply(r2);
+    try {
+      const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: r2.counts, requirements: r2, light: false });
+      if ((out.floors || 1) !== (floors || 1) || out.fit?.applied?.length) continue; // يغيّر الأدوار أو ما زال يحتاج تخفيفًا آخر: ليس تعديلًا نظيفًا
+      let probe = createSession({ land: s.input.land, counts: r2.counts, requirements: r2, discovery: s.input.discovery, idea: s.input.idea, result: out });
+      for (let g = 0; g < PROBE_MAX && probe.designs.length < PROBE_MAX && now() - t0 <= budgetMs; g++) { const o = await extendSession(probe, { target: PROBE_MAX }, { generate }); probe = o.session; if (!o.added) break; }
+      const k = probe.designs.length; if (k > s.designs.length) found.push({ id: ed.id, label, k });
+    } catch { /* تعديل لا يتسع: لا يُقترح */ }
+  }
+  return found;
 }
 
 /**

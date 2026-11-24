@@ -442,7 +442,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
   const allow = m => !only || (Array.isArray(only) ? only.includes(m) : only === m);
   // الشكل الذي طلبه العميل صراحةً يتقدم على سقوف التضخم الافتراضية (طلب العميل فوق افتراض الميزان): يُعاد تقييمه بلا رفض التضخم
   const progFree = { ...program, caps: false };
-  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; const s = score(placed, circ, W, D, wantShape && mode === wantShape ? progFree : program); if (s === null) return; const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
+  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; dg('s.try.' + mode); const s = score(placed, circ, W, D, wantShape && mode === wantShape ? progFree : program); if (s === null) { dg('s.rej.' + mode); return; } dg('s.ok.' + mode); const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
   // المحور الأعرض يعطي صالة بصافي ≥ 4.5 م؛ الأضيق يبقى للأراضي التي لا تتسع لغيره
   // العميل حدّد موضع الصالة (مثلًا «على الحوش الخلفي»): لا يُقسم المحور؛ طلبه يتقدم على التناسب الافتراضي، ويُعلن قصور الصالة بالأرقام
   const splitOk = !(program.rules || []).some(r => r.a === 'hall' || r.b === 'hall');
@@ -1560,6 +1560,7 @@ export function clearVillaPools() { POOLS.clear(); }
 function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4, pick = null, maxFails = null, maxSim = VISUAL_LIMIT.relaxed, title = 'تصميم أولي من شرعاء', exclude = [], prefer = null, shown = [], shownMacro = [], blend = null }) {
   // shown: بصمات بصرية لما عُرض على العميل؛ لا يُعاد ما يشبهها مرئيًا فوق الحد (VISUAL_LIMIT)
   let visLimit = shown.length ? VISUAL_LIMIT.strict : 1, visSkips = 0;
+  const gate = {}, gs = k => { gate[k] = (gate[k] || 0) + 1; dg('b.' + k); };
   const tw = requirements.tweaks || {};
   // ذوق العميل: أنماط تنظيم تُقدَّم في الترتيب دون فرضها (ما لا يتسع منها أو يتعيّب لا يُعرض)
   const preferModes = (Array.isArray(tw.preferModes) ? tw.preferModes : []).filter(m => ['center', 'tee', 'court', 'L', 'rows', 'side', 'bands'].includes(m));
@@ -1629,12 +1630,14 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
   const poolObj = pool || (poolKey ? poolGet(poolKey) : null), builtCache = poolObj ? poolObj.built : null;
   const seenSig = new Set(), ex = new Set(exclude.map(patCore)), avoid = new Set([...(tw.avoidModes || []), ...(program.prefs?.noCorridors && !program.prefs?.courtyard ? ['tee', 'rows', 'court'] : []), ...(program.prefs?.courtyard === false ? ['court'] : [])]);
   // الشكل الذي طلبه العميل: تنويعاته مطلوبة فلا يُحدّ عددها بحدّ الفكرة
-  const filterCands = list => { const seenS = new Set(); for (const c of list) c.idea ||= ideaKey(c); return list.filter(c => { if (seenS.has(c.sig) || ex.has(c.pat) || avoid.has(c.mode) || (!prefPat && !blend && c.mode !== askedMode && (shownIdeas.get(c.idea) || 0) >= IDEA_CAP)) return false; seenS.add(c.sig); return true; }); };
+  const ideaSeen = new Set(), sigSeen = new Set();
+  const filterCands = list => { const seenS = new Set(); for (const c of list) { c.idea ||= ideaKey(c); ideaSeen.add(c.idea); sigSeen.add(c.sig); } return list.filter(c => { if (seenS.has(c.sig)) { dg('f.dupSig'); return false; } if (ex.has(c.pat)) { dg('f.excludedPat'); return false; } if (avoid.has(c.mode)) { dg('f.avoidMode'); return false; } if (!prefPat && !blend && c.mode !== askedMode && (shownIdeas.get(c.idea) || 0) >= IDEA_CAP) { dg('f.ideaCap'); return false; } seenS.add(c.sig); dg('f.kept'); return true; }); };
+  let everHad = cands.length > 0; // هل وُلد أي مرشح قبل استبعاد ما عُرض؟ (لا مرشح أصلًا = لا تتسع الأرض، لا «نفاد»)
   cands = filterCands(cands);
   // توسيع المرشحين ببحث التوسيع (مرة واحدة): يُستدعى حين لا يبقى من البحث المعتاد ما يختلف عمّا عُرض
   const extTaken = new Set();
   // الذي أُضيف من قبل في استدعاءات سابقة يُضاف من البداية
-  if (poolObj?.ext?.length) { const have = new Set(poolObj.cands.map(c => c.sig)); const more = poolObj.ext.filter(c => !have.has(c.sig)); if (more.length && (exclude.length || shown.length)) { for (const c of more) extTaken.add(c); cands = filterCands([...cands, ...more.map(c => ({ ...c }))].sort((a, b) => a.pen - b.pen)); } }
+  if (poolObj?.ext?.length) { const have = new Set(poolObj.cands.map(c => c.sig)); const more = poolObj.ext.filter(c => !have.has(c.sig)); if (more.length && (exclude.length || shown.length)) { everHad = true; for (const c of more) extTaken.add(c); cands = filterCands([...cands, ...more.map(c => ({ ...c }))].sort((a, b) => a.pen - b.pen)); } }
   const addExt = () => {
     if (blend || !poolObj || (!exclude.length && !shown.length)) return false;
     const __t1 = Date.now();
@@ -1646,6 +1649,7 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
       for (const env of batch) poolObj.ext.push(...collectExt(env));
       const have = new Set([...poolObj.cands, ...cands].map(c => c.sig)), more = poolObj.ext.filter(c => !have.has(c.sig) && !extTaken.has(c));
       if (!more.length) continue;
+      everHad = true;
       for (const c of more) extTaken.add(c);
       cands = filterCands([...cands, ...more.map(c => ({ ...c }))].sort((a, b) => a.pen - b.pen)); added = true;
     }
@@ -1654,7 +1658,7 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
   };
   // كل ما بقي سبق عرضه (أو بلغت أفكاره حدّها): نفاد لا «الأرض لا تتسع»
   while (!cands.length && exclude.length && addExt());
-  if (!cands.length && exclude.length) { const err = Error(`عرضت عليك ${exclude.length} ${exclude.length > 2 ? 'تصاميم' : 'تصميمين'} ولم يبقَ لهذا البرنامج وهذه الأرض فكرة تنظيم سليمة لم تُعرض؛ لن أكرر الفكرة نفسها بأسماء مختلفة. غيّر طلبًا (شكلًا مثل L أو U، أو عددًا، أو مقاسًا) أو اطلب دمج تصميمين.`); err.code = 'VILLA_EXHAUSTED'; throw err; }
+  if (!cands.length && exclude.length && everHad) { const err = Error(`عرضت عليك ${designsAr(exclude.length)} ولم يبقَ لهذا البرنامج وهذه الأرض فكرة تنظيم سليمة لم تُعرض؛ لن أكرر الفكرة نفسها بأسماء مختلفة. غيّر طلبًا (شكلًا مثل L أو U، أو عددًا، أو مقاسًا) أو اطلب دمج تصميمين.`); err.code = 'VILLA_EXHAUSTED'; err.stats = { stage: 'ideas', ideas: ideaSeen.size, layouts: sigSeen.size, shown: exclude.length, W: r2(W), D: r2(D), floors: 1, gate: { ...gate } }; throw err; }
   if (!cands.length) {
     const err = Error(`لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م = ${Math.round(W * D)} م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو ${Math.round(need)} م².`);
     err.code = 'VILLA_NO_FIT'; err.need = need; err.available = W * D; throw err;
@@ -1683,10 +1687,10 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
               const built = cand.env.w * cand.env.d;
               layout.notes.push(`مسطح الدور ${Math.round(built - (cand.court ? A_(cand.court) : 0))} م²${cand.court ? ` مع حديقة داخلية ${Math.round(A_(cand.court))} م²` : ''} (${r2(cand.env.w)} × ${r2(cand.env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`);
               const check = checkDoc(doc);
-              if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: check.problems }); return null; }
+              if (!check.ok) { dg('b.checkDoc'); if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: check.problems }); return null; }
               const relaxed = relaxFixtures(doc);
               const q = quality(relaxed, { bedrooms: program.counts.bedrooms });
-              if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: q.issues, doc: relaxed }); return null; }
+              if (q.reject) { dg('b.qualityReject'); if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: cand.pat, why: q.issues, doc: relaxed }); return null; }
               const ledger = verifyRequest(relaxed, requirements, { entry });
               return { layout, relaxed, q, vsig: visualSig(relaxed), ledger };
             })();
@@ -1700,14 +1704,14 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
         if (!base) continue;
         const { layout, relaxed, q, vsig, ledger } = base;
         const vis = shown.length ? Math.max(...shown.map(x => visualSim(vsig, x))) : 0;
-        if (vis > visLimit) { visSkips++; continue; }
+        gs('built'); if (vis > visLimit) { visSkips++; gs('visual'); continue; }
         const mac = shownMacro.length ? Math.max(...shownMacro.map(x => macroSim(base.msig ||= macroSig(relaxed), x))) : 0;
-        if (mac > macLimitFor(visLimit)) { visSkips++; continue; }
+        if (mac > macLimitFor(visLimit)) { visSkips++; gs('macro'); continue; }
         // فكرة سبق عرضها: لا تعود إلا مختلفة مرئيًا بوضوح، وتُعلن تنويعًا
-        const again = !prefPat && !blend && cand.mode !== askedMode && (shownIdeas.get(cand.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { visSkips++; continue; }
+        const again = !prefPat && !blend && cand.mode !== askedMode && (shownIdeas.get(cand.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { visSkips++; gs('ideaAgain'); continue; }
         const bl = blendScore(vsig, blend); if (bl === null) continue;
         // «تصميم آخر» لا يُملأ بتصميم يخفق في بنود من طلب العميل أكثر مما أخفق الأول (معيب لا مختلف)
-        if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { visSkips++; continue; } // بنود الحديقة تُستكمل بعد الاختيار (applyGardens)
+        if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { visSkips++; gs('maxFails'); continue; } // بنود الحديقة تُستكمل بعد الاختيار (applyGardens)
         // مجلس الرجال بلا دورة مياه خاصة: عيب ضيافة يُؤخّر البديل خلف كل بديل سليم
         const wcMissing = layout.notes.some(n => /دورة مياه (?:الضيوف|الرجال) لم تتسع/.test(n)) ? 1 : 0;
         designs.push({ maxBed: maxBedOf(q.metrics), area: cand.env.w * cand.env.d - (cand.court ? A_(cand.court) : 0), doc: relaxed, vsig, visual: r2(vis), macro: r2(mac), blend: bl, penalty: r2(cand.pen), architecturalCost: q.architecturalCost, quality: r2(cand.pen + q.cost + MACRO_COST * mac + SOFT_FAIL_COST * splitFails(ledger, requirements).soft), same: !!prefPat && cand.pat === prefPat, mirror, issues: q.issues, mode: cand.mode, idea: cand.idea, env: cand.env, pat: withIdea(cand.pat, cand.idea), notes: [ideaNote(cand.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...program.notes, ...layout.notes, ...hallNotes(q.metrics, W, D)].filter(Boolean), summary: describe(cand) + ideaSuffix(cand.idea), rooms: layout.rooms, ledger, fails: splitFails(ledger, requirements).hard, softFails: splitFails(ledger, requirements).soft, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) + wcMissing, newestFail: Math.max(0, ...ledger.filter(x => !x.ok && /^R\d+$/.test(x.id) && !softIds(requirements).has(x.id)).map(x => +x.id.slice(1))) });
@@ -1728,7 +1732,7 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
   // لم يبقَ ما يختلف ≥ 40٪ بالبحث المعتاد: يُوسَّع البحث (تباديل ترتيب الغرف) قبل أي تخفيف، ثم يُقبل ما يختلف ≥ 32٪ ثم ≥ 25٪ مع إعلانه، ولا يُعرض ما فوق ذلك
   while (!designs.length && shown.length && addExt()) designs = runAll();
   for (const lim of [VISUAL_LIMIT.mid, VISUAL_LIMIT.relaxed].filter(x => x <= maxSim + 1e-9)) if (!designs.length && shown.length) { visLimit = lim; visRelaxed = true; designs = runAll(); }
-  if (!designs.length && shown.length) { const err = Error(`عرضت عليك ${shown.length} ${shown.length > 2 ? 'تصاميم' : 'تصميمين'} ولم يبقَ لهذا البرنامج وهذه الأرض توزيع سليم يختلف عنها بوضوح؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا مثل L أو U، أو عددًا، أو مقاسًا) أو اطلب دمج تصميمين.`); err.code = 'VILLA_EXHAUSTED'; err.maxSim = maxSim; throw err; }
+  if (!designs.length && shown.length) { const err = Error(`عرضت عليك ${designsAr(shown.length)} ولم يبقَ لهذا البرنامج وهذه الأرض توزيع سليم يختلف عنها بوضوح؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا مثل L أو U، أو عددًا، أو مقاسًا) أو اطلب دمج تصميمين.`); err.code = 'VILLA_EXHAUSTED'; err.maxSim = maxSim; err.stats = { stage: 'gates', ideas: ideaSeen.size, layouts: sigSeen.size, shown: shown.length, W: r2(W), D: r2(D), floors: 1, gate: { ...gate } }; throw err; }
   if (!designs.length) { const err = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك لهذا البرنامج والأرض؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : 'تعذّر بناء أي بديل سليم من التوزيعات المرشحة.'); err.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_BUILD_FAILED'; throw err; }
   if (!designs.length && blend) { const err = Error('لم أجد توزيعًا سليمًا يجمع بين التصميمين دون أن يكون نسخة من أحدهما؛ جرّب تصميمين آخرين.'); err.code = 'VILLA_NO_BLEND'; throw err; }
   // تنفيذ طلب العميل أولًا، ثم (عند الدمج) الأكثر جمعًا للتصميمين، ثم الجودة
@@ -1892,12 +1896,14 @@ function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 
   // ما يُستبعد بحسب ما عُرض: توقيع مطابق، أو أرضي سبق عرضه (العلوي الآخر ليس تصميمًا جديدًا)، أو فكرة بلغت حدّها
   const usable = list => list.filter(x => !(exSet.has(x.pat) || (!prefPat && exGround.has(x.g.pat)) || (!prefPat && x.g.mode !== x.wantG2 && (shownIdeas.get(x.idea) || 0) >= IDEA_CAP)));
   let usableP = usable(pairs);
+  dg('p.pairs', pairs.length); dg('p.usableFirst', usableP.length);
   while (!usableP.length && exclude.length && addExt2()) usableP = usable(pairs);
   if (globalThis.__villaDebug) globalThis.__villaDebug.searchMs = Date.now() - __t0;
   if (globalThis.__villaDebug) { const st = {}; for (const p of pairs) st[p.idea] = (st[p.idea] || 0) + 1; globalThis.__villaDebug.stats = { splits: dbgStats, pairs: st }; }
   let diff2 = differentFrom(usableP.map(x => ({ ...x })), exclude), pairs2 = diff2.list;
-  if (!usableP.length) { const e = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : `لم أجد توزيعًا مهنيًا لدورين داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م).`); e.code = exclude.length ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; throw e; }
+  if (!usableP.length) { const e = Error(exclude.length ? 'لم يبقَ توزيع مختلف عمّا عُرض عليك؛ غيّر طلبًا (مقاسًا أو عددًا) لأجد توزيعًا جديدًا.' : `لم أجد توزيعًا مهنيًا لدورين داخل المساحة القابلة للبناء (${r2(W)} × ${r2(D)} م).`); e.code = exclude.length && pairs.length ? 'VILLA_EXHAUSTED' : 'VILLA_NO_FIT'; if (e.code === 'VILLA_EXHAUSTED') e.stats = { stage: 'ideas', ideas: new Set(pairs.map(x => x.idea)).size, layouts: pairs.length, shown: exclude.length, W: r2(W), D: r2(D), floors: 2, gate: {} }; throw e; }
   let visLimit = shown.length ? VISUAL_LIMIT.strict : 1, visRelaxed = false;
+  const gate = {}, gs = k => { gate[k] = (gate[k] || 0) + 1; dg('b.' + k); };
   const buildPairs = () => {
   const designs = [];
   // المرحلة الأولى بالترتيب كما كان؛ الثانية تكمّل الأنماط الغائبة، وفيها فقط يُجرَّب العلوي الاحتياطي
@@ -1922,8 +1928,8 @@ function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 
       doc = drawLevel(doc, ul, { level: L2, T });
       doc = addStair(doc, pr.g.stairRect, T, LV);
       { const sr = pr.g.stairRect, c = T((sr.x0 + sr.x1) / 2, (sr.y0 + sr.y1) / 2); try { doc = applyCommand(doc, { type: 'add-text', level: L2, at: c, text: 'فتحة السلم', size: .35 }).doc; } catch { /* نص اختياري */ } }
-      const check = checkDoc(doc); if (!check.ok) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: uPat, why: check.problems }); return null; }
-      const relaxed = relaxFixtures(doc), q = quality(relaxed, { bedrooms: program.counts.bedrooms }); if (q.reject) { if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: uPat, why: q.issues, doc: relaxed }); return null; }
+      const check = checkDoc(doc); if (!check.ok) { dg('b.checkDoc'); if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: uPat, why: check.problems }); return null; }
+      const relaxed = relaxFixtures(doc), q = quality(relaxed, { bedrooms: program.counts.bedrooms }); if (q.reject) { dg('b.qualityReject'); if (globalThis.__villaDebug) (globalThis.__villaDebug.skips ||= []).push({ pat: uPat, why: q.issues, doc: relaxed }); return null; }
         return { gl, ul, relaxed, q, ledger: verifyRequest(relaxed, requirements, { entry }), vsig: visualSig(relaxed) };
         })();
         if (builtCache2) builtCache2.set(ck, base);
@@ -1932,13 +1938,13 @@ function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 
       const { gl, ul, relaxed, q, ledger, vsig } = base;
       const vis = shown.length ? Math.max(...shown.map(x => visualSim(vsig, x))) : 0;
       const dbg = globalThis.__villaDebug;
-      if (vis > visLimit) { if (dbg) dbg.visSkip = (dbg.visSkip || 0) + 1; continue; }
+      gs('built'); if (vis > visLimit) { gs('visual'); if (dbg) dbg.visSkip = (dbg.visSkip || 0) + 1; continue; }
       const mac = shownMacro.length ? Math.max(...shownMacro.map(x => macroSim(base.msig ||= macroSig(relaxed), x))) : 0;
-      if (mac > macLimitFor(visLimit)) { if (dbg) dbg.macSkip = (dbg.macSkip || 0) + 1; continue; }
+      if (mac > macLimitFor(visLimit)) { gs('macro'); if (dbg) dbg.macSkip = (dbg.macSkip || 0) + 1; continue; }
       // فكرة سبق عرضها: لا تعود إلا مختلفة مرئيًا بوضوح، وتُعلن تنويعًا
-      const again = !prefPat && !blend && pr.g.mode !== pr.wantG2 && (shownIdeas.get(pr.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { if (dbg) dbg.againSkip = (dbg.againSkip || 0) + 1; continue; }
+      const again = !prefPat && !blend && pr.g.mode !== pr.wantG2 && (shownIdeas.get(pr.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { gs('ideaAgain'); if (dbg) dbg.againSkip = (dbg.againSkip || 0) + 1; continue; }
       const bl = blendScore(vsig, blend); if (bl === null) continue;
-      if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { if (dbg) dbg.failSkip = (dbg.failSkip || 0) + 1; continue; }
+      if (maxFails !== null && splitFails(ledger.filter(x => !/^G-/.test(x.id)), requirements).hard > maxFails) { gs('maxFails'); if (dbg) dbg.failSkip = (dbg.failSkip || 0) + 1; continue; }
       const notes = [...new Set([ideaNote(pr.idea), ...(again ? ['تنويع على فكرة سبق عرضها: التنظيم نفسه بتوزيع مختلف للغرف (لم يبقَ لهذا البرنامج والأرض فكرة تنظيم لم تُعرض).'] : []), ...(pr.split.moved ? [`«${pr.split.moved.name}» في الدور الأرضي (لم تطلب ذلك): برنامج الدور العلوي أكبر من الأرضي، فنقلُ غرفة إلى الأرضي يوازن الدورين ويغني عن فراغات لم تُطلب؛ إن أردت كل غرف النوم فوق فاختر بديلًا آخر.`] : []), ...program.notes, ...gl.notes, ...ul.notes, `مسطح كل دور ${Math.round(env.w * env.d - (pr.g.court ? A_(pr.g.court) : 0))} م²${pr.g.court ? ` مع حديقة داخلية ${Math.round(A_(pr.g.court))} م²` : ''} (${r2(env.w)} × ${r2(env.d)} م) من مساحة قابلة للبناء ${Math.round(W * D)} م²؛ الباقي ساحات.`, 'السلم في نهاية الصالة ويصل إلى الصالة العلوية في الموضع نفسه.'])];
       notes.push(...hallNotes(q.metrics, W, D));
       const pen = pr.pen + (ui ? uCand.pen - pr.u.pen : 0);
@@ -1951,7 +1957,7 @@ function generateVillaTwoFloorsLegacy({ land, counts, requirements = {}, keep = 
   let designs = buildPairs();
   while (!designs.length && shown.length && addExt2()) { usableP = usable(pairs); diff2 = differentFrom(usableP.map(x => ({ ...x })), exclude); pairs2 = diff2.list; designs = buildPairs(); }
   for (const lim of [VISUAL_LIMIT.mid, VISUAL_LIMIT.relaxed].filter(x => x <= maxSim + 1e-9)) if (!designs.length && shown.length) { visLimit = lim; visRelaxed = true; designs = buildPairs(); }
-  if (!designs.length && shown.length) { const e = Error(`عرضت عليك ${shown.length} ${shown.length > 2 ? 'تصاميم' : 'تصميمين'} ولم يبقَ لهذا البرنامج وهذه الأرض توزيع سليم لدورين يختلف عنها بوضوح؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو اطلب دمج تصميمين.`); e.code = 'VILLA_EXHAUSTED'; e.maxSim = maxSim; throw e; }
+  if (!designs.length && shown.length) { const e = Error(`عرضت عليك ${designsAr(shown.length)} ولم يبقَ لهذا البرنامج وهذه الأرض توزيع سليم لدورين يختلف عنها بوضوح؛ لن أكرر تصميمًا سبق. غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو اطلب دمج تصميمين.`); e.code = 'VILLA_EXHAUSTED'; e.maxSim = maxSim; e.stats = { stage: 'gates', ideas: new Set(pairs.map(x => x.idea)).size, layouts: pairs.length, shown: shown.length, W: r2(W), D: r2(D), floors: 2, gate: { ...gate } }; throw e; }
   if (!designs.length && blend) { const e = Error('لم أجد توزيعًا سليمًا لدورين يجمع بين التصميمين دون أن يكون نسخة من أحدهما؛ جرّب تصميمين آخرين.'); e.code = 'VILLA_NO_BLEND'; throw e; }
   if (!designs.length) { const e = Error('تعذّر بناء أي بديل سليم لدورين.'); e.code = 'VILLA_BUILD_FAILED'; throw e; }
   // عند التساوي في عدد البنود غير المنفّذة: يُقدَّم ما يحفظ أحدث طلبات العميل (يتعارض طلبان فيُضحّى بالأقدم لا بما طلبه الآن)
@@ -2572,6 +2578,10 @@ export function referenceKit() {
 // ------------------------------------------------------------------------------------------ مفتاح المحرك المرجعي (الافتراضي: القديم وحده)
 import { generateReferenceDesigns, engineMode } from './villa-reference.mjs';
 /** حصيلة بحث المولّد (تُقرأ لعرض قرار المراجعة): ما بُني وما استُبعد للتشابه وما لم يُختر وسبب كل منها من سجل التنفيذ. أرقام فعلية لا تقديرات. */
+/** عدد التصاميم بالعربية الصحيحة: 1 تصميمًا واحدًا، 2 تصميمين، 3-10 تصاميم، فوقها تصميمًا. */
+export const designsAr = n => (n === 1 ? 'تصميمًا واحدًا' : n === 2 ? 'تصميمين' : n >= 3 && n <= 10 ? `${n} تصاميم` : `${n} تصميمًا`);
+/** عدّاد تشخيصي (يعمل فقط حين يُهيَّأ globalThis.__villaDebug): كم مرشحًا وُلد وكم سقط عند كل مرحلة. */
+const dg = (k, n = 1) => { const d = globalThis.__villaDebug; if (d) { d.diag ||= {}; d.diag[k] = (d.diag[k] || 0) + n; } };
 function searchStats(designs, picked, skipped) {
   const why = d => (d.ledger || []).filter(x => !x.ok && !/^G-/.test(x.id)).slice(0, 3).map(x => String(x.text || x.label || x.id).slice(0, 90));
   const row = d => ({ mode: d.mode, idea: d.idea || null, fails: d.fails || 0, softFails: d.softFails || 0, quality: d.quality, why: why(d) });
