@@ -8,6 +8,7 @@ import { generateInitialDesign } from '../dist/home-flow.mjs';
 import { createSession, extendSession, redesign, exhaustedMessage } from '../dist/design-session.mjs';
 import { designsAr, visualSig, visualSim, macroSig, macroSim, VISUAL_LIMIT, MACRO_LIMIT } from '../dist/villa-layout.mjs';
 import { parseDoc } from '../dist/draw/doc.mjs';
+import { reviewGate, ctxOfSession } from '../dist/design-review.mjs';
 
 const fx = JSON.parse(readFileSync(new URL('./fixtures/qa-cases.json', import.meta.url), 'utf8')), C = id => fx.cases.find(c => c.id === id);
 async function start(id) {
@@ -56,3 +57,17 @@ test('أرض كبيرة (20×20): ستة تصاميم فأكثر دون تخفي
   const s = await exhaust(await start('r20x20-f1-b3'), 8); assert.ok(s.designs.length >= 6, 'عدد التصاميم ' + s.designs.length);
   const sig = s.designs.map(d => visualSig(parseDoc(d.doc))); for (let i = 0; i < sig.length; i++) for (let j = 0; j < i; j++) assert.ok(visualSim(sig[i], sig[j]) <= VISUAL_LIMIT.relaxed + 1e-9);
 });
+
+// بوابة جودة كل بديل معروض لأرض ضيقة (12.5 م): سليم هندسيًا (checkDoc في البناء)، ولا مخالفات إلزامية في مراجعة عزيز أكثر من أفضل ما سبقه، ولا تكرار بصري/هيكلي.
+// القياس الموثّق: بدائل مصدر «التقسيم الحرّ» (120 ألف إلى 1.5 مليون توزيع عشوائي حتمي) كلها أضعف من التصميم الأول (55-69 مقابل 76 في 12.5×25، و64 مقابل 80 في 12.5×30)
+// فلم تُعتمد؛ هذا الاختبار يحمي أي مصدر جديد يُضاف لاحقًا من عرض بديل أضعف.
+const mandatoryOf = (s, d) => reviewGate({ route: 'alternative', doc: JSON.parse(d.doc), ctx: ctxOfSession(s) }).summary.counts.mandatory.violated;
+for (const id of ['n12.5x25-f1-b3', 'n12.5x30-f1-b3', 'n12.5x25-f2-b3w', 'n12.5x30-f2-b5p']) {
+  test(`${id}: كل بديل معروض بلا مخالفات إلزامية أكثر من أفضل ما سبقه وبلا تكرار`, { timeout: 240000 }, async () => {
+    const s = await exhaust(await start(id)); assert.ok(s.designs.length >= 1);
+    let best = mandatoryOf(s, s.designs[0]);
+    for (let i = 1; i < s.designs.length; i++) { const m = mandatoryOf(s, s.designs[i]); assert.ok(m <= best, `التصميم ${i + 1}: ${m} مخالفة إلزامية أكثر من أفضل سابق ${best}`); best = Math.min(best, m); }
+    const sig = s.designs.map(d => visualSig(parseDoc(d.doc))), mac = s.designs.map(d => macroSig(parseDoc(d.doc)));
+    for (let i = 0; i < sig.length; i++) for (let j = 0; j < i; j++) { assert.ok(visualSim(sig[i], sig[j]) <= VISUAL_LIMIT.relaxed + 1e-9); assert.ok(macroSim(mac[i], mac[j]) <= MACRO_LIMIT.relaxed + 1e-9); }
+  });
+}

@@ -1,0 +1,207 @@
+diff --git a/dist/design-session.mjs b/dist/design-session.mjs
+index af43cc6..f75769e 100644
+--- a/dist/design-session.mjs
++++ b/dist/design-session.mjs
+@@ -10,7 +10,7 @@ import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, ali
+ import { fitStatement } from './fit-ladder.mjs';
+ import { scorePlan, rankByScore } from './plan-score.mjs';
+ import { solarSite } from './geo-land.mjs';
+-import { stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
++import { reviewGate, stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
+ export { scorePlan, rankByScore };
+ 
+ export const SESSION_KEY = 'mizan.design.session.v1';
+@@ -102,6 +102,22 @@ export function carryOver(next, prev) {
+  * - نص لم يُفهم منه شيء ولا خيار معه: لا يُولَّد تصميم؛ يُرمى SHARA_UNCLEAR ليعيد العميل الصياغة.
+  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
+  */
++
++/**
++ * بوابة جودة المصدر الإضافي (التوزيعات الحرّة للأرض الضيقة): بديل منه لا يُعرض إلا إن كان سليمًا ولا يقلّ عن أضعف ما عُرض:
++ * مخالفات إلزامية في مراجعة عزيز لا تزيد عن أفضل تصميم معروض، ودرجة خطة الميزان لا تقل عن أضعف تصميم معروض.
++ */
++export const FREE_PAT = /^free\|/;
++function mandatoryOf(session, doc) { try { return reviewGate({ route: 'alternative', doc, ctx: ctxOfSession(session) }).summary.counts.mandatory.violated; } catch { return null; } }
++export function freeQualityGate(session, out) {
++  try {
++    const doc = parseDoc(serialize(out.doc)), mine = mandatoryOf(session, doc), sc = scoreDesign(session, { doc: serialize(out.doc) });
++    const shown = session.designs.map(d => ({ m: d.review?.counts?.mandatory?.violated ?? mandatoryOf(session, parseDoc(d.doc)), t: d.score?.total ?? scoreDesign(session, d)?.total ?? null }));
++    const bestM = Math.min(...shown.map(x => x.m ?? 99)), weakest = Math.min(...shown.map(x => x.t ?? 0));
++    const ok = mine !== null && mine <= bestM && sc && sc.total >= weakest;
++    return { ok, mandatory: mine, bestMandatory: bestM, score: sc?.total ?? null, weakest };
++  } catch (e) { return { ok: false, error: String(e?.message || e) }; }
++}
+ export async function redesign(session, { picks = [], text = '', ai = null, auto = false, maxSim = undefined } = {}, { generate = generateInitialDesign } = {}) {
+   const s = clone(session), req = s.input.requirements, changes = [];
+   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
+@@ -142,7 +158,16 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
+   const fitHint = (!more && !picks.length) || plainAlt ? hintOf(cur) : null;
+   // «تصميم آخر» لا يخفق في بنود من طلب العميل أكثر مما أخفق أفضل تصميم عُرض (يخفق بنودًا أقل: يُقبل): مختلف لا معيب
+   const maxFails = different && !more && !picks.length ? Math.min(...s.designs.map(d => Array.isArray(d.ledger) ? splitFails(d.ledger, req).hard : 99)) : null;
+-  const out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude, prefer, shown, shownMacro, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
++  let out, gateTries = 0, excl2 = exclude;
++  for (;;) {
++    out = await generate({ land: s.input.land, rooms: null, discovery: s.input.discovery, idea: s.input.idea, counts: req.counts, requirements: req, exclude: excl2, prefer, shown, shownMacro, light: true, ...(maxSim !== undefined && different ? { maxSim } : {}), ...(maxFails !== null && maxFails < 99 ? { maxFails } : {}), ...(fitHint ? { fitHint } : {}) });
++    if (!different || !FREE_PAT.test(String(out.pat || ''))) break;
++    const g = freeQualityGate(s, out);
++    if (globalThis.__villaDebug) (globalThis.__villaDebug.freeGate ||= []).push({ pat: out.pat, ...g });
++    if (g.ok || globalThis.__freeNoGate) break;
++    if (++gateTries >= 8) { const e = Error('لم يبقَ توزيع يختلف بوضوح عمّا عُرض عليك بجودة لا تقل عن أضعف ما عُرض؛ لن أعرض أضعف.'); e.code = 'VILLA_EXHAUSTED'; throw e; }
++    excl2 = [...excl2, out.pat];
++  }
+   const outSig = visualSig(parseDoc(serialize(out.doc))), outMac = macroSig(parseDoc(serialize(out.doc)));
+   // ضمان أخير مستقل عن المولّد: «تصميم آخر» لا يُقبل إن شابه أي تصميم عُرض فوق الحد
+   if (different) {
+@@ -237,6 +262,7 @@ const EDITS = [
+   { id: 'majlis_w', can: r => (r.counts?.majlis | 0) >= 2, apply: r => { r.counts.majlis = 1; r.prefs.womenSeparate = false; }, label: () => 'دمج مجلس النساء في مجلس واحد' },
+ ];
+ async function probeEdits(s, generate, { budgetMs = 2500, now = () => Date.now() } = {}) {
++  if (globalThis.__noProbe) return [];
+   const req = s.input.requirements, floors = req.prefs?.floors ?? s.input.land?.floors ?? 1, t0 = now(), found = [];
+   for (const ed of EDITS) {
+     if (now() - t0 > budgetMs || found.length >= 2) break;
+diff --git a/dist/villa-layout.mjs b/dist/villa-layout.mjs
+index 7c93893..065db29 100644
+--- a/dist/villa-layout.mjs
++++ b/dist/villa-layout.mjs
+@@ -247,6 +247,7 @@ function spineVariants(L, R, wl, wh, W, g, stair, ht) {
+   }
+   return out;
+ }
++export const FREE_TRIES = 120000;
+ const W_ = r => r.x1 - r.x0, H_ = r => r.y1 - r.y0, A_ = r => W_(r) * H_(r);
+ const touch = (a, b) => {
+   const ox = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0), oy = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+@@ -255,6 +256,64 @@ const touch = (a, b) => {
+   return 0;
+ };
+ 
++
++/**
++ * توليد التوزيعات الحرّة للأرض الضيقة (مصدر إضافي لبحث التوسيع، بالبوابات نفسها): تقسيم مقصّي عشوائي حتمي (بذرة ثابتة) للغلاف
++ * إلى أحزمة أو أعمدة تتداخل فيها الكتل وفراغات الحركة (ردهة، صالة، ممر)، فتخرج هياكل لا تنتجها القوالب الثابتة (صالة وسطى بحزام،
++ * ممر جانبي ثم صالة خلفية، خدمة أمامية…). لا يقرّر شيئًا بنفسه: كل مرشح يمرّ على score ثم على بوابات البناء والمراجعة كغيره.
++ */
++function* freeLayouts(program, blocks, W, D, tries, seed) {
++  const T = DESIGN_TARGETS;
++  let st = (seed >>> 0) || 1; const rnd = () => (st = (Math.imul(st, 1664525) + 1013904223) >>> 0) / 4294967296;
++  const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
++  const foyer = { id: 'foyer', kind: 'foyer', area: T.foyer * 1.15, circ: 'foyer' }, hallB = { id: 'hall', kind: 'hall', area: program.hallArea || T.hall, circ: 'hall' };
++  const rooms = blocks.map(b => ({ b, area: b.area }));
++  const lay = (items, r, dir, out, front = true) => {
++    if (items.length === 1) { out.push({ it: items[0], r }); return true; }
++    const k = Math.min(items.length, 2 + (items.length > 3 && rnd() < .45 ? 1 : 0));
++    // قطع نقاط التقسيم على القائمة المرتبة
++    const cuts = new Set(); while (cuts.size < k - 1) cuts.add(1 + Math.floor(rnd() * (items.length - 1)));
++    const idx = [0, ...[...cuts].sort((a, b) => a - b), items.length], groups = [];
++    for (let i = 0; i < idx.length - 1; i++) groups.push(items.slice(idx[i], idx[i + 1]));
++    // الردهة في المقدمة: عند القسمة على المحور y تأتي مجموعتها أولًا
++    if (front && dir === 'y') { const fi = groups.findIndex(g => g.includes(foyer)); if (fi > 0) groups.unshift(...groups.splice(fi, 1)); }
++    const L = dir === 'y' ? H_(r) : W_(r), fixedOf = g => (g.length === 1 && g[0].fixed ? g[0].fixed : 0);
++    const fixedSum = groups.reduce((a, g) => a + fixedOf(g), 0), wsum = groups.reduce((a, g) => a + (fixedOf(g) ? 0 : g.reduce((x, i) => x + i.area, 0)), 0);
++    if (L - fixedSum < 2.4 * (groups.length - groups.filter(fixedOf).length)) return false;
++    let pos = dir === 'y' ? r.y0 : r.x0;
++    for (let i = 0; i < groups.length; i++) {
++      const g = groups[i], size = i === groups.length - 1 ? (dir === 'y' ? r.y1 : r.x1) - pos : snap(fixedOf(g) || (L - fixedSum) * g.reduce((x, it) => x + it.area, 0) / wsum);
++      const sub = dir === 'y' ? { x0: r.x0, x1: r.x1, y0: pos, y1: pos + size } : { x0: pos, x1: pos + size, y0: r.y0, y1: r.y1 };
++      if (size < 1.1) return false;
++      if (!lay(g, sub, dir === 'y' ? 'x' : 'y', out, front && (dir === 'x' ? g.includes(foyer) : i === 0))) return false;
++      pos += size;
++    }
++    return true;
++  };
++  for (let t = 0; t < tries; t++) {
++    const corr = rnd() < .5 ? { id: 'spine', kind: 'spine', area: 0, fixed: snap(T.galleryW * (.85 + rnd() * .3)), circ: 'spine' } : null;
++    const items = shuffle([...rooms, foyer, hallB, ...(corr ? [corr] : [])]);
++    const out = []; if (!lay(items, { x0: 0, y0: 0, x1: W, y1: D }, rnd() < .5 ? 'y' : 'x', out)) { dg('fr.lay'); continue; }
++    const fo = out.find(o => o.it === foyer), ha = out.find(o => o.it === hallB), co = corr ? out.find(o => o.it === corr) : null;
++    if (fo.r.y0 > EPS || W_(fo.r) < 1.8 || H_(fo.r) < 1.8) { dg('fr.foyer'); continue; }
++    const cr = [fo, ha, ...(co ? [co] : [])];
++    // الحركة كلها متصلة بالردهة
++    const seen = new Set([fo]), q = [fo]; while (q.length) { const a = q.pop(); for (const b of cr) if (!seen.has(b) && touch(a.r, b.r) >= 1.0) { seen.add(b); q.push(b); } }
++    if (seen.size !== cr.length) { dg('fr.conn'); continue; }
++    // الصالة صالحة التناسب، والممر شريط فعلًا (لا مربعًا)
++    if (co && (Math.min(W_(co.r), H_(co.r)) > T.galleryW * 1.5 || Math.max(W_(co.r), H_(co.r)) < 3)) { dg('fr.corr'); continue; }
++    const circ = cr.map(o => ({ id: o.it === corr ? (H_(o.r) > W_(o.r) ? 'spine' : 'gallery') : o.it.circ, r: o.r }));
++    const placed = out.filter(o => o.it.b).map(o => {
++      let best = null, bt = 0;
++      for (const c of circ) { const tt = touch(o.r, c.r); if (tt > bt + 1e-6) { bt = tt; best = c; } }
++      if (!best) return { block: o.it.b, r: o.r, door: 'x1' };
++      const door = Math.abs(best.r.x1 - o.r.x0) < 1e-3 ? 'x0' : Math.abs(best.r.x0 - o.r.x1) < 1e-3 ? 'x1' : Math.abs(best.r.y1 - o.r.y0) < 1e-3 ? 'y0' : 'y1';
++      return { block: o.it.b, r: o.r, door };
++    });
++    yield { placed, circ };
++  }
++}
++
+ /** تقييم ترتيب كامل (كتل + فراغات حركة). أقل = أفضل. null = مرفوض. */
+ function score(placed, circ, W, D, program = {}) {
+   const dbg = globalThis.__villaDebug, no = why => { if (dbg) dbg[why] = (dbg[why] || 0) + 1; return null; };
+@@ -434,6 +493,7 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
+   const T = DESIGN_TARGETS, out = [];
+   // أرضي الدورين: الفائض عن احتياجه (حين يكون العلوي أكبر برنامجًا) يأخذ «جلسة عائلية»؛ الفناء يستوعب فائضه بحديقته فيبقى بلا إضافة
+   const blocks0 = program.blocks, blocks = program.twoFloor && stair && !noFiller ? withFiller(blocks0, W * D, blocks0.reduce((a, b) => a + b.area, 0) + T.foyer + (program.hallArea || T.hall) + 15, false) : blocks0;
++  if (globalThis.__villaDebug) ((globalThis.__villaDebug.progs ||= {})[W.toFixed(1) + 'x' + D.toFixed(1)] ||= blocks.map(b => [b.id, b.kind, +b.area.toFixed(1), b.bath ? 'bath' : '', b.master ? 'M' : '', b.men ? 'men' : '', b.guestWc ? 'wc' : ''].filter(Boolean).join(':')));
+   const suites = blocks.filter(b => b.kind === 'suite' && !b.guest).sort(byRank).reverse(); // الرئيسية أولًا
+   // الشكل المطلوب يتقدم على غيره؛ بلا طلب: الفناء بديل مختلف جذريًا لا الخيار الأول
+   const wantShape = wantedShape(program);
+@@ -442,16 +502,16 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
+   const allow = m => !only || (Array.isArray(only) ? only.includes(m) : only === m);
+   // الشكل الذي طلبه العميل صراحةً يتقدم على سقوف التضخم الافتراضية (طلب العميل فوق افتراض الميزان): يُعاد تقييمه بلا رفض التضخم
+   const progFree = { ...program, caps: false };
+-  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; dg('s.try.' + mode); const s = score(placed, circ, W, D, wantShape && mode === wantShape ? progFree : program); if (s === null) { dg('s.rej.' + mode); return; } dg('s.ok.' + mode); const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
++  const push = (mode, placed, circ, meta) => { if (!allow(mode)) return; dg('s.try.' + mode); const s = score(placed, circ, W, D, wantShape && mode === wantShape ? progFree : program); if (s === null) { dg('s.rej.' + mode); return; } dg('s.ok.' + mode); if (globalThis.__villaDebug) { const m = (globalThis.__villaDebug.minpen ||= {}); m[mode] = Math.min(m[mode] ?? 1e9, +s.toFixed(0)); } if (mode === 'free' && globalThis.__villaDebug) (globalThis.__villaDebug.freeOk ||= []).push({ s: +s.toFixed(0), p: placed.map(q => q.block.id.slice(0, 4) + '@' + [q.r.x0, q.r.y0, q.r.x1, q.r.y1].map(v => +v.toFixed(1)).join(',')), c: circ.map(q => q.id + '@' + [q.r.x0, q.r.y0, q.r.x1, q.r.y1].map(v => +v.toFixed(1)).join(',')) }); const rp = rulePenalty(placed, circ, W, D, program.rules, program.entry); out.push({ mode, placed, circ, raw: s + bias(mode), rp, pen: s + bias(mode) + rp.base + Math.min(...rp.p), ...meta }); };
+   // المحور الأعرض يعطي صالة بصافي ≥ 4.5 م؛ الأضيق يبقى للأراضي التي لا تتسع لغيره
+   // العميل حدّد موضع الصالة (مثلًا «على الحوش الخلفي»): لا يُقسم المحور؛ طلبه يتقدم على التناسب الافتراضي، ويُعلن قصور الصالة بالأرقام
+   const splitOk = !(program.rules || []).some(r => r.a === 'hall' || r.b === 'hall');
+-  const hubWidths = (stair ? [4.8, 5.2, 5.6] : [3.6, 4.2, 4.8, 5.4]).filter(h => W - h >= 7.2).slice(-3);
++  const hubWidths = globalThis.__narrowHub && W < 10.5 ? [2.2, 2.6, 3.0, 3.4].filter(h => W - h >= 6.4) : (stair ? [4.8, 5.2, 5.6] : [3.6, 4.2, 4.8, 5.4]).filter(h => W - h >= 7.2).slice(-3);
+ 
+   // (1) صالة مركزية بين جناحين، و(2) شكل T: جناحان + ممر عرضي + صف خلفي
+   if ((allow('center') || allow('tee')) && blocks.length <= 15) for (const wh of hubWidths) for (const sp of ext ? [.5, .42, .58, .34, .66] : [.5, .42, .58]) {
+     const wl = snap((W - wh) * sp), wr = W - wh - wl;
+-    if (wl < 3.6 || wr < 3.6) continue;
++    if (wl < (globalThis.__narrowHub && W < 10.5 ? 3.2 : 3.6) || wr < (globalThis.__narrowHub && W < 10.5 ? 3.2 : 3.6)) continue;
+     for (let kBack = 0; kBack <= (stair ? Math.max(3, Math.min(suites.length + 1, 4)) : Math.min(suites.length + 1, 4)); kBack++) {
+       // الصف الخلفي: الرئيسية ثم بقية الأجنحة (وقد تضاف العائلية)
+       const fam = blocks.find(b => b.kind === 'family');
+@@ -638,12 +698,12 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
+           for (const bo of [B, [...B].reverse()]) {
+             if (bo !== B && B.length < 2) continue;
+             const by = row(bo, 0, W, fd + hd, D, 'y0'), pl = [...fy.filter(p => p !== fo), ...by];
+-            if (pl.some(p => p.r.x1 - p.r.x0 < 2.4 || p.r.y1 - p.r.y0 < 2.4)) continue;
++            if (pl.some(p => p.r.x1 - p.r.x0 < 2.4 || p.r.y1 - p.r.y0 < 2.4)) { dg('s.bandsSmall'); continue; }
+             const circ = [{ id: 'foyer', r: fo.r }, { id: 'hall', r: { x0: 0, y0: fd, x1: W, y1: fd + hd } }];
+             for (const sx of stair ? [0, 1] : [null]) {
+               const sr = stair ? { x0: sx ? W - .1 - 2.6 : .1, y0: fd + .2, x1: sx ? W - .1 : .1 + 2.6, y1: fd + .2 + stair.len } : null;
+-              const sc = score(pl, circ, W, D, program); if (sc === null) continue;
+-              bandsOut.push({ mode: 'bands', placed: pl, circ, raw: sc, hd, fd, ...(sr ? { stairRect: sr, stairAt: sx } : {}) });
++              dg('s.try.bands'); const sc = score(pl, circ, W, D, program); if (sc === null) { dg('s.rej.bands'); continue; }
++              dg('s.ok.bands'); bandsOut.push({ mode: 'bands', placed: pl, circ, raw: sc, hd, fd, ...(sr ? { stairRect: sr, stairAt: sx } : {}) });
+             }
+           }
+         }
+@@ -722,6 +782,11 @@ export function searchLayouts(program, W, D, { keep = 8, stair = null, upper = n
+       push('side', pl, [{ id: 'foyer', r: { x0: 0, y0: 0, x1: W, y1: f } }, { id: 'hall', r: { x0: 0, y0: f, x1: W, y1: h } }, { id: 'spine', r: { x0: sx0, y0: h, x1: sx0 + cw, y1: D } }], { wh: W, sideAt: side, spine: h, train: true });
+     }
+   }
++  // (10) توزيعات حرّة للأرض الضيقة: مصدر إضافي لبحث التوسيع فقط (لا يغيّر التصميم الأول ولا زمنه)
++  if (ext && !stair && allow('free') && W < 13 && blocks.length <= 9) {
++    let seed = Math.round(W * 100) * 7919 + Math.round(D * 100) * 104729 + blocks.length * 31;
++    for (const c of freeLayouts(program, blocks, W, D, globalThis.__freeTries || FREE_TRIES, seed)) push('free', c.placed, c.circ, {});
++  }
+   out.sort((a, b) => a.pen - b.pen);
+   const res = [], seen = new Set(), byMode = {};
+   for (const c of out) {
+@@ -1704,9 +1769,9 @@ function generateVillaDesignsLegacy({ land, counts, requirements = {}, keep = 4,
+         if (!base) continue;
+         const { layout, relaxed, q, vsig, ledger } = base;
+         const vis = shown.length ? Math.max(...shown.map(x => visualSim(vsig, x))) : 0;
+-        gs('built'); if (vis > visLimit) { visSkips++; gs('visual'); continue; }
++        gs('built'); dg('m.' + cand.mode + '.built'); if (globalThis.__villaDebug) (globalThis.__villaDebug.trace ||= []).push([cand.mode, +vis.toFixed(2), +(shownMacro.length ? Math.max(...shownMacro.map(x => macroSim(base.msig ||= macroSig(relaxed), x))) : 0).toFixed(2), visLimit]); if (vis > visLimit) { visSkips++; gs('visual'); dg('m.' + cand.mode + '.visual'); continue; }
+         const mac = shownMacro.length ? Math.max(...shownMacro.map(x => macroSim(base.msig ||= macroSig(relaxed), x))) : 0;
+-        if (mac > macLimitFor(visLimit)) { visSkips++; gs('macro'); continue; }
++        if (mac > macLimitFor(visLimit)) { visSkips++; gs('macro'); dg('m.' + cand.mode + '.macro'); continue; }
+         // فكرة سبق عرضها: لا تعود إلا مختلفة مرئيًا بوضوح، وتُعلن تنويعًا
+         const again = !prefPat && !blend && cand.mode !== askedMode && (shownIdeas.get(cand.idea) || 0) > 0; if (again && vis > Math.max(IDEA_VARIANT_VIS, visLimit)) { visSkips++; gs('ideaAgain'); continue; }
+         const bl = blendScore(vsig, blend); if (bl === null) continue;
