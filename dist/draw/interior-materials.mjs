@@ -56,7 +56,8 @@ export function attachInterior(THREE, lib, { quality = 1, maxAnisotropy = 4 } = 
       }
       case 'fxf': { // upholstery / fabric variant of a fixture material: colour + a fine woven normal map and a soft sheen
         const src = lib.fixtures[a]; if (!src) return null; const m = src.clone(); m.color.set(hex(b)); m.name = key; m.roughness = .92;
-        if (hasCanvas) { const wv = PAINTERS.fabricWeave({ S: q(128), coarse: a.startsWith('cushion') || a === 'throwFab' ? 1.5 : 1 }); const nt = T(normalFromHeight(wv, 2.2), .22, false); if (nt) { m.normalMap = nt; m.normalScale = new THREE.Vector2(.5, .5); } m.needsUpdate = true; }
+        // lite tier (phones): flat-shaded low-poly furniture rendered pure black with the weave normal map (measured), so lite keeps colour only
+        if (hasCanvas && quality > .5) { const wv = PAINTERS.fabricWeave({ S: q(128), coarse: a.startsWith('cushion') || a === 'throwFab' ? 1.5 : 1 }); const nt = T(normalFromHeight(wv, 2.2), .22, false); if (nt) { m.normalMap = nt; m.normalScale = new THREE.Vector2(.5, .5); } m.needsUpdate = true; }
         return m;
       }
       case 'rug': { // rug top: [style, field, border, motif, ink] -> own pattern, UV 0..1 over the whole rug

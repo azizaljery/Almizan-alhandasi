@@ -30,6 +30,7 @@ export const DEFAULTS = Object.freeze({
   doors: 'ajar',            // interior door leaves: 'ajar' | 'closed' | 'open'   (entry doors stay closed)
   plinth: .45,              // finished floor above the ground, metres
   slab: .2,                 // floor / roof slab thickness
+  roofCornice: true,        // projecting band under the roof parapet on exterior walls
   skirting: true, cornice: true, ao: true, fixtures: true, site: true, car: true,
   stoneAccent: 'entry',     // stone cladding on the façade that holds the entry door ('entry' | 'none')
   textures: true, maxAnisotropy: 4, quality: 1,
@@ -305,7 +306,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     }
 
     // ---- parapet + coping on roofs ----------------------------------------------------------------------------------
-    const parapetWalls = [];
+    const parapetWalls = [], corniceWalls = [];
     if (parapetH > 0) for (const seg of L.solids.segments) {
       if (seg.kind === 'fence' || seg.kind === 'parapet') continue;
       const sp = seg.sideL || seg.sideR;
@@ -318,6 +319,13 @@ export function buildBuildingScene(doc, THREE, options = {}) {
         PA.quad('fence', pt(0, H), pt(len, H), pt(len, H + parapetH), pt(0, H + parapetH), n3, [[0, H], [len, H], [len, H + parapetH], [0, H + parapetH]]);
       }
       parapetWalls.push({ id: seg.wallId + '#' + seg.id, level: L.id, a: seg.a, b: seg.b, t: seg.t + .1, h: .07, kind: 'wall' });
+      corniceWalls.push({ id: seg.wallId + '~' + seg.id, level: L.id, a: seg.a, b: seg.b, t: seg.t + .16, h: .17, kind: 'wall' });
+    }
+    // roof-edge cornice: a projecting band under the parapet (shadow line + proportion) on every exterior wall below an open roof
+    if (opt.roofCornice && corniceWalls.length) {
+      const cr = buildWallSolids(corniceWalls, [], { levelHeight: .17 });
+      for (const s of cr.segments) PA.prism({ top: 'trim', side: 'trim', bottom: 'none' }, s.quad, E + H - .17, E + H);
+      for (const j of cr.joints) PA.prism({ top: 'trim', side: 'trim', bottom: 'none' }, j.poly, E + H - .17, E + H);
     }
     if (parapetWalls.length) {
       const cop = buildWallSolids(parapetWalls, [], { levelHeight: .07 });

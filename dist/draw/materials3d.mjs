@@ -216,6 +216,15 @@ const painters = {
     noise(hx, S, S, 24, rng(seed + 1));
     return { color: c, height: hc };
   },
+  /** open desert ground beyond the plot: soft large-scale tone drift + fine grain so the terrain is not one flat colour (colour multiplies the terrain tint). */
+  sand(S = 512) {
+    const c = makeCanvas(S), x = c.getContext('2d'), r = rng(83);
+    x.fillStyle = '#ececec'; x.fillRect(0, 0, S, S);
+    blotches(x, S, S, 46, r, S * .16, S * .46, () => r() > .5 ? 'rgba(255,255,255,ALPHA)' : 'rgba(170,150,120,ALPHA)', .09);
+    for (let i = 0; i < 70; i++) { const px = r() * S, py = r() * S, l = 40 + r() * 120; x.strokeStyle = `rgba(150,130,100,${.015 + r() * .025})`; x.lineWidth = 1 + r() * 2; x.beginPath(); x.moveTo(px, py); x.bezierCurveTo(px + l * .3, py + (r() - .5) * 14, px + l * .6, py + (r() - .5) * 14, px + l, py + (r() - .5) * 8); x.stroke(); }
+    noise(x, S, S, 8, r);
+    return { color: c };
+  },
   grass(S = 512) {
     const c = makeCanvas(S), x = c.getContext('2d'), r = rng(81);
     x.fillStyle = '#5b8a38'; x.fillRect(0, 0, S, S);
@@ -289,6 +298,7 @@ export function createMaterialLibrary(THREE, { textures = true, maxAnisotropy = 
   const woodT = paint('wood', () => painters.wood({ S: S(1024) }), 1.4, { ns: 1.5 });
   const grassT = paint('grass', () => painters.grass(S(512)), 3), pavingT = paint('paving', () => painters.paving({ S: S(512) }), 1.2, { ns: 3 });
   const roofT = paint('roof', () => painters.tile({ S: S(512), size: 1.2, tile: .4, base: [[190, 187, 180], [184, 181, 174], [196, 193, 186]], grout: 'rgba(120,118,112,0.9)', groutPx: 3, seed: 37 }), 1.2, { ns: 3 });
+  const sandT = paint('sand', () => painters.sand(S(512)), 16);
   const doorT = paint('door', () => painters.door(S(512)), 1, { ns: 1.2 });
   const rugT = hasCanvas ? (made.rug ||= { map: T(painters.rug().color, 1, { repeatCover: true }) }) : {};
   const blob = hasCanvas ? (made.blob ||= { map: T(painters.blob().color, 1, { repeatCover: true }) }) : {};
@@ -340,7 +350,7 @@ export function createMaterialLibrary(THREE, { textures = true, maxAnisotropy = 
   m.aoDecal.name = 'aoDecal';
   m.section = std('section', { color: '#d6cdbd', roughness: 1 });
   m.trim = std('trim', { color: '#f6f1e6', roughness: .85 });
-  m.terrain = std('terrain', { color: '#bfae8a', roughness: 1 });
+  m.terrain = std('terrain', { color: '#c4b18a', roughness: 1, map: sandT.map || null });
   m.asphalt = std('asphalt', { color: '#3b3d40', roughness: .95, ...PO(-2, -2) });
   m.laneLine = std('laneLine', { color: '#e9e6dc', roughness: .8, ...PO(-4, -4) });
   m.sidewalk = std('sidewalk', { color: '#ffffff', roughness: .9, map: pavingT.map || null, ...PO(-3, -3) });
