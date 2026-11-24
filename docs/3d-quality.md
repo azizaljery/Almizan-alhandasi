@@ -30,3 +30,6 @@
 - مشكلة التأطير الداخلي (#5) وكثرة المثلثات (#4).
 - لم يُشغَّل scripts/build.mjs: يفشل هنا بـERR_MODULE_NOT_FOUND (esbuild غير مثبّت في الـworktree)، غير متحقق أثره.
 - مسار صور الذكاء الاصطناعي (worker/photo.mjs) لا يُختبر هنا.
+
+## نتيجة المجموعة الكاملة (بعد الالتزام الأخير للكود)
+tests 1871، pass 1866، fail 1 (حزمة المهندس: المسموح)، todo 4 (D1 وD5 وD7 وD8)، cancelled 0، skipped 0. السجل: /tmp/claude-0/work/q3d/full.log
