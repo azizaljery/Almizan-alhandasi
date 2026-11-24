@@ -226,7 +226,7 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
   // بعد نفاد البدائل العادية مرّة: لا يُعاد البحث العادي في كل ضغطة، بل يُكمَل مباشرة بالبديل الاحتياطي
   const fbOnly = !!session.fallbackMode && relaxed;
   try {
-    if (fbOnly) { const x = new Error('fallback'); x.code = 'VILLA_EXHAUSTED'; throw x; }
+    if (fbOnly) { const x = new Error('fallback'); x.code = 'VILLA_EXHAUSTED'; if (session.exhaustStats) x.stats = session.exhaustStats; throw x; }
     const out = await redesign(session, { auto: true, maxSim: relaxed ? VISUAL_LIMIT.relaxed : VISUAL_LIMIT.mid }, { generate });
     out.session.current = keepCurrent;
     return { session: out.session, added: true, exhausted: false };
@@ -239,7 +239,7 @@ export async function extendSession(session, { target = TARGET_DESIGNS, relaxed 
       }
       const s = clone(session);
       if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now(), ...(e.stats ? { stats: e.stats } : {}), ...(fbInfo?.tried?.length || fbInfo?.budget ? { fallback: { tried: fbInfo.tried.length, rejected: fbInfo.tried.filter(x => x.mandatory === null || x.mandatory > x.best).length, budget: !!fbInfo.budget, shown: s.designs.filter(d => d.fallback).length } } : {}) }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; if (s.designs.length < 5) { const sg = await probeEdits(s, generate); if (sg.length) s.exhausted.suggest = sg; } delete s.softEnd; return { session: s, added: false, exhausted: true }; }
-      s.softEnd = { count: s.designs.length, at: Date.now() };
+      s.softEnd = { count: s.designs.length, at: Date.now() }; if (e.stats) s.exhaustStats = e.stats;
       return { session: s, added: false, exhausted: false, softEnd: true };
     }
     return { session, added: false, exhausted: false, error: { message: e.message, code: e.code || null } };
