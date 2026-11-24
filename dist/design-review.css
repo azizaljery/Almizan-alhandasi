@@ -124,3 +124,8 @@ body.mizan-review .mzr-top .pill{background:transparent!important;background-ima
 .mz-aziz .az-fold{margin:6px 0}
 .mz-aziz .az-fold>summary{font-weight:600}
 .mz-aziz .az-rej-sum{margin:4px 0}
+
+.fallback-note{border:1px solid var(--mzr-warn);border-inline-start-width:5px}
+.fallback-note h2{margin:0 0 6px}
+.fallback-note p{margin:4px 0;line-height:1.7}
+.mz-aziz .az-fallback{border:1px solid var(--mzr-warn);padding:6px 8px;border-radius:8px;margin:6px 0;line-height:1.7}

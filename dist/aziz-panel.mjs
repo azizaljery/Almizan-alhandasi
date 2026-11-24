@@ -110,7 +110,7 @@ export function azizPanelModel(session, doc, { report = null, currentPv = null }
   return { version: AZIZ_PANEL_VERSION, title: PANEL_TITLE, planVersion: stamp?.planVersion || null, currentPv, stale, route: stamp?.route || null, routeAr,
     staleNote: stale ? `تغيّر المخطط بعد قرار المراجعة${routeAr ? ' (' + routeAr + ')' : ''}؛ قسم المرشحين أدناه عن النسخة السابقة، أما الجدول فمقيس من المخطط الحالي.` : null,
     sources: [{ id: 'aziz', ...aziz }, { id: 'checker', ...checker }, { id: 'generator', line: cand.available ? `مولّد الميزان: جرّب ${cand.built} توزيعًا لهذا الطلب.` : 'مولّد الميزان: عدد التوزيعات التي جرّبها غير متاح لهذا المحرك.', status: cand.available ? 'ran' : 'na' }],
-    who: WHO_AZIZ, headline, changed: changed.length, rows, candidates: cand, unverified, fit: { floors: fit?.floors || null, facts: st.facts, need: st.need }, disclaimer: PANEL_DISCLAIMER };
+    who: WHO_AZIZ, headline, fallback: d.fallback ? { text: d.fallback.text, source: 'generator', hall: d.fallback.hall || null, usual: d.fallback.usual || null, score: d.fallback.score ?? null, firstScore: d.fallback.firstScore ?? null } : null, changed: changed.length, rows, candidates: cand, unverified, fit: { floors: fit?.floors || null, facts: st.facts, need: st.need }, disclaimer: PANEL_DISCLAIMER };
 }
 
 /** رسم اللوحة (el: مساعد إنشاء العناصر في الصفحة). */
@@ -127,6 +127,7 @@ export function azizPanelCard(m, el, { wide = (typeof matchMedia === 'function' 
     m.staleNote ? el('p', { class: 'az-stale', role: 'status' }, m.staleNote) : null,
     el('ul', { class: 'az-sources' }, m.sources.map(srcLine)),
     el('p', { class: 'az-headline' }, m.headline),
+    m.fallback ? el('p', { class: 'az-fallback', id: 'azFallback', role: 'note' }, m.fallback.text) : null,
     det('azWho', 'من هو عزيز؟', ...m.who.map(t => el('p', {}, t))),
     det('azTable', `طلبك ↔ ما تحقق (${m.changed ? m.changed + ' بنود تغيّرت' : 'كل البنود تحققت'})`, m.rows.length ? el('ul', { class: 'az-rows' }, m.rows.map(rowCard)) : el('p', { class: 'sub' }, 'لا بنود أعداد أو مقاسات محددة في طلبك للمقارنة.')),
     det('azCand', 'ما الذي فُحص ورُفض ولماذا',

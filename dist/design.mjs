@@ -177,6 +177,7 @@ function show(index) {
   const sc = scoreOf(index) || (() => { const v = scoreDesign(session, d); if (v) d.score = v; return v; })();
   const scBadge = i => { const v = scoreOf(i); return v ? el('span', { class: 'ori sc-b' + (i === top && session.designs.length > 1 ? ' best' : ''), title: 'درجة المطابقة: ' + v.total + '/100 — ' + v.grade }, (i === top && session.designs.length > 1 ? '★ ' : '') + v.total) : null; };
   const nav = navBlock(index, badges);
+  const fbCard = d.fallback ? el('div', { class: 'card fallback-note', id: 'fallbackNote', role: 'note' }, el('h2', {}, 'بديل بصالة أضيق من المعتاد'), el('p', {}, d.fallback.text)) : null;
   const scoreBox = scoreCard(sc, index === top && session.designs.length > 1);
   if (session.designs.some(x => !x.score)) { const idle = globalThis.requestIdleCallback || (f => setTimeout(f, 300)); idle(() => { let changed = false; for (const x of session.designs) if (!x.score) { x.score = scoreDesign(session, x); changed = changed || !!x.score; } if (changed && session.current === index) { const h = document.querySelector('.dnav'); if (h) { [...h.querySelectorAll('button[data-design]')].forEach(b => { const i = +b.dataset.design, v = session.designs[i].score; if (v && !b.querySelector('.sc-b')) b.insertBefore(Object.assign(document.createElement('span'), { className: 'ori sc-b', textContent: String(v.total) }), b.querySelector('.ori')); }); } } }); }
   const best = badges.find(b => b.best && b.index !== index) || null;
@@ -191,6 +192,7 @@ function show(index) {
     ...(replyCard ? [replyCard] : []),
     el('div', { class: 'titlebar' }, el('div', {}, el('h1', {}, index === 0 ? 'تصميمك الأولي' : 'التصميم ' + (index + 1)), el('div', { class: 'sub' }, 'مسقط مبدئي قابل للتعديل؛ الأبعاد بين محاور الجدران والمساحات صافية من داخل الجدران.'), orientLine)),
     nav,
+    ...(fbCard ? [fbCard] : []),
     el('section', { class: 'specs', 'aria-label': 'المواصفات' }, specs.map(([k, v]) => el('div', { class: 'spec' }, el('b', {}, v), el('span', {}, k)))),
     el('div', { class: 'grid' }, plan, el('div', { id: 'azizHost', class: 'az-host' }), el('div', { class: 'actions', style: 'gap:16px' }, side, ...(scoreBox ? [scoreBox] : []), ...(fixCard ? [fixCard] : []), reqCard, el('div', { id: 'reviewHost' }), el('div', { id: 'lockHost' }))),
     ...(fitCard ? [fitCard] : []),

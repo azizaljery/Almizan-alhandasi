@@ -6,11 +6,11 @@ import { verifyRequest, mergeRules } from './rules.mjs';
 import { withAi } from './requirements.mjs';
 export { mergeRules };
 import { parseDoc, serialize } from './draw/doc.mjs';
-import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails, designsAr } from './villa-layout.mjs';
+import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, alignSig, VISUAL_LIMIT, BLEND_COPY, splitFails, designsAr, HALL_LIMITS, HALL_RELAX, setHallRelax, planMetrics } from './villa-layout.mjs';
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
-import { stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
+import { reviewGate, stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
 export { scorePlan, rankByScore };
 
 export const SESSION_KEY = 'mizan.design.session.v1';
@@ -179,20 +179,66 @@ export async function redesign(session, { picks = [], text = '', ai = null, auto
  * تنتهي بالنفاد الصادق: حين لا يبقى توزيع يختلف عمّا عُرض تُسجَّل الجلسة exhausted بعدد ما عُرض فعلًا (لا يُختلق عدد).
  * يعيد { session, added, exhausted, error? }؛ added = false عند النفاد أو الفشل.
  */
+
+/**
+ * البديل الاحتياطي بصالة مخفَّفة (بعد نفاد البدائل بالحدود المعتادة فقط): تُخفَّف حدود الصالة وحدها (HALL_RELAX) مستوى بعد مستوى
+ * (أقل تخفيف يكفي)، ولا يُمسّ غيرها: لا حدود تشابه ولا عرض ممر ولا تهوية ولا مقاسات غرف ولا بنود الطلب. يمرّ على بقية البوابات كغيره:
+ * سلامة الرسم والجودة في المولّد، ثم مراجعة الميزان (عزيز والخصوصية والحياة اليومية) بلا مخالفات إلزامية أكثر من أفضل ما عُرض؛
+ * وإلا فالنفاد الصادق. يُوسَم بالأرقام الفعلية ودرجته بجانب درجة الأول، منسوبًا لمولّد الميزان.
+ */
+const FALLBACK_BUDGET_MS = 6000, FALLBACK_TRIES = 4;
+const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
+function mandatoryCount(session, d) { try { const c = d.review?.counts?.mandatory; return c ? c.violated : reviewGate({ route: 'alternative', doc: parseDoc(d.doc), ctx: ctxOfSession(session) }).summary.counts.mandatory.violated; } catch { return null; } }
+/** وسم البديل الاحتياطي: أرقام الصالة الفعلية مقابل المعتاد، ودرجته بجانب درجة الأول. */
+export function fallbackLabel(session, d, level) {
+  let halls = []; try { halls = planMetrics(parseDoc(d.doc)).levels.map((lv, i) => (lv.hall ? { level: i, w: lv.hall.w, l: lv.hall.l, ratio: lv.hall.ratio } : null)).filter(Boolean); } catch { halls = []; }
+  const worst = halls.slice().sort((a, b) => b.ratio - a.ratio)[0] || null, first = session.designs[0]?.score?.total ?? null, mine = d.score?.total ?? null;
+  const usual = `عرض صافٍ ≥ ${f1(HALL_LIMITS.minNetW)} م ونسبة ≤ 1:${f1(HALL_LIMITS.ratio)}`;
+  const text = `بديل بصالة أضيق من المعتاد (من مولّد الميزان، لا من عزيز): ${worst ? `الصالة ${f1(worst.w)} × ${f1(worst.l)} م (نسبة 1:${f1(worst.ratio)}) بدل المعتاد (${usual})` : 'حدود الصالة مخفَّفة'}؛ جاء لأن الأرض لا تتسع لتنوع أكبر بالحدود المعتادة.${mine !== null && first !== null ? ` درجته ${mine}/100 مقابل ${first}/100 للتصميم الأول، فلا يُعرض على أنه بجودة الأول.` : ''}`;
+  return { kind: 'hall', level, hall: worst, halls, usual: { ...HALL_LIMITS }, applied: HALL_RELAX[level] ? { ratio: HALL_RELAX[level].ratio, minNetW: HALL_RELAX[level].minNetW } : null, score: mine, firstScore: first, source: 'generator', text };
+}
+async function hallFallback(session, generate, { levels = HALL_RELAX.length - 1, budgetMs = FALLBACK_BUDGET_MS, now = () => Date.now() } = {}) {
+  const t0 = now(), tried = [], keepCurrent = session.current;
+  const best = Math.min(...session.designs.map(d => mandatoryCount(session, d) ?? 99));
+  for (let lv = 1; lv <= levels; lv++) {
+    let base = session;
+    for (let k = 0; k < FALLBACK_TRIES; k++) {
+      if (now() - t0 > budgetMs) return { out: null, tried, budget: true };
+      let out;
+      try { setHallRelax(lv); out = await redesign(base, { auto: true, maxSim: VISUAL_LIMIT.relaxed }, { generate }); }
+      catch (e) { if (e.code === 'VILLA_EXHAUSTED') break; return { out: null, tried, error: e }; }
+      finally { setHallRelax(0); }
+      const d = out.session.designs[out.session.designs.length - 1], m = mandatoryCount(out.session, d);
+      tried.push({ level: lv, mandatory: m, best, pat: d.pat });
+      if (m !== null && m <= best) { d.fallback = fallbackLabel(out.session, d, lv); d.fallback.mandatory = m; d.notes = [d.fallback.text, ...(d.notes || [])]; out.session.current = keepCurrent; out.session.fallbackMode = true; return { out, tried }; }
+      // لم يجتز البوابة: يُستبعد نمطه ويُجرَّب غيره في المستوى نفسه
+      base = clone(session); base.seenPats = [...new Set([...(base.seenPats || []), ...tried.filter(x => x.level === lv).map(x => x.pat).filter(Boolean)])];
+    }
+  }
+  return { out: null, tried };
+}
 export async function extendSession(session, { target = TARGET_DESIGNS, relaxed = false } = {}, { generate = generateInitialDesign } = {}) {
   if (session.designs.length >= MAX_DESIGNS) return { session, added: false, exhausted: false, capped: true };
   if (session.exhausted || session.designs.length >= target) return { session, added: false, exhausted: !!session.exhausted };
   // الإكمال التلقائي لا يقبل إلا ما يختلف هيكليًا بوضوح (حتى 60٪ تشابهًا)؛ الأقرب (حتى 70٪) يُعرض بطلب العميل وحده، وبإعلانه في ملاحظات التصميم
   if (session.softEnd && !relaxed) return { session, added: false, exhausted: false, softEnd: true };
   const keepCurrent = session.current;
+  // بعد نفاد البدائل العادية مرّة: لا يُعاد البحث العادي في كل ضغطة، بل يُكمَل مباشرة بالبديل الاحتياطي
+  const fbOnly = !!session.fallbackMode && relaxed;
   try {
+    if (fbOnly) { const x = new Error('fallback'); x.code = 'VILLA_EXHAUSTED'; throw x; }
     const out = await redesign(session, { auto: true, maxSim: relaxed ? VISUAL_LIMIT.relaxed : VISUAL_LIMIT.mid }, { generate });
     out.session.current = keepCurrent;
     return { session: out.session, added: true, exhausted: false };
   } catch (e) {
     if (e.code === 'VILLA_EXHAUSTED') {
+      let fbInfo = null;
+      if (relaxed) {
+        const narrow = (e.stats?.W ?? 99) < 13, fb = await hallFallback(session, generate, { levels: narrow ? HALL_RELAX.length - 1 : 3 }); fbInfo = fb;
+        if (fb.out) return { session: fb.out.session, added: true, exhausted: false, fallback: true };
+      }
       const s = clone(session);
-      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now(), ...(e.stats ? { stats: e.stats } : {}) }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; if (s.designs.length < 5) { const sg = await probeEdits(s, generate); if (sg.length) s.exhausted.suggest = sg; } delete s.softEnd; return { session: s, added: false, exhausted: true }; }
+      if (relaxed) { s.exhausted = { count: s.seen?.length || s.designs.length, at: Date.now(), ...(e.stats ? { stats: e.stats } : {}), ...(fbInfo?.tried?.length || fbInfo?.budget ? { fallback: { tried: fbInfo.tried.length, rejected: fbInfo.tried.filter(x => x.mandatory === null || x.mandatory > x.best).length, budget: !!fbInfo.budget, shown: s.designs.filter(d => d.fallback).length } } : {}) }; const two = s.designs.length < TARGET_DESIGNS ? await probeTwoFloors(s, generate) : null; if (two) s.exhausted.twoFloors = two; if (s.designs.length < 5) { const sg = await probeEdits(s, generate); if (sg.length) s.exhausted.suggest = sg; } delete s.softEnd; return { session: s, added: false, exhausted: true }; }
       s.softEnd = { count: s.designs.length, at: Date.now() };
       return { session: s, added: false, exhausted: false, softEnd: true };
     }
@@ -207,7 +253,8 @@ export const exhaustedMessage = (n, twoFloors = null, ex = null) => {
   const ideasAr = k => (k === 1 ? 'لفكرة تنظيمية واحدة' : k === 2 ? 'لفكرتين تنظيميتين' : `لـ${k} أفكار تنظيمية`), layoutsAr = k => (k === 1 ? 'توزيعًا واحدًا' : k === 2 ? 'توزيعين' : k <= 10 ? `${k} توزيعات` : `${k} توزيعًا`), st = ex?.stats || null;
   const gates = st?.gate ? (st.gate.visual || 0) + (st.gate.macro || 0) + (st.gate.ideaAgain || 0) : 0;
   const why = st ? ` عرضتُ عليك فعليًا ${designsAr(n)}. مساحة البناء الصافية لأرضك ${st.W} × ${st.D} م${st.floors === 2 ? ' للدور' : ''} تتسع ${ideasAr(st.ideas)} فقط لبرنامجك${st.layouts ? ` (جرّبتُ ${layoutsAr(st.layouts)}${gates ? `، وسقط ${gates} منها لأنها تشبه ما عُرض فوق حدّ التشابه المعتمد` : ''})` : ''}، وليس لقلّة البحث: الحدود لم تُخفَّف.` : '';
-  return `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${why}${ex?.suggest?.length ? ' خطوات قِسْتُها لتوسيع الخيارات: ' + ex.suggest.map(x => `${x.label} (يعطي ${x.k === 2 ? 'تصميمين مختلفين' : x.k + ' تصاميم مختلفة'})`).join('؛ ') + '.' : st ? ' قِسْتُ ما ينطبق على طلبك من (تقليل غرفة نوم، الاستغناء عن غرفة الطعام أو الخادمة، دمج المجلسين) فلم يزد أيٌّ منها التصاميم المختلفة دون تغيير عدد الأدوار؛ ويبقى دمج تصميمين أو تغيير عدد الأدوار إن لم تكن حدّدته.' : ''}${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
+  const fbx = ex?.fallback ? ` منها ${ex.fallback.shown} بصالة أضيق من المعتاد (بديل احتياطي موسوم بأرقامه).` + (ex.fallback.tried ? ` وجرّبتُ تخفيف حدّ الصالة وحدها في ${ex.fallback.tried} محاولة، ولم يجتز بوابات المراجعة منها ${ex.fallback.rejected}.` : ' ولم ينتج تخفيف حدّ الصالة وحدها تصميمًا جديدًا مختلفًا.') : '';
+  return `وصلنا إلى كل التوزيعات المختلفة الممكنة لأرضك وبرنامجك (${n} تصميمًا). لن أكرر تصميمًا سبق؛ غيّر طلبًا (شكلًا أو عددًا أو مقاسًا) أو ادمج تصميمين لأولّد غيرها.${why}${fbx}${ex?.suggest?.length ? ' خطوات قِسْتُها لتوسيع الخيارات: ' + ex.suggest.map(x => `${x.label} (يعطي ${x.k === 2 ? 'تصميمين مختلفين' : x.k + ' تصاميم مختلفة'})`).join('؛ ') + '.' : st ? ' قِسْتُ ما ينطبق على طلبك من (تقليل غرفة نوم، الاستغناء عن غرفة الطعام أو الخادمة، دمج المجلسين) فلم يزد أيٌّ منها التصاميم المختلفة دون تغيير عدد الأدوار؛ ويبقى دمج تصميمين أو تغيير عدد الأدوار إن لم تكن حدّدته.' : ''}${twoFloors ? ` جرّب دورين: أرضك تتسع لتنويع أكبر بدورين (قِسْتُ ${twoFloors} تصاميم مختلفة بدورين، وقد يوجد أكثر).` : ''}`;
 };
 /** أرض بدور واحد مصرَّح انتهت قبل العشرين: يُقاس ما يعطيه الدوران (أول دفعة) ليقترحهما الإعلان بعدد حقيقي لا بتخمين. null إن لم يزد العدد أو تعذّر القياس. */
 const PROBE_MAX = 8;
