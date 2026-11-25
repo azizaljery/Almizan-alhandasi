@@ -347,7 +347,7 @@ export function buildBuildingScene(doc, THREE, options = {}) {
     // rich procedural furniture (interior-furniture): on with the interior finish system, or on request (professional photo path); falls back to fixtures3d
     const RICH = opt.richFurniture ?? (!!IV && !LITE), furnStyle = IV ? IV.id : (opt.furnitureStyle || 'contemporary');
     const mkFix = (kind, dims, mats, vkey) => {
-      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed, low: LITE || (opt.quality ?? 1) < .8 }); if (g) return g; } catch { /* fall back to the plain model */ } }
+      if (RICH && isRichKind(kind)) { try { const g = buildRichFixture(THREE, kind, dims, mats, { style: furnStyle, variant: Math.abs(Math.round(vkey)), seed: dims.seed, coarse: !!IV, low: LITE || (opt.quality ?? 1) < .8 }); if (g) return g; } catch { /* fall back to the plain model */ } }
       return buildFixture(THREE, kind, LITE ? { ...dims, low: true } : dims, mats);
     };
     // ---- interior helpers: room furniture materials, ceiling pieces, light fittings ----------------------------------------------------

@@ -74,9 +74,10 @@ test('3D quality: façade variants are deterministic, distinct, and never overri
 
 test('3D quality: soft boxes use the cheap grid for small radii and keep the fine grid for cushions', () => {
   const tris = g => g.index.count / 3;
-  assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .05)), 192);
+  assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .05, true)), 192);
+  assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .05)), 432, 'default stays fine (photo path)');
   assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .1)), 432);
-  const g = softBoxGeometry(THREE, 1, .3, .6, .05); let bad = 0; for (const v of g.attributes.position.array) if (!Number.isFinite(v)) bad++; assert.equal(bad, 0);
+  const g = softBoxGeometry(THREE, 1, .3, .6, .05, true); let bad = 0; for (const v of g.attributes.position.array) if (!Number.isFinite(v)) bad++; assert.equal(bad, 0);
 });
 
 test('3D quality: trees come in three crown shapes and stay light in lite', () => {

@@ -21,7 +21,7 @@ export function buildRichFixture(THREE, kind, dims = {}, mats, opts = {}) {
   if (!isRichKind(kind)) return null;
   const def = FIXTURES[kind] || {}, w = dims.w ?? def.w ?? 1, d = dims.d ?? def.d ?? 1, h = dims.h ?? def.h ?? 1;
   const style = FURNITURE_STYLES.includes(opts.style) ? opts.style : 'contemporary', variant = opts.variant | 0, seed = opts.seed ?? 1;
-  const K = makeKit(THREE, mats, 'fixture:' + kind, { low: !!opts.low }); K.g.userData = { kind, dims: { w, d, h }, style, rich: true };
+  const K = makeKit(THREE, mats, 'fixture:' + kind, { low: !!opts.low, coarse: !!opts.coarse }); K.g.userData = { kind, dims: { w, d, h }, style, rich: true };
   const { box, rbox, cush, cyl, sph, tor, rod, lathe, tube, leaf, sub } = K;
   const has = n => !!mats[n];
   const MG = has('glow') ? 'glow' : 'lampShade';

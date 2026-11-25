@@ -17,10 +17,10 @@ export function metreUV(THREE, geo) {
  * Box with a genuinely round edge: a 6x6x6 grid whose coordinates crowd towards the edges so each quarter-round gets 2 segments, positions = inner box + r * unit direction
  * (analytic normals). 432 triangles. Used for upholstered parts, where the 3-segment chamfer of roundedBoxGeometry reads as faceted.
  */
-export function softBoxGeometry(THREE, w, h, d, r = .05) {
+export function softBoxGeometry(THREE, w, h, d, r = .05, allowCoarse = false) {
   r = Math.max(.004, Math.min(r, w / 2 - 1e-3, h / 2 - 1e-3, d / 2 - 1e-3));
   // small radii (< 7 cm: arm bases, plinths, trims) use a 4-grid with one smooth-shaded segment per quarter-round (192 triangles instead of 432); the silhouette difference is below a centimetre
-  const coarse = r < .07, N = coarse ? 4 : 6, geo = new THREE.BoxGeometry(2, 2, 2, N, N, N), pos = geo.attributes.position, nor = geo.attributes.normal;
+  const coarse = allowCoarse && r < .07, N = coarse ? 4 : 6, geo = new THREE.BoxGeometry(2, 2, 2, N, N, N), pos = geo.attributes.position, nor = geo.attributes.normal;
   const P = coarse ? [-1, -.7, 0, .7, 1] : [-1, -.92, -.7, 0, .7, .92, 1], Z0 = .7, hx = w / 2, hy = h / 2, hz = d / 2, ix = hx - r, iy = hy - r, iz = hz - r;
   const prof = u => { const k = Math.round((u + 1) * N / 2); return P[Math.max(0, Math.min(N, k))]; }; // uniform grid step is 1/3 -> index 0..6
   const ax = (u, inner) => { const a = Math.abs(u), sg = Math.sign(u) || 1; if (a <= Z0) return [u / Z0 * inner, 0]; const s = (a - Z0) / (1 - Z0); return [sg * inner, sg * Math.sin(s * Math.PI / 2)]; };
@@ -33,8 +33,8 @@ export function softBoxGeometry(THREE, w, h, d, r = .05) {
 }
 
 /** Soft cushion: a rounded box squeezed towards its corners (lens section) so it reads as stuffed fabric, not a block. */
-export function pillowGeometry(THREE, w, h, d, { r = null, pinch = .38, crown = 0, low = false } = {}) {
-  const rr = r ?? Math.min(h * .46, w * .2, d * .2), geo = low ? roundedBoxGeometry(THREE, w, h, d, rr) : softBoxGeometry(THREE, w, h, d, rr);
+export function pillowGeometry(THREE, w, h, d, { r = null, pinch = .38, crown = 0, low = false, coarse = false } = {}) {
+  const rr = r ?? Math.min(h * .46, w * .2, d * .2), geo = low ? roundedBoxGeometry(THREE, w, h, d, rr) : softBoxGeometry(THREE, w, h, d, rr, coarse);
   const pos = geo.attributes.position, hx = w / 2, hz = d / 2;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i) / hx, z = pos.getZ(i) / hz, q = (x * x + z * z) / 2, y = pos.getY(i);
@@ -44,7 +44,7 @@ export function pillowGeometry(THREE, w, h, d, { r = null, pinch = .38, crown = 
 }
 
 /** Everything a furniture builder needs, bound to one Group and one material map. */
-export function makeKit(THREE, mats, name, { low = false } = {}) {
+export function makeKit(THREE, mats, name, { low = false, coarse = false } = {}) {
   const g = new THREE.Group(); g.name = name;
   const M = n => (typeof n === 'string' ? (mats[n] || mats.fallback) : n);
   const add = (geo, mat, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1, parent = g) => {
@@ -53,8 +53,8 @@ export function makeKit(THREE, mats, name, { low = false } = {}) {
   };
   // x,y0,z = centre x, BOTTOM y, centre z
   const box = (mat, sx, sy, sz, x, y0, z, ry = 0, rx = 0, rz = 0) => add(new THREE.BoxGeometry(sx, sy, sz), mat, x, y0 + sy / 2, z, rx, ry, rz);
-  const rbox = (mat, sx, sy, sz, r, x, y0, z, ry = 0, rx = 0, rz = 0) => add(r >= .028 && !low ? softBoxGeometry(THREE, sx, sy, sz, r) : roundedBoxGeometry(THREE, sx, sy, sz, r), mat, x, y0 + sy / 2, z, rx, ry, rz);
-  const cush = (mat, sx, sy, sz, x, y0, z, ry = 0, rx = 0, rz = 0, o = {}) => add(pillowGeometry(THREE, sx, sy, sz, { ...o, low }), mat, x, y0 + sy / 2, z, rx, ry, rz);
+  const rbox = (mat, sx, sy, sz, r, x, y0, z, ry = 0, rx = 0, rz = 0) => add(r >= .028 && !low ? softBoxGeometry(THREE, sx, sy, sz, r, coarse) : roundedBoxGeometry(THREE, sx, sy, sz, r), mat, x, y0 + sy / 2, z, rx, ry, rz);
+  const cush = (mat, sx, sy, sz, x, y0, z, ry = 0, rx = 0, rz = 0, o = {}) => add(pillowGeometry(THREE, sx, sy, sz, { ...o, low, coarse }), mat, x, y0 + sy / 2, z, rx, ry, rz);
   const cyl = (mat, rt, rb, hh, x, y0, z, seg = 12, rx = 0, rz = 0, ry = 0) => add(new THREE.CylinderGeometry(rt, rb, hh, seg), mat, x, y0 + hh / 2, z, rx, ry, rz);
   const sph = (mat, rx_, ry_, rz_, x, y, z, ws = 8, hs = 6) => add(new THREE.SphereGeometry(1, ws, hs), mat, x, y, z, 0, 0, 0, rx_, ry_, rz_);
   const tor = (mat, R, r, x, y, z, rx = Math.PI / 2, ry = 0, rz = 0, rs = 6, ts = 18, sx = 1, sy = 1, sz = 1) => add(new THREE.TorusGeometry(R, r, rs, ts), mat, x, y, z, rx, ry, rz, sx, sy, sz);
