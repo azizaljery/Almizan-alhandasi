@@ -63,7 +63,7 @@ export class DrawViewer {
     this.scene.add(this.sun, this.sun.target);
     this.hemi = new T.HemisphereLight('#cfe2f5', '#b8a888', .55); this.scene.add(this.hemi);
     this.lamp = new T.PointLight('#ffe6c2', 0, 14, 1); this.scene.add(this.lamp); // walk-mode ceiling-height fill that follows the walker, off by default
-    this.skyUniforms = { top: { value: new T.Color() }, horizon: { value: new T.Color() }, ground: { value: new T.Color() }, sunDir: { value: new T.Vector3(0, 1, 0) }, sunColor: { value: new T.Color() }, glow: { value: 1 } };
+    this.skyUniforms = { top: { value: new T.Color() }, horizon: { value: new T.Color() }, ground: { value: new T.Color() }, sunDir: { value: new T.Vector3(0, 1, 0) }, sunColor: { value: new T.Color() }, glow: { value: 1 }, cloudCol: { value: new T.Color('#ffffff') }, cloudAmt: { value: 1 } };
     this.sky = new T.Mesh(new T.SphereGeometry(1, 32, 16), this.makeSkyMaterial(false));
     this.sky.scale.setScalar(900); this.sky.renderOrder = -10; this.sky.frustumCulled = false; this.scene.add(this.sky);
     this.pmrem = new T.PMREMGenerator(r);
@@ -135,8 +135,11 @@ export class DrawViewer {
     return new T.ShaderMaterial({
       uniforms: this.skyUniforms, side: T.BackSide, depthWrite: false, fog: false,
       vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-      fragmentShader: `uniform vec3 top; uniform vec3 horizon; uniform vec3 ground; uniform vec3 sunDir; uniform vec3 sunColor; uniform float glow; varying vec3 vDir;
+      fragmentShader: `uniform vec3 top; uniform vec3 horizon; uniform vec3 ground; uniform vec3 sunDir; uniform vec3 sunColor; uniform float glow; uniform vec3 cloudCol; uniform float cloudAmt; varying vec3 vDir;
+        float hs(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hs(i), hs(i + vec2(1.0, 0.0)), f.x), mix(hs(i + vec2(0.0, 1.0)), hs(i + vec2(1.0, 1.0)), f.x), f.y); }
         void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(horizon, top, pow(clamp(h, 0.0, 1.0), 0.55)) : mix(horizon, ground, clamp(-h * 3.0, 0.0, 1.0));
+          if (h > 0.0 && cloudAmt > 0.0) { vec2 uv = vDir.xz / (h * 0.9 + 0.14) * 0.85 + vec2(3.7, 1.3); float n = vn(uv) * 0.55 + vn(uv * 2.1) * 0.3 + vn(uv * 4.3) * 0.15; float cv = smoothstep(0.44, 0.72, n) * smoothstep(0.03, 0.28, h) * 0.92 * cloudAmt; c = mix(c, mix(cloudCol, horizon, 0.18), cv); }
           float s = max(dot(normalize(vDir), normalize(sunDir)), 0.0); c += sunColor * (pow(s, 600.0) * 3.0 + pow(s, 14.0) * 0.18) * glow; gl_FragColor = vec4(c, 1.0); }`,
     });
   }
@@ -184,7 +187,8 @@ export class DrawViewer {
     const T = this.THREE, S = STYLES[this.style];
     this.skyUniforms.top.value.set(S.zenith); this.skyUniforms.horizon.value.set(S.horizon); this.skyUniforms.ground.value.set(S.ground); this.skyUniforms.sunColor.value.set(S.sun);
     // The visible sky dome writes raw colours to the canvas (no tone mapping), so it needs the sRGB numbers, not linear ones.
-    for (const k of ['top', 'horizon', 'ground', 'sunColor']) this.skyUniforms[k].value.convertLinearToSRGB();
+    this.skyUniforms.cloudCol.value.set(this.style === 'dusk' ? '#ffcfae' : '#ffffff'); this.skyUniforms.cloudAmt.value = this.style === 'dusk' ? .7 : 1;
+    for (const k of ['top', 'horizon', 'ground', 'sunColor', 'cloudCol']) this.skyUniforms[k].value.convertLinearToSRGB();
     this.scene.fog = new T.Fog(new T.Color(S.fog), 90, 420);
     this.sun.color.set(S.sun); this.sun.intensity = S.sunIntensity * this.sunFade(); this.hemi.color.set(S.hemiSky); this.hemi.groundColor.set(S.hemiGround); this.hemi.intensity = S.hemi;
     this.renderer.toneMappingExposure = S.exposure;
@@ -528,6 +532,8 @@ export class DrawViewer {
       starts = [...starts, ...extra.sort((a, c) => Math.hypot(a.x - r.centroid.x, a.y - r.centroid.y) - Math.hypot(c.x - r.centroid.x, c.y - r.centroid.y)).slice(0, 18)];
     }
     const lvId = this.built.levels[lvIndex]?.id, furniture = (this.built.fixtureBoxes || []).filter(f => f.level === lvId && pointInPolygon({ x: f.x, y: f.y }, r.polygon, 0)).map(f => ({ x: f.x, y: f.y, w: f.kind === 'rug' ? .3 : f.kind.startsWith('bed') ? 1.6 : f.kind === 'majlis-sofa' || f.kind.startsWith('sofa') ? 1.3 : 1, bed: f.kind.startsWith('bed'), rot: f.rot || 0 }));
+    // stair bodies in this room: a view that ends on a staircase (or backs into one) reads as standing against a wall
+    const stairPts = (this.built.levels[lvIndex]?.stairs || []).map(st => st.layout?.hole).filter(h => h?.length && h.every(p => pointInPolygon(p, r.polygon, 1e-6) || true)).map(h => ({ x: h.reduce((a, p) => a + p.x, 0) / h.length, y: h.reduce((a, p) => a + p.y, 0) / h.length })).filter(c => pointInPolygon(c, r.polygon, 0));
     let best = null;
     if (!starts.length) { this.walk.level = prevLevel; return null; }
     for (const p of starts) for (let k = 0; k < 36; k++) {
@@ -541,7 +547,8 @@ export class DrawViewer {
       let seen = 0, bedFace = 0; for (const f of furniture) { const fa = Math.atan2(f.x - x, f.y - y), d = Math.abs(Math.atan2(Math.sin(fa - a), Math.cos(fa - a))); if (d < 32 * DEG && Math.hypot(f.x - x, f.y - y) > .9) { const dd = Math.hypot(f.x - x, f.y - y), prox = dd < 1.3 ? .35 : dd < 5.2 ? 1 : 5.2 / dd; seen += f.w * prox; if (f.bed) bedFace += Math.cos(a - f.rot) * prox; } } // a bed is photographed from its foot: look along the head direction (plan heading = document rotation)
       const square = rings[0].some((A, i) => { const B = rings[0][(i + 1) % rings[0].length], e = Math.atan2(B.x - A.x, B.y - A.y); return Math.abs(Math.sin(e - a)) < .05 || Math.abs(Math.cos(e - a)) < .05; });
       const score = Math.min(depth, 6.5) * .5 - off * .6 + Math.min(seen, 5) * 1.1 + (square ? .5 : 0) + bedFace * 3.4 - (front < 2.6 ? (2.6 - front) * 1.4 : 0); // a view that ends in a wall a metre ahead is not a composition
-      if (!best || score > best.score) best = { x, y, headingDeg: a / DEG, depth, score };
+      let stairPen = 0; for (const c of stairPts) { const dd = Math.hypot(c.x - x, c.y - y), sa = Math.atan2(c.x - x, c.y - y), d = Math.abs(Math.atan2(Math.sin(sa - a), Math.cos(sa - a))); if (dd < 3.4 && d < 40 * DEG) stairPen += 1.2 + (3.4 - dd) * 1.1; }
+      if (!best || score - stairPen > best.score) best = { x, y, headingDeg: a / DEG, depth, score: score - stairPen };
     }
     this.walk.level = prevLevel;
     return best ? { x: best.x, y: best.y, headingDeg: best.headingDeg, depth: best.depth } : null;

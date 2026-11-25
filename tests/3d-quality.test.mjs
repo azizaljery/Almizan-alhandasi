@@ -49,3 +49,53 @@ test('3D quality: lite tier upholstery gets no weave normal map (it rendered bla
   assert.ok(i > 0);
   assert.match(src.slice(i, i + 900), /hasCanvas && quality > \.5/);
 });
+
+// ---------------------------------------------------------------- round 2
+import { FACADE_VARIANTS } from '../dist/draw/scene3d.mjs';
+import { safeDesignHash } from '../dist/draw/interior-themes.mjs';
+import { softBoxGeometry } from '../dist/draw/interior-kit.mjs';
+import { buildFixture, createFixtureMaterials } from '../dist/draw/fixtures3d.mjs';
+
+test('3D quality: façade variants are deterministic, distinct, and never override a stated finish', () => {
+  assert.ok(FACADE_VARIANTS.length >= 6);
+  assert.equal(new Set(FACADE_VARIANTS.map(v => v.render)).size, FACADE_VARIANTS.length, 'distinct render colours');
+  for (const v of FACADE_VARIANTS) for (const k of ['render', 'accent', 'plinth', 'door', 'frame']) assert.match(v[k], /^#[0-9a-f]{6}$/i);
+  const doc = twoLevels(), v = FACADE_VARIANTS[safeDesignHash(doc) % FACADE_VARIANTS.length];
+  const a = buildBuildingScene(doc, THREE, { textures: false }), b = buildBuildingScene(doc, THREE, { textures: false });
+  assert.equal(a.lib.m.render.color.getHexString(), b.lib.m.render.color.getHexString(), 'same design, same façade');
+  assert.equal('#' + a.lib.m.render.color.getHexString(), new THREE.Color(v.render).getHexString().replace(/^/, '#'));
+  const stated = structuredClone(doc); stated.finish = { facade: { color: '#123456' } };
+  const c = buildBuildingScene(stated, THREE, { textures: false });
+  assert.equal(c.lib.m.render.color.getHexString(), '123456', 'a stated façade colour wins over the variant');
+  const off = buildBuildingScene(doc, THREE, { textures: false, facadeVariety: false });
+  assert.notEqual(off.lib.m.render.color.getHexString(), '123456');
+  for (const x of [a, b, c, off]) x.dispose();
+});
+
+test('3D quality: soft boxes use the cheap grid for small radii and keep the fine grid for cushions', () => {
+  const tris = g => g.index.count / 3;
+  assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .05)), 192);
+  assert.equal(tris(softBoxGeometry(THREE, 1, .3, .6, .1)), 432);
+  const g = softBoxGeometry(THREE, 1, .3, .6, .05); let bad = 0; for (const v of g.attributes.position.array) if (!Number.isFinite(v)) bad++; assert.equal(bad, 0);
+});
+
+test('3D quality: trees come in three crown shapes and stay light in lite', () => {
+  const mats = createFixtureMaterials(THREE);
+  const count = (seed, low) => { const g = buildFixture(THREE, 'tree', { w: 2.3, d: 2.3, h: 3.6, seed, low }, mats); let n = 0; g.traverse(o => { if (o.isMesh) n += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; }); return n; };
+  const full = [0, 1, 2].map(s => count(s, false));
+  assert.equal(new Set(full).size, 3, `three distinct crowns (${full})`);
+  for (const s of [0, 1, 2]) assert.ok(count(s, true) < 400, `lite tree ${s} stays small (${count(s, true)})`);
+});
+
+test('3D quality: sky shader carries the cloud layer and the dusk style tints it', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const src = await readFile(new URL('../dist/draw/viewer-draw.mjs', import.meta.url), 'utf8');
+  assert.match(src, /uniform vec3 cloudCol; uniform float cloudAmt/);
+  assert.match(src, /this\.style === 'dusk' \? '#ffcfae'/);
+});
+
+test('3D quality: roomView penalises views that end on a staircase', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const src = await readFile(new URL('../dist/draw/viewer-draw.mjs', import.meta.url), 'utf8');
+  assert.match(src, /stairPen/);
+});

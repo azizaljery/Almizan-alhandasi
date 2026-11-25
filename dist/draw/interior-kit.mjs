@@ -19,9 +19,10 @@ export function metreUV(THREE, geo) {
  */
 export function softBoxGeometry(THREE, w, h, d, r = .05) {
   r = Math.max(.004, Math.min(r, w / 2 - 1e-3, h / 2 - 1e-3, d / 2 - 1e-3));
-  const geo = new THREE.BoxGeometry(2, 2, 2, 6, 6, 6), pos = geo.attributes.position, nor = geo.attributes.normal;
-  const P = [-1, -.92, -.7, 0, .7, .92, 1], Z0 = .7, hx = w / 2, hy = h / 2, hz = d / 2, ix = hx - r, iy = hy - r, iz = hz - r;
-  const prof = u => { const k = Math.round((u + 1) * 3); return P[Math.max(0, Math.min(6, k))]; }; // uniform grid step is 1/3 -> index 0..6
+  // small radii (< 7 cm: arm bases, plinths, trims) use a 4-grid with one smooth-shaded segment per quarter-round (192 triangles instead of 432); the silhouette difference is below a centimetre
+  const coarse = r < .07, N = coarse ? 4 : 6, geo = new THREE.BoxGeometry(2, 2, 2, N, N, N), pos = geo.attributes.position, nor = geo.attributes.normal;
+  const P = coarse ? [-1, -.7, 0, .7, 1] : [-1, -.92, -.7, 0, .7, .92, 1], Z0 = .7, hx = w / 2, hy = h / 2, hz = d / 2, ix = hx - r, iy = hy - r, iz = hz - r;
+  const prof = u => { const k = Math.round((u + 1) * N / 2); return P[Math.max(0, Math.min(N, k))]; }; // uniform grid step is 1/3 -> index 0..6
   const ax = (u, inner) => { const a = Math.abs(u), sg = Math.sign(u) || 1; if (a <= Z0) return [u / Z0 * inner, 0]; const s = (a - Z0) / (1 - Z0); return [sg * inner, sg * Math.sin(s * Math.PI / 2)]; };
   for (let i = 0; i < pos.count; i++) {
     const [cx, dx] = ax(prof(pos.getX(i)), ix), [cy, dy] = ax(prof(pos.getY(i)), iy), [cz, dz] = ax(prof(pos.getZ(i)), iz), l = Math.hypot(dx, dy, dz) || 1;

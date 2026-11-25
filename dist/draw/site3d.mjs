@@ -174,7 +174,7 @@ export function buildSite(THREE, doc, lib, ctx) {
       if (!inside(p) || !clearOfGates(p)) continue;
       if (buildingPoly && dist(p, closest(buildingPoly, p)) < 2.2) continue;
       if (placed.some(o => dist(o.p, p) < 3.2)) continue;
-      place('tree', p, { w: 2.3, d: 2.3, h: 3.6, seed: k }); out.trees++;
+      place('tree', p, { w: 2.3 + (k % 3) * .25, d: 2.3, h: 3.6 + (k % 2) * .6, seed: k }); out.trees++;
     }
   }
   // parked car: free rectangle nearest to the vehicle gate (or the pedestrian gate)

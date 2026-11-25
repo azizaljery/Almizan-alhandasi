@@ -462,6 +462,17 @@ export function buildFixture(THREE, kind, dims = {}, materials = null) {
 
   function tree() {
     const R = rng(Math.round((dims.seed ?? 3) * 7919) + 11), trunkH = h * .42;
+    const style = Math.abs(Math.round((dims.seed ?? 3) * 7)) % 3; // 0 round crown (default), 1 tall narrow crown (cypress / ficus), 2 wide flat crown (ghaf / acacia)
+    if (style === 1) {
+      cyl('trunk', w * .04, w * .06, trunkH * .8, 0, 0, 0, 8);
+      for (let i = 0; i < 4; i++) { const t = i / 3, s = w * (.34 - t * .16); add(new THREE.IcosahedronGeometry(1, low ? 0 : 1), i % 2 ? 'leafA' : 'leafB', (R() - .5) * w * .06, trunkH * .7 + h * (.12 + t * .46), (R() - .5) * w * .06, 0, R() * 3, 0, s, s * 1.5, s); }
+      return;
+    }
+    if (style === 2) {
+      cyl('trunk', w * .05, w * .08, trunkH * 1.05, 0, 0, 0, 8);
+      for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + R(), r = i ? w * (.3 + R() * .14) : 0, s = w * (.3 + R() * .08); add(new THREE.IcosahedronGeometry(1, low ? 0 : 1), i % 2 ? 'leafA' : 'leafB', Math.cos(a) * r, trunkH * 1.05 + h * (.08 + R() * .08), Math.sin(a) * r, 0, R() * 3, 0, s * 1.15, s * .5, s * 1.15); }
+      return;
+    }
     cyl('trunk', w * .05, w * .08, trunkH, 0, 0, 0, 8);
     const blobs = 7;
     for (let i = 0; i < blobs; i++) {

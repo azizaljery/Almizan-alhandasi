@@ -42,6 +42,14 @@ export const DEFAULTS = Object.freeze({
   materials: null,          // supply a material library to share textures between scenes
 });
 
+export const FACADE_VARIANTS = Object.freeze([
+  { id: 'cream-stone', render: '#ece0c8', accent: '#e6d4ae', plinth: '#d9c7a4', door: '#2b2420', frame: '#2a2d30' },
+  { id: 'sand-warm', render: '#e3d2b0', accent: '#f0dcb8', plinth: '#d8c49c', door: '#5a3d28', frame: '#3a2f28', stone: 'entry' },
+  { id: 'greige-stone', render: '#d6d0c4', accent: '#e8e0d0', plinth: '#c8bca4', door: '#2f3a3a', frame: '#2a2d30', stone: 'all' },
+  { id: 'warm-grey', render: '#cfcac1', accent: '#d2cbbf', plinth: '#aaa296', door: '#3a4048', frame: '#26292c', stone: 'entry' },
+  { id: 'soft-white', render: '#f2eee4', accent: '#f4ecd8', plinth: '#d6c8a6', door: '#4a3424', frame: '#3b3530', stone: 'entry' },
+  { id: 'terracotta-sand', render: '#e1c8a6', accent: '#ebc9a0', plinth: '#cfae86', door: '#2b2420', frame: '#3a2f28', stone: 'all' },
+]);
 const smooth = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 const hexRgb = c => [parseInt(c.slice(1, 3), 16) / 255, parseInt(c.slice(3, 5), 16) / 255, parseInt(c.slice(5, 7), 16) / 255];
 const PAINT_MIX = .5;
@@ -50,13 +58,16 @@ const sign = v => v < 0 ? -1 : 1;
 
 export function buildBuildingScene(doc, THREE, options = {}) {
   const fin = doc.finish || {}, fac = fin.facade || {};
-  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...options };
+  // façade variety: when the project states no façade finish, a variant is chosen deterministically from the design fingerprint (sand / warm grey / greige renders, stone tones, entry-door and frame colours, partial stone on the ground floor)
+  const variant = !fac.color && !fac.accentColor && !fac.accent && options.facadeVariety !== false ? FACADE_VARIANTS[safeDesignHash(doc) % FACADE_VARIANTS.length] : null;
+  const opt = { ...DEFAULTS, ...(fac.accent ? { stoneAccent: fac.accent } : {}), ...(variant?.stone ? { stoneAccent: variant.stone } : {}), ...options };
   const ownLib = !opt.materials;
   const lib = opt.materials || createMaterialLibrary(THREE, { textures: opt.textures, maxAnisotropy: opt.maxAnisotropy, quality: opt.quality });
   const group = new THREE.Group(); group.name = 'mizan-building';
   if (ownLib) { // façade / material choices of the project
     const m = lib.m, paint = (mat, c) => { if (mat && c) mat.color.set(c); };
     paint(m.render, fac.color); paint(m.accent, fac.accentColor); paint(m.plinth, fac.plinthColor || fac.accentColor); paint(m.coping, fac.copingColor || fin.roof);
+    if (variant) { paint(m.render, variant.render); paint(m.accent, variant.accent); paint(m.plinth, variant.plinth); paint(m.doorEntry, variant.door); paint(m.aluminium, variant.frame); }
     paint(m.aluminium, fin.aluminium); paint(m.doorEntry, fin.entryDoor); paint(m.fence, fin.fence);
     if (fac.base === 'stone') { for (const k of ['map', 'bumpMap', 'normalMap', 'roughnessMap']) m.render[k] = m.accent[k]; m.render.bumpScale = m.accent.bumpScale; m.render.normalScale?.copy?.(m.accent.normalScale); m.render.roughness = m.accent.roughness; m.render.needsUpdate = true; if (!fac.color) m.render.color.copy(m.accent.color); }
     if (fac.base === 'paint') { m.render.map = null; m.render.bumpMap = null; m.render.needsUpdate = true; }
