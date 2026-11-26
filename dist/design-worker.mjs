@@ -23,7 +23,11 @@ export const OPS = {
 };
 /** النتيجة بيانات صِرفة كما تُحفظ في التخزين (JSON)، فتطابق ما تقرؤه الصفحات بعد الحفظ حرفيًا. */
 export const plain = v => (v === undefined ? null : JSON.parse(JSON.stringify(v)));
-export const errorData = e => ({ message: e?.message || String(e), code: e?.code || null, unclear: e?.unclear || null, name: e?.name || 'Error' });
+export const errorData = e => {
+  const reports = Array.isArray(e?.architectQuality) ? e.architectQuality : e?.architectQuality?.rejected?.map(r => r.report) || [];
+  const issues = reports.flatMap(r => r.checks.filter(c => c.state === 'fail')).map(c => ({ id: c.id, title: c.title, reason: c.reason }));
+  return { message: e?.message || String(e), code: e?.code || null, unclear: e?.unclear || null, name: e?.name || 'Error', architectIssues: issues.filter((c,i)=>issues.findIndex(x=>x.title===c.title)===i).slice(0,6) };
+};
 
 if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typeof document === 'undefined') {
   self.addEventListener('message', async ev => {

@@ -12,7 +12,7 @@ function boot() {
     worker.addEventListener('message', ev => {
       const w = waiting.get(ev.data?.id); if (!w) return; waiting.delete(ev.data.id);
       if (ev.data.ok) w.resolve(ev.data.result);
-      else { const e = Error(ev.data.error?.message || 'خطأ غير معروف'); if (ev.data.error?.code) e.code = ev.data.error.code; if (ev.data.error?.unclear) e.unclear = ev.data.error.unclear; w.reject(e); }
+      else { const e = Error(ev.data.error?.message || 'خطأ غير معروف'); if (ev.data.error?.code) e.code = ev.data.error.code; if (ev.data.error?.unclear) e.unclear = ev.data.error.unclear; if (ev.data.error?.architectIssues) e.architectIssues = ev.data.error.architectIssues; w.reject(e); }
     });
     // تعذّر تحميل العامل أو تعطّل: ما كان ينتظر يُنفَّذ في الخيط الرئيسي، وما بعده كذلك
     const down = () => { dead = true; try { worker?.terminate(); } catch { /* انتهى */ } worker = null; failAll('worker-error'); };
@@ -29,7 +29,8 @@ async function runLocal(op, args) {
     local ||= import('./design-worker.mjs');
     const { OPS, plain } = await local;
     await new Promise(r => setTimeout(r, 30)); // يُرسم مؤشر الانتظار قبل أن ينشغل الخيط
-    return plain(await OPS[op](args || {}));
+    try { return plain(await OPS[op](args || {})); }
+    catch(e) { const { errorData } = await local; Object.assign(e, errorData(e)); throw e; }
   } finally { if (counted) localRunning--; }
 }
 /** هل يوجد توليد جارٍ الآن؟ (لا يُبدأ طلب ثانٍ يعدّل الجلسة نفسها قبل انتهاء الأول) */

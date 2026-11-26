@@ -18,6 +18,8 @@ import { docToLegacy } from './draw/export-legacy.mjs';
 import { climb, fitFacts, programNeed } from './fit-ladder.mjs';
 import { normalizeGeo } from './geo-land.mjs';
 import { normalizeStreetWidths } from './municipal-rules.mjs';
+import { architectInterview, interviewFacts, recordArchitectAnswer } from './architect/interview.mjs';
+import { evaluateSaudiQuality, qualityAdmissible } from './architect/saudi-quality.mjs';
 
 // الحوش الخارجي والمصعد يفهمهما المحلي ويرسمهما؛ لا نعرض قول الذكاء إنه «غير ممثل/غير مدعوم» فيناقض ما رُسم
 const OUTDOOR_AI_NOISE = x => /مسبح|شلال|حديقة|عشب|احواض|أحواض|مصعد|اسانسير|أسانسير|ليفت/.test(x) && /غير (?:مدعوم|ممثل|منفذ|متاح|مطبق)|لا (?:يمكن|يدعم|يمثل|يُمثل)|خارج (?:برنامج|نطاق)/.test(x);
@@ -75,11 +77,12 @@ export const MAX_QUESTIONS_PER_ROUND = 3;
  * وكل سؤال بسببه الهندسي، ويمكن التوليد في أي لحظة بلا حقل إلزامي. المنطق في shara/brief-engine.mjs.
  */
 export class SharaSession {
-  constructor({ land = null } = {}) {
+  constructor({ land = null, interview = 'legacy' } = {}) {
     this.mode = null; this.phase = 'mode'; this.land = land;
     this.texts = []; this.ai = null; this.edits = []; this.disabledCustoms = []; this.skipped = []; this.countOverrides = {};
     this.brief = null; this.asked = 0; this.guidedStep = 0; this.log = []; this.rounds = 0;
     this.counts = {}; this.requirements = null; this.idea = '';
+    this.interview = interview === 'adaptive' ? 'adaptive' : 'legacy'; this.architectAnswers = {}; this.architectSkips = {};
   }
   start() {
     return this.#push([
@@ -91,7 +94,36 @@ export class SharaSession {
   /** يبني الموجز من كل ما قاله العميل حتى الآن ويحدّث ما يستهلكه المولّد. */
   #rebuild() {
     this.idea = this.texts.join('، ').slice(0, 4000);
-    const b = buildBrief(this.idea, { ai: this.ai, disabledCustoms: this.disabledCustoms, edits: this.edits, land: this.land, skipped: this.skipped });
+    let familyOverride = null;
+    if (this.interview === 'adaptive') {
+      const facts = interviewFacts(this.texts, this.land, this.architectAnswers); familyOverride = {};
+      if (facts.children.value === false) Object.assign(familyOverride, { boys: 0, girls: 0, kids: 0 });
+      if (facts.parents.value !== 'resident') familyOverride.elderly = [];
+      const sharing = this.architectAnswers.a_room_sharing;
+      if (sharing?.resolved && sharing.choice === 'individual' && sharing.contextKey === JSON.stringify([facts.children.value, facts.childCount.value])) familyOverride.sharing = 'individual';
+    }
+    const b = buildBrief(this.idea, { ai: this.ai, disabledCustoms: this.disabledCustoms, edits: this.edits, land: this.land, skipped: this.skipped, familyOverride });
+    if (this.interview === 'adaptive') {
+      const view = architectInterview({ texts: this.texts, land: this.land, answers: this.architectAnswers, skipped: this.architectSkips, brief: b });
+      this.architect = view;
+      // Existing domain questions remain available; equivalent adaptive questions are not repeated.
+      const replaced = new Set(['kids_ages', 'majlis_entry']);
+      if (view.facts.children.value === false) replaced.add('kids_gender');
+      b.questions = [...view.questions, ...b.questions.filter(q => !replaced.has(q.id))];
+      b.requirements.architect = view.contract;
+      if (view.facts.parents.value !== 'resident' && !b.program.some(r => r.id === 'elderly_room')) delete b.requirements.prefs.elderlyRoom;
+      // Explicit room-sharing choice updates the actual architectural program, not only the wording.
+      const sharing = this.architectAnswers.a_room_sharing;
+      if (sharing?.resolved && sharing.choice === 'individual' && sharing.contextKey === JSON.stringify([view.facts.children.value, view.facts.childCount.value])) {
+        for (const [id, n] of [['bedroom_boys', b.family.boys || b.family.kids], ['bedroom_girls', b.family.girls]]) {
+          const r = b.program.find(r => r.id === id && r.source === 'family');
+          if (r && n === r.count) { r.reason = 'طلبتَ غرفة مستقلة لكل ابن/ابنة'; r.source = 'said'; }
+        }
+      }
+      const targets = ['صالة متناسبة', ...(view.contract.separateEntries ? ['مدخلا استقبال مستقلان'] : []), ...(view.contract.diningService ? ['طعام قريب عبر الأبواب من المطبخ والمجلس'] : [])];
+      b.understood.push('أهداف التصميم المتفق عليها: ' + targets.join('، ') + '؛ تُفحص على المخطط الناتج.');
+      const area = b.program.reduce((s,r) => s + r.area * r.count, 0); b.totals.area = Math.round(area); b.totals.builtArea = Math.round(area * 1.3); b.totals.rooms = b.program.reduce((s,r) => s + r.count, 0);
+    }
     // الأعداد النهائية التي يكتبها العميل بنفسه (المسار القديم) تحكم
     const counts = { ...b.counts, ...this.countOverrides };
     // مصدر كل صف (قلتَه / افتراض عرفي / استنتاج): يحدد سلّم الاتساع به ما يُخفَّف أولًا إن لم تتسع الأرض
@@ -105,17 +137,17 @@ export class SharaSession {
     const addable = ADDABLE.filter(id => !rows.some(r => r.id === id)).map(id => ({ id, label: labelOf(id) }));
     return msg('البرنامج المعماري كما فهمته. عدّل أي صف في مكانه (±، حذف، إضافة)؛ ما لم تذكره افترضته وقلتُ لماذا.', { kind: 'program', id: 'program', rows, totals: b.totals, counts: this.counts, customs: b.customs, addable, floors: b.floors });
   }
-  #askMsg(q) { return msg(q.text, { kind: 'ask', id: q.id, reason: q.reason, options: q.options || [], multi: !!q.multi, free: q.free !== false, placeholder: q.placeholder || 'أو اكتب جوابك بحرية…' }); }
+  #askMsg(q) { return msg(q.text, { kind: 'ask', id: q.id, reason: q.reason, affects: q.affects || [], options: q.options || [], multi: !!q.multi, free: q.free !== false, placeholder: q.placeholder || 'أو اكتب جوابك بحرية…' }); }
   #generateMsg() {
     this.phase = 'ready';
     const left = this.brief.questions.filter(q => !this.skipped.includes(q.id)).length;
     return msg(left ? 'يمكنك توليد التصميم الآن بهذا البرنامج، أو الإجابة عن السؤال أعلاه لتحسينه. لا حقل إلزامي.' : 'البرنامج مكتمل من جهتي. اضغط «توليد التصميم» لأفتح لك تصميمًا أوليًا داخل المرسم تعدّل عليه بيدك.', { kind: 'generate', id: 'generate' });
   }
   /** دور كامل بعد كلام جديد: الجدول، ثم ما فُهم من العلاقات، ثم ما لن يُطبَّق، ثم سؤال واحد (إن بقي)، ثم التوليد. */
-  #round() {
+  #round({ incremental = false } = {}) {
     const b = this.#rebuild(); const out = [this.#programMsg()];
     {
-      if (b.understood.length) out.push(msg('فهمت من كلامك وسأطبّقه في التصميم:', { kind: 'list', id: 'understood', items: b.understood }));
+      if (b.understood.length && !incremental) out.push(msg('فهمت من كلامك وسأطبّقه في التصميم:', { kind: 'list', id: 'understood', items: b.understood }));
       const notes = [...b.notes, ...(this.aiNotes || [])];
       if (notes.length) out.push(msg(notes.join('\n'), { kind: 'note' }));
       if (b.unsupported.length) out.push(msg('ما لن أطبّقه في هذا الإصدار (بصدق):', { kind: 'list', id: 'unsupported', items: b.unsupported }));
@@ -128,7 +160,7 @@ export class SharaSession {
     return out;
   }
   #nextQuestion() {
-    if (this.asked >= MAX_QUESTIONS_PER_ROUND) return null;
+    if (this.interview !== 'adaptive' && this.asked >= MAX_QUESTIONS_PER_ROUND) return null;
     const q = this.brief.questions.find(q => !this.skipped.includes(q.id));
     if (q) this.asked++;
     return q || null;
@@ -148,12 +180,20 @@ export class SharaSession {
       if (!['free', 'guided'].includes(value)) throw Error('اختيار غير معروف.');
       this.mode = value;
       if (value === 'free') { this.phase = 'free'; return this.#push([msg('تحدّث معي بحرية عن بيتك وأسرتك وكيف تحب أن تعيش فيه؛ سأحوّل كلامك إلى برنامج معماري كامل ولن أسألك عمّا فهمته.', { kind: 'text', id: 'free' })]); }
+      if (this.interview === 'adaptive') { this.phase = 'program'; this.#rebuild(); return this.#push([msg(SHARA_GOAL), this.#askMsg(this.brief.questions[0])]); }
       this.phase = 'guided'; this.guidedStep = 0;
       return this.#push([msg(SHARA_GOAL), this.#askMsg(GUIDED_STEPS[0])]);
     }
     if (id === 'free' || id === 'more') {
       this.#addText(value); this.asked = 0; this.phase = 'program';
       return this.#push(this.#round());
+    }
+    if (this.interview === 'adaptive' && id.startsWith('a_')) {
+      const q = this.brief?.questions.find(q => q.id === id); if (!q) throw Error('السؤال تغيّر بعد تحديث بياناتك؛ استخدم السؤال الحالي.');
+      const a = recordArchitectAnswer(q, value, this.texts.length + 1);
+      const text = answerToText(q, value); if (text.trim()) this.texts.push(text.trim());
+      a.at = this.texts.length; this.architectAnswers[id] = a;
+      return this.#push(this.#round({ incremental: true }));
     }
     const g = GUIDED_STEPS.findIndex(s => s.id === id);
     if (g >= 0) {
@@ -166,6 +206,10 @@ export class SharaSession {
     }
     if (id === 'skip') {
       const qid = String(value || ''); if (!qid) throw Error('لا سؤال لتخطّيه.');
+      if (this.interview === 'adaptive' && qid.startsWith('a_')) {
+        const q = this.brief?.questions.find(q => q.id === qid); if (!q) throw Error('السؤال ليس متاحًا الآن.');
+        this.architectSkips[qid] = q.contextKey; return this.#push(this.#round());
+      }
       const gi = GUIDED_STEPS.findIndex(s => s.id === qid);
       if (gi >= 0) return this.answer(qid, { picks: [], text: '' });
       if (!this.skipped.includes(qid)) this.skipped.push(qid);
@@ -227,13 +271,15 @@ export class SharaSession {
   setLand(land) { this.land = land; if (this.brief) this.#rebuild(); }
   /** حالة الحوار كما تُحفظ في التخزين (بيانات فقط): منها يُستعاد الحوار عند الرجوع إلى شرعاء من أي صفحة. */
   toJSON() {
-    return { v: 1, mode: this.mode, phase: this.phase, land: this.land, texts: [...this.texts], ai: this.ai, edits: [...this.edits], disabledCustoms: [...this.disabledCustoms],
+    return { v: 1, interview: this.interview, architectAnswers: structuredClone(this.architectAnswers), architectSkips: { ...this.architectSkips }, mode: this.mode, phase: this.phase, land: this.land, texts: [...this.texts], ai: this.ai, edits: [...this.edits], disabledCustoms: [...this.disabledCustoms],
       skipped: [...this.skipped], countOverrides: { ...this.countOverrides }, asked: this.asked, guidedStep: this.guidedStep, rounds: this.rounds, aiNotes: [...(this.aiNotes || [])] };
   }
   /** يستعيد جلسة محفوظة بـ toJSON؛ البرنامج يُعاد بناؤه من الكلام نفسه (المصدر واحد فلا يختلف عمّا عُرض). يعيد null إن فسدت البيانات. */
   static restore(data, { land = null } = {}) {
     if (!data || data.v !== 1 || !Array.isArray(data.texts)) return null;
-    const s = new SharaSession({ land: land || data.land || null });
+    const s = new SharaSession({ land: land || data.land || null, interview: data.interview });
+    s.architectAnswers = data.architectAnswers && typeof data.architectAnswers === 'object' ? structuredClone(data.architectAnswers) : {};
+    s.architectSkips = data.architectSkips && typeof data.architectSkips === 'object' ? { ...data.architectSkips } : {};
     s.mode = ['free', 'guided'].includes(data.mode) ? data.mode : null;
     s.phase = ['mode', 'free', 'guided', 'program', 'ready'].includes(data.phase) ? data.phase : 'mode';
     s.texts = data.texts.filter(t => typeof t === 'string').map(t => t.slice(0, 2000)); s.ai = data.ai && typeof data.ai === 'object' ? data.ai : null;
@@ -247,6 +293,7 @@ export class SharaSession {
   }
   /** الرسائل التي يكمل منها العميل بعد الاستعادة: أين توقف (اختيار الطريقة، الكتابة الحرة، السؤال الموجّه) أو البرنامج وزر التوليد. */
   resume() {
+    if (this.interview === 'adaptive' && this.mode) return this.#push(this.#round());
     if (this.brief) return this.#push([this.#programMsg(), this.#generateMsg()]);
     if (this.phase === 'free') return this.#push([msg('أكمل من حيث توقفت: حدّثني بحرية عن بيتك وأسرتك.', { kind: 'text', id: 'free' })]);
     if (this.phase === 'guided') return this.#push([this.#askMsg(GUIDED_STEPS[this.guidedStep])]);
@@ -292,6 +339,16 @@ const PASS_CODES = ['VILLA_EXHAUSTED', 'VILLA_NO_BLEND'];
  */
 export async function generateInitialDesign(args) {
   const { strict = false, fitHint = null, ...a } = args;
+  if (a.requirements?.architect?.enabled) {
+    // A personally agreed quality contract is never relaxed by the automatic fit ladder.
+    const out = await generateExact(a), contract = a.requirements.architect;
+    const reviewed = (out.alternatives?.length ? out.alternatives : [{ doc: out.doc }]).map(d => ({ ...d, architectQuality: evaluateSaudiQuality(d.doc, contract) }));
+    const valid = reviewed.filter(d => qualityAdmissible(d.architectQuality));
+    if (!valid.length && contract.enforce !== false) { const e = Error('لم يحقق أي توزيع أهداف الجودة المتفق عليها. عدّل البرنامج أو اطلب توزيعًا يدويًا؛ لم أغيّر الأعداد أو الشروط تلقائيًا.'); e.code = 'ARCHITECT_QUALITY_NOT_MET'; e.architectQuality = reviewed.map(d => d.architectQuality); throw e; }
+    const accepted = valid.length ? valid : reviewed;
+    return { ...out, doc: accepted[0].doc, alternatives: accepted, alternativesCount: accepted.length, architectQuality: accepted[0].architectQuality,
+      notes: [...(out.notes || []), ...(accepted[0].architectQuality.unknown.length ? ['بقيت بنود جودة غير متحققة؛ تُعرض في تقرير المراجعة ولا تُعدّ معتمدة.'] : [])] };
+  }
   if (strict || a.engine === 'legacy') return generateExact(a);
   normalizeLand(a.land); // أخطاء الإدخال تُرمى كما هي
   let first = null;

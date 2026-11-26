@@ -1,0 +1,2229 @@
+{
+  "baseline": "4eb43b92e70835c65c76464185cbd53c74995852",
+  "counts": {
+    "bedrooms": 3,
+    "majlis": 2,
+    "halls": 1,
+    "kitchens": 1,
+    "baths": 4,
+    "dining": 1
+  },
+  "cases": [
+    {
+      "id": "standard-south",
+      "width": 20,
+      "length": 30,
+      "streets": [
+        "s"
+      ],
+      "entries": [
+        "s"
+      ],
+      "floors": 1
+    },
+    {
+      "id": "wide-south",
+      "width": 25,
+      "length": 30,
+      "streets": [
+        "s"
+      ],
+      "entries": [
+        "s"
+      ],
+      "floors": 1
+    },
+    {
+      "id": "east-front",
+      "width": 30,
+      "length": 20,
+      "streets": [
+        "e"
+      ],
+      "entries": [
+        "e"
+      ],
+      "floors": 1
+    },
+    {
+      "id": "corner",
+      "width": 24,
+      "length": 30,
+      "streets": [
+        "s",
+        "e"
+      ],
+      "entries": [
+        "s",
+        "e"
+      ],
+      "floors": 1
+    },
+    {
+      "id": "two-floors",
+      "width": 20,
+      "length": 30,
+      "streets": [
+        "s"
+      ],
+      "entries": [
+        "s"
+      ],
+      "floors": 2
+    },
+    {
+      "id": "narrow",
+      "width": 12,
+      "length": 30,
+      "streets": [
+        "s"
+      ],
+      "entries": [
+        "s"
+      ],
+      "floors": 1
+    }
+  ],
+  "scope": "Six synthetic plots, fixed three-bedroom/two-majlis program; not a general success rate or a photorealism benchmark.",
+  "results": [
+    {
+      "id": "standard-south",
+      "before": {
+        "schema": "architect-quality/1",
+        "status": "needs-revision",
+        "eligible": false,
+        "checks": [
+          {
+            "id": "hall:r2",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.68 × 5.99 م، 27.99 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 46.86 م².",
+            "evidence": {
+              "width": 4.68,
+              "length": 5.99,
+              "aspect": 1.28,
+              "area": 27.99,
+              "cap": 46.86,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r2"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r5",
+                  "via": "o4",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r4",
+                "route": {
+                  "metres": 4.42,
+                  "roomIds": [
+                    "r5",
+                    "r4"
+                  ],
+                  "openingIds": [
+                    "o4",
+                    "o5"
+                  ],
+                  "points": [
+                    {
+                      "x": 7.75,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 7.0120000000000005,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 6.888,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 4.3325,
+                      "y": 5.9075
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r7",
+                "route": {
+                  "metres": 13.53,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r8",
+                    "r7"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 10.950000000000001,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 10.950000000000001,
+                      "y": 6.388
+                    },
+                    {
+                      "x": 10.950000000000001,
+                      "y": 6.5120000000000005
+                    },
+                    {
+                      "x": 8.612,
+                      "y": 11.8
+                    },
+                    {
+                      "x": 8.488000000000001,
+                      "y": 11.8
+                    },
+                    {
+                      "x": 7.0120000000000005,
+                      "y": 12.075000000000001
+                    },
+                    {
+                      "x": 6.888,
+                      "y": 12.075000000000001
+                    },
+                    {
+                      "x": 4.3325,
+                      "y": 11.025
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r7"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.07 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r14",
+              "to": "r13",
+              "route": {
+                "metres": 3.07,
+                "roomIds": [
+                  "r14",
+                  "r13"
+                ],
+                "openingIds": [
+                  "o19"
+                ],
+                "points": [
+                  {
+                    "x": 15.8175,
+                    "y": 7.9
+                  },
+                  {
+                    "x": 15.850000000000001,
+                    "y": 6.5120000000000005
+                  },
+                  {
+                    "x": 15.850000000000001,
+                    "y": 6.388
+                  },
+                  {
+                    "x": 15.8175,
+                    "y": 4.8325
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r14",
+              "r13"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "fail",
+            "required": true,
+            "reason": "لا يوجد مسار عبر الأبواب يحقق فصل الضيافة والخدمة؛ التلاصق بجدار لا يثبت الوصول.",
+            "evidence": {
+              "maxMetres": 10
+            },
+            "roomIds": [
+              "r4",
+              "r13"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [
+          "men-dining"
+        ],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "after": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.77 × 7.48 م، 35.64 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 55.54 م².",
+            "evidence": {
+              "width": 4.77,
+              "length": 7.48,
+              "aspect": 1.57,
+              "area": 35.64,
+              "cap": 55.54,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r6",
+                  "via": "o6",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 2.73,
+                  "roomIds": [
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o6"
+                  ],
+                  "points": [
+                    {
+                      "x": 16.075000000000003,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 16.0425,
+                      "y": 6.0075
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r2",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r12",
+                "route": {
+                  "metres": 6.33,
+                  "roomIds": [
+                    "r2",
+                    "r12"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o12"
+                  ],
+                  "points": [
+                    {
+                      "x": 10.000000000000002,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 6.2620000000000005,
+                      "y": 4.55
+                    },
+                    {
+                      "x": 6.138,
+                      "y": 4.55
+                    },
+                    {
+                      "x": 3.9575,
+                      "y": 5.1325
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r12"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.08 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r10",
+              "to": "r9",
+              "route": {
+                "metres": 3.08,
+                "roomIds": [
+                  "r10",
+                  "r9"
+                ],
+                "openingIds": [
+                  "o22"
+                ],
+                "points": [
+                  {
+                    "x": 16.0425,
+                    "y": 15.125
+                  },
+                  {
+                    "x": 16.075000000000003,
+                    "y": 13.761999999999999
+                  },
+                  {
+                    "x": 16.075000000000003,
+                    "y": 13.638
+                  },
+                  {
+                    "x": 16.0425,
+                    "y": 12.05
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r10",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 6.52 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r9",
+              "route": {
+                "metres": 6.52,
+                "roomIds": [
+                  "r6",
+                  "r8",
+                  "r9"
+                ],
+                "openingIds": [
+                  "o7",
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 16.0425,
+                    "y": 6.0075
+                  },
+                  {
+                    "x": 15.025000000000002,
+                    "y": 8.738000000000001
+                  },
+                  {
+                    "x": 15.025000000000002,
+                    "y": 8.862
+                  },
+                  {
+                    "x": 15.025000000000002,
+                    "y": 10.338000000000001
+                  },
+                  {
+                    "x": 15.025000000000002,
+                    "y": 10.462
+                  },
+                  {
+                    "x": 16.0425,
+                    "y": 12.05
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "checked": 4,
+      "returned": 1,
+      "changes": 0,
+      "ms": 3457
+    },
+    {
+      "id": "wide-south",
+      "before": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.36 × 6.43 م، 28.07 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 56.33 م².",
+            "evidence": {
+              "width": 4.36,
+              "length": 6.43,
+              "aspect": 1.47,
+              "area": 28.07,
+              "cap": 56.33,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r7",
+                  "via": "o7",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 4.83,
+                  "roomIds": [
+                    "r7",
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 13.8,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 13.062,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 12.938,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 10.3,
+                      "y": 6.5075
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r9",
+                "route": {
+                  "metres": 13.51,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r10",
+                    "r9"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o10",
+                    "o11"
+                  ],
+                  "points": [
+                    {
+                      "x": 15.875,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 15.875,
+                      "y": 9.738000000000001
+                    },
+                    {
+                      "x": 15.875,
+                      "y": 9.862
+                    },
+                    {
+                      "x": 18.049999999999997,
+                      "y": 9.862
+                    },
+                    {
+                      "x": 18.049999999999997,
+                      "y": 9.738000000000001
+                    },
+                    {
+                      "x": 19.2,
+                      "y": 8.261999999999999
+                    },
+                    {
+                      "x": 19.2,
+                      "y": 8.138
+                    },
+                    {
+                      "x": 20.2175,
+                      "y": 5.7075
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 2.94 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r4",
+              "to": "r5",
+              "route": {
+                "metres": 2.94,
+                "roomIds": [
+                  "r4",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 3.0575,
+                    "y": 6.5075
+                  },
+                  {
+                    "x": 4.338,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 4.462000000000001,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 6,
+                    "y": 6.5075
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r5"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 4.3 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r5",
+              "route": {
+                "metres": 4.3,
+                "roomIds": [
+                  "r6",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o20"
+                ],
+                "points": [
+                  {
+                    "x": 10.3,
+                    "y": 6.5075
+                  },
+                  {
+                    "x": 7.662,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 7.537999999999999,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 6,
+                    "y": 6.5075
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r5"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "after": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.36 × 6.43 م، 28.07 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 56.33 م².",
+            "evidence": {
+              "width": 4.36,
+              "length": 6.43,
+              "aspect": 1.47,
+              "area": 28.07,
+              "cap": 56.33,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r7",
+                  "via": "o7",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 4.83,
+                  "roomIds": [
+                    "r7",
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 13.8,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 13.062,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 12.938,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 10.3,
+                      "y": 6.5075
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r9",
+                "route": {
+                  "metres": 13.51,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r10",
+                    "r9"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o10",
+                    "o11"
+                  ],
+                  "points": [
+                    {
+                      "x": 15.875,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 15.875,
+                      "y": 9.738000000000001
+                    },
+                    {
+                      "x": 15.875,
+                      "y": 9.862
+                    },
+                    {
+                      "x": 18.049999999999997,
+                      "y": 9.862
+                    },
+                    {
+                      "x": 18.049999999999997,
+                      "y": 9.738000000000001
+                    },
+                    {
+                      "x": 19.2,
+                      "y": 8.261999999999999
+                    },
+                    {
+                      "x": 19.2,
+                      "y": 8.138
+                    },
+                    {
+                      "x": 20.2175,
+                      "y": 5.7075
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 2.94 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r4",
+              "to": "r5",
+              "route": {
+                "metres": 2.94,
+                "roomIds": [
+                  "r4",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 3.0575,
+                    "y": 6.5075
+                  },
+                  {
+                    "x": 4.338,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 4.462000000000001,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 6,
+                    "y": 6.5075
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r5"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 4.3 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r5",
+              "route": {
+                "metres": 4.3,
+                "roomIds": [
+                  "r6",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o20"
+                ],
+                "points": [
+                  {
+                    "x": 10.3,
+                    "y": 6.5075
+                  },
+                  {
+                    "x": 7.662,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 7.537999999999999,
+                    "y": 6.475
+                  },
+                  {
+                    "x": 6,
+                    "y": 6.5075
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r5"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "checked": 5,
+      "returned": 1,
+      "changes": 0,
+      "ms": 2815
+    },
+    {
+      "id": "east-front",
+      "before": {
+        "schema": "architect-quality/1",
+        "status": "needs-revision",
+        "eligible": false,
+        "checks": [
+          {
+            "id": "hall:r2",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.68 × 5.99 م، 27.99 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 46.86 م².",
+            "evidence": {
+              "width": 4.68,
+              "length": 5.99,
+              "aspect": 1.28,
+              "area": 27.99,
+              "cap": 46.86,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r2"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r5",
+                  "via": "o4",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r4",
+                "route": {
+                  "metres": 4.42,
+                  "roomIds": [
+                    "r5",
+                    "r4"
+                  ],
+                  "openingIds": [
+                    "o4",
+                    "o5"
+                  ],
+                  "points": [
+                    {
+                      "x": 26.723000000000003,
+                      "y": 7.75
+                    },
+                    {
+                      "x": 25.650000000000002,
+                      "y": 7.0120000000000005
+                    },
+                    {
+                      "x": 25.650000000000002,
+                      "y": 6.888
+                    },
+                    {
+                      "x": 24.0925,
+                      "y": 4.3325
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r7",
+                "route": {
+                  "metres": 13.53,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r8",
+                    "r7"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 26.723000000000003,
+                      "y": 10.950000000000001
+                    },
+                    {
+                      "x": 23.612000000000002,
+                      "y": 10.950000000000001
+                    },
+                    {
+                      "x": 23.488,
+                      "y": 10.950000000000001
+                    },
+                    {
+                      "x": 18.200000000000003,
+                      "y": 8.612
+                    },
+                    {
+                      "x": 18.200000000000003,
+                      "y": 8.488000000000001
+                    },
+                    {
+                      "x": 17.925,
+                      "y": 7.0120000000000005
+                    },
+                    {
+                      "x": 17.925,
+                      "y": 6.888
+                    },
+                    {
+                      "x": 18.975,
+                      "y": 4.3325
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r7"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.07 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r14",
+              "to": "r13",
+              "route": {
+                "metres": 3.07,
+                "roomIds": [
+                  "r14",
+                  "r13"
+                ],
+                "openingIds": [
+                  "o19"
+                ],
+                "points": [
+                  {
+                    "x": 22.1,
+                    "y": 15.8175
+                  },
+                  {
+                    "x": 23.488,
+                    "y": 15.850000000000001
+                  },
+                  {
+                    "x": 23.612000000000002,
+                    "y": 15.850000000000001
+                  },
+                  {
+                    "x": 25.1675,
+                    "y": 15.8175
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r14",
+              "r13"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "fail",
+            "required": true,
+            "reason": "لا يوجد مسار عبر الأبواب يحقق فصل الضيافة والخدمة؛ التلاصق بجدار لا يثبت الوصول.",
+            "evidence": {
+              "maxMetres": 10
+            },
+            "roomIds": [
+              "r4",
+              "r13"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [
+          "men-dining"
+        ],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "after": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.76 × 7.48 م، 35.64 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 55.54 م².",
+            "evidence": {
+              "width": 4.76,
+              "length": 7.48,
+              "aspect": 1.57,
+              "area": 35.64,
+              "cap": 55.54,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r6",
+                  "via": "o6",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 2.73,
+                  "roomIds": [
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o6"
+                  ],
+                  "points": [
+                    {
+                      "x": 26.723000000000003,
+                      "y": 16.075000000000003
+                    },
+                    {
+                      "x": 23.9925,
+                      "y": 16.0425
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r2",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r12",
+                "route": {
+                  "metres": 6.33,
+                  "roomIds": [
+                    "r2",
+                    "r12"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o12"
+                  ],
+                  "points": [
+                    {
+                      "x": 26.723000000000003,
+                      "y": 10.000000000000002
+                    },
+                    {
+                      "x": 25.450000000000003,
+                      "y": 6.2620000000000005
+                    },
+                    {
+                      "x": 25.450000000000003,
+                      "y": 6.138
+                    },
+                    {
+                      "x": 24.8675,
+                      "y": 3.9575
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r12"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.08 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r10",
+              "to": "r9",
+              "route": {
+                "metres": 3.08,
+                "roomIds": [
+                  "r10",
+                  "r9"
+                ],
+                "openingIds": [
+                  "o22"
+                ],
+                "points": [
+                  {
+                    "x": 14.875,
+                    "y": 16.0425
+                  },
+                  {
+                    "x": 16.238,
+                    "y": 16.075000000000003
+                  },
+                  {
+                    "x": 16.362000000000002,
+                    "y": 16.075000000000003
+                  },
+                  {
+                    "x": 17.95,
+                    "y": 16.0425
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r10",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 6.52 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r9",
+              "route": {
+                "metres": 6.52,
+                "roomIds": [
+                  "r6",
+                  "r8",
+                  "r9"
+                ],
+                "openingIds": [
+                  "o7",
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 23.9925,
+                    "y": 16.0425
+                  },
+                  {
+                    "x": 21.262,
+                    "y": 15.025000000000002
+                  },
+                  {
+                    "x": 21.137999999999998,
+                    "y": 15.025000000000002
+                  },
+                  {
+                    "x": 19.662000000000003,
+                    "y": 15.025000000000002
+                  },
+                  {
+                    "x": 19.538,
+                    "y": 15.025000000000002
+                  },
+                  {
+                    "x": 17.95,
+                    "y": 16.0425
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "checked": 6,
+      "returned": 2,
+      "changes": 0,
+      "ms": 2835
+    },
+    {
+      "id": "corner",
+      "before": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.56 × 5.68 م، 25.93 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 46.53 م².",
+            "evidence": {
+              "width": 4.56,
+              "length": 5.68,
+              "aspect": 1.24,
+              "area": 25.93,
+              "cap": 46.53,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r7",
+                  "via": "o7",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 4.19,
+                  "roomIds": [
+                    "r7",
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 10.55,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 11.288,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 11.411999999999999,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 13.8,
+                      "y": 5.7325
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r9",
+                "route": {
+                  "metres": 11.05,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r10",
+                    "r9"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o10",
+                    "o11"
+                  ],
+                  "points": [
+                    {
+                      "x": 8.55,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 8.55,
+                      "y": 8.188
+                    },
+                    {
+                      "x": 8.55,
+                      "y": 8.312
+                    },
+                    {
+                      "x": 6.450000000000001,
+                      "y": 8.312
+                    },
+                    {
+                      "x": 6.450000000000001,
+                      "y": 8.188
+                    },
+                    {
+                      "x": 5.55,
+                      "y": 6.712000000000001
+                    },
+                    {
+                      "x": 5.55,
+                      "y": 6.588
+                    },
+                    {
+                      "x": 4.5325,
+                      "y": 4.9325
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 2.77 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r4",
+              "to": "r5",
+              "route": {
+                "metres": 2.77,
+                "roomIds": [
+                  "r4",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 20.5175,
+                    "y": 5.7325
+                  },
+                  {
+                    "x": 19.312,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 19.188,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 17.75,
+                    "y": 5.7325
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r5"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.95 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r5",
+              "route": {
+                "metres": 3.95,
+                "roomIds": [
+                  "r6",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o20"
+                ],
+                "points": [
+                  {
+                    "x": 13.8,
+                    "y": 5.7325
+                  },
+                  {
+                    "x": 16.188,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 16.312,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 17.75,
+                    "y": 5.7325
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r5"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "after": {
+        "schema": "architect-quality/1",
+        "status": "pass",
+        "eligible": true,
+        "checks": [
+          {
+            "id": "hall:r3",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "pass",
+            "required": true,
+            "reason": "الصالة: 4.56 × 5.68 م، 25.93 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 46.53 م².",
+            "evidence": {
+              "width": 4.56,
+              "length": 5.68,
+              "aspect": 1.24,
+              "area": 25.93,
+              "cap": 46.53,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r7",
+                  "via": "o7",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r6",
+                "route": {
+                  "metres": 4.19,
+                  "roomIds": [
+                    "r7",
+                    "r6"
+                  ],
+                  "openingIds": [
+                    "o7",
+                    "o8"
+                  ],
+                  "points": [
+                    {
+                      "x": 10.55,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 11.288,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 11.411999999999999,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 13.8,
+                      "y": 5.7325
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r9",
+                "route": {
+                  "metres": 11.05,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r10",
+                    "r9"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o10",
+                    "o11"
+                  ],
+                  "points": [
+                    {
+                      "x": 8.55,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 8.55,
+                      "y": 8.188
+                    },
+                    {
+                      "x": 8.55,
+                      "y": 8.312
+                    },
+                    {
+                      "x": 6.450000000000001,
+                      "y": 8.312
+                    },
+                    {
+                      "x": 6.450000000000001,
+                      "y": 8.188
+                    },
+                    {
+                      "x": 5.55,
+                      "y": 6.712000000000001
+                    },
+                    {
+                      "x": 5.55,
+                      "y": 6.588
+                    },
+                    {
+                      "x": 4.5325,
+                      "y": 4.9325
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r9"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 2.77 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r4",
+              "to": "r5",
+              "route": {
+                "metres": 2.77,
+                "roomIds": [
+                  "r4",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o21"
+                ],
+                "points": [
+                  {
+                    "x": 20.5175,
+                    "y": 5.7325
+                  },
+                  {
+                    "x": 19.312,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 19.188,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 17.75,
+                    "y": 5.7325
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r5"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 3.95 م (المستهدف ≤ 10 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r6",
+              "to": "r5",
+              "route": {
+                "metres": 3.95,
+                "roomIds": [
+                  "r6",
+                  "r5"
+                ],
+                "openingIds": [
+                  "o20"
+                ],
+                "points": [
+                  {
+                    "x": 13.8,
+                    "y": 5.7325
+                  },
+                  {
+                    "x": 16.188,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 16.312,
+                    "y": 5.699999999999999
+                  },
+                  {
+                    "x": 17.75,
+                    "y": 5.7325
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r6",
+              "r5"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "checked": 5,
+      "returned": 1,
+      "changes": 0,
+      "ms": 2826
+    },
+    {
+      "id": "two-floors",
+      "before": {
+        "schema": "architect-quality/1",
+        "status": "needs-revision",
+        "eligible": false,
+        "checks": [
+          {
+            "id": "hall:r2",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "fail",
+            "required": true,
+            "reason": "الصالة: 5.48 × 8.57 م، 46.94 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 36 م².",
+            "evidence": {
+              "width": 5.48,
+              "length": 8.57,
+              "aspect": 1.56,
+              "area": 46.94,
+              "cap": 36,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r2"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "hall:r11",
+            "title": "صالة متناسبة قابلة للتأثيث",
+            "state": "fail",
+            "required": true,
+            "reason": "الصالة العلوية: 5.42 × 7.52 م، 40.69 م²؛ المستهدف عرض ≥ 4 م، نسبة ≤ 1.8 ومساحة ≤ 36 م².",
+            "evidence": {
+              "width": 5.42,
+              "length": 7.52,
+              "aspect": 1.39,
+              "area": 40.69,
+              "cap": 36,
+              "shape": "rectangle",
+              "limits": {
+                "hallAspect": 1.8,
+                "hallWidth": 4,
+                "hallArea": 36,
+                "hallShare": 0.22,
+                "servingMetres": 8,
+                "guestDiningMetres": 10,
+                "parentBathMetres": 5
+              }
+            },
+            "roomIds": [
+              "r11"
+            ],
+            "levelId": "L2"
+          },
+          {
+            "id": "independent-entries",
+            "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+            "state": "pass",
+            "required": true,
+            "reason": "بابان خارجيان مختلفان ومساران داخليان لا يتشاركان غرفة؛ لا يعبر الرجال الصالة أو مجلس النساء.",
+            "evidence": {
+              "male": {
+                "entry": {
+                  "room": "r6",
+                  "via": "o6",
+                  "flagged": true,
+                  "kind": "door"
+                },
+                "target": "r5",
+                "route": {
+                  "metres": 3.97,
+                  "roomIds": [
+                    "r6",
+                    "r5"
+                  ],
+                  "openingIds": [
+                    "o6",
+                    "o7"
+                  ],
+                  "points": [
+                    {
+                      "x": 12.85,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 13.588000000000001,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 13.712,
+                      "y": 4.35
+                    },
+                    {
+                      "x": 15.3925,
+                      "y": 6.2575
+                    }
+                  ]
+                }
+              },
+              "female": {
+                "entry": {
+                  "room": "r1",
+                  "via": "o1",
+                  "flagged": true,
+                  "kind": "door2"
+                },
+                "target": "r8",
+                "route": {
+                  "metres": 14.89,
+                  "roomIds": [
+                    "r1",
+                    "r2",
+                    "r9",
+                    "r8"
+                  ],
+                  "openingIds": [
+                    "o1",
+                    "o2",
+                    "o9",
+                    "o10"
+                  ],
+                  "points": [
+                    {
+                      "x": 9.25,
+                      "y": 3.277
+                    },
+                    {
+                      "x": 9.25,
+                      "y": 5.888
+                    },
+                    {
+                      "x": 9.25,
+                      "y": 6.0120000000000005
+                    },
+                    {
+                      "x": 11.988000000000001,
+                      "y": 13.8
+                    },
+                    {
+                      "x": 12.112,
+                      "y": 13.8
+                    },
+                    {
+                      "x": 13.588000000000001,
+                      "y": 13.05
+                    },
+                    {
+                      "x": 13.712,
+                      "y": 13.05
+                    },
+                    {
+                      "x": 15.3925,
+                      "y": 11.9675
+                    }
+                  ]
+                }
+              }
+            },
+            "roomIds": [
+              "r5",
+              "r8"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "kitchen-dining",
+            "title": "خدمة المطبخ إلى الطعام",
+            "state": "pass",
+            "required": true,
+            "reason": "المسار بين نقطتي الغرفتين عبر الأبواب 5.71 م (المستهدف ≤ 8 م)، دون عبور الصالة أو غرف النوم.",
+            "evidence": {
+              "from": "r4",
+              "to": "r3",
+              "route": {
+                "metres": 5.71,
+                "roomIds": [
+                  "r4",
+                  "r3"
+                ],
+                "openingIds": [
+                  "o12"
+                ],
+                "points": [
+                  {
+                    "x": 4.6325,
+                    "y": 11.9925
+                  },
+                  {
+                    "x": 4.6,
+                    "y": 9.411999999999999
+                  },
+                  {
+                    "x": 4.6,
+                    "y": 9.288
+                  },
+                  {
+                    "x": 4.6325,
+                    "y": 6.2825
+                  }
+                ]
+              }
+            },
+            "roomIds": [
+              "r4",
+              "r3"
+            ],
+            "levelId": "L1"
+          },
+          {
+            "id": "men-dining",
+            "title": "وصول الرجال إلى الطعام",
+            "state": "fail",
+            "required": true,
+            "reason": "لا يوجد مسار عبر الأبواب يحقق فصل الضيافة والخدمة؛ التلاصق بجدار لا يثبت الوصول.",
+            "evidence": {
+              "maxMetres": 10
+            },
+            "roomIds": [
+              "r5",
+              "r3"
+            ],
+            "levelId": "L1"
+          }
+        ],
+        "failed": [
+          "hall:r2",
+          "hall:r11",
+          "men-dining"
+        ],
+        "unknown": [],
+        "limitations": [
+          "المسارات بين نقاط داخل الغرف عبر الأبواب، بلا محاكاة أثاث أو جسم إنسان.",
+          "الحدود أهداف تصميمية وليست شهادة اشتراطات أو اعتمادًا إنشائيًا."
+        ]
+      },
+      "after": {
+        "status": "refused",
+        "code": "ARCHITECT_QUALITY_NOT_MET",
+        "message": "لم أجد ضمن المرشحين توزيعًا يحقق أهداف الصالة والمداخل ومسارات الطعام معًا. لن أخفف هذه الأهداف أو أحذف غرفًا تلقائيًا؛ يلزم تعديل البرنامج أو توزيع يدوي."
+      },
+      "checked": 3,
+      "rejected": [
+        {
+          "mode": "center",
+          "failed": [
+            "hall:r2",
+            "hall:r11",
+            "men-dining"
+          ]
+        },
+        {
+          "mode": "court",
+          "failed": [
+            "hall:r3",
+            "hall:r19",
+            "hall:r16"
+          ]
+        },
+        {
+          "mode": "center",
+          "failed": [
+            "hall:r2",
+            "hall:r5",
+            "hall:r12",
+            "men-dining"
+          ]
+        }
+      ],
+      "ms": 1777
+    },
+    {
+      "id": "narrow",
+      "before": {
+        "error": "VILLA_NO_FIT",
+        "message": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (8.7 × 25.2 م = 219 م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 184 م²."
+      },
+      "after": {
+        "status": "refused",
+        "code": "VILLA_NO_FIT",
+        "message": "لم أجد توزيعًا مهنيًا لهذا البرنامج داخل المساحة القابلة للبناء (8.7 × 25.2 م = 219 م²)؛ البرنامج بالمقاسات التصميمية المستهدفة يحتاج نحو 184 م²."
+      },
+      "checked": 0,
+      "ms": 2
+    }
+  ]
+}

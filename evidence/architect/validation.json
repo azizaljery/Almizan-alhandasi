@@ -1,0 +1,40 @@
+{
+  "baseline": "4eb43b92e70835c65c76464185cbd53c74995852",
+  "full_integration": {
+    "command": "node --test --test-concurrency=4 tests/*.test.mjs",
+    "tests": 1896,
+    "pass": 1882,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 10,
+    "todo": 4,
+    "note": "Ran during integration; final affected modules were checked again in focused and browser runs."
+  },
+  "focused": {
+    "command": "node --test tests/architect-*.test.mjs tests/shara-session.test.mjs tests/shara-brief.test.mjs tests/design-review.test.mjs tests/brief-contract.test.mjs tests/photo-pro.test.mjs tests/photo-interior.test.mjs",
+    "tests": 114,
+    "pass": 114,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "new_modules_final": {
+    "command": "node --test tests/architect-*.test.mjs",
+    "tests": 21,
+    "pass": 21,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "passed": true
+  },
+  "browser": "browser.json",
+  "benchmark": "benchmark.json",
+  "live_provider": "not verified",
+  "physical_mobile_device": "not verified",
+  "deployment": "not performed"
+}

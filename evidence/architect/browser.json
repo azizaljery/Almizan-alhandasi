@@ -1,0 +1,74 @@
+[
+  {
+    "width": 1280,
+    "childlessBranch": true,
+    "changedHouseholdBranch": true,
+    "realWorker": {
+      "walls": 25,
+      "architect": [
+        {
+          "title": "صالة متناسبة قابلة للتأثيث",
+          "state": "verified"
+        },
+        {
+          "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+          "state": "verified"
+        },
+        {
+          "title": "خدمة المطبخ إلى الطعام",
+          "state": "verified"
+        },
+        {
+          "title": "وصول الرجال إلى الطعام",
+          "state": "verified"
+        }
+      ]
+    },
+    "qualityRefusal": {
+      "code": "ARCHITECT_QUALITY_NOT_MET",
+      "issues": 3
+    },
+    "blankImageAudit": {
+      "geometryMeasured": false,
+      "technical": false
+    },
+    "uncaughtErrors": [],
+    "horizontalOverflow": false
+  },
+  {
+    "width": 390,
+    "childlessBranch": true,
+    "changedHouseholdBranch": true,
+    "realWorker": {
+      "walls": 25,
+      "architect": [
+        {
+          "title": "صالة متناسبة قابلة للتأثيث",
+          "state": "verified"
+        },
+        {
+          "title": "مدخل رجال ومدخل نساء/عائلة مستقلان",
+          "state": "verified"
+        },
+        {
+          "title": "خدمة المطبخ إلى الطعام",
+          "state": "verified"
+        },
+        {
+          "title": "وصول الرجال إلى الطعام",
+          "state": "verified"
+        }
+      ]
+    },
+    "qualityRefusal": {
+      "code": "ARCHITECT_QUALITY_NOT_MET",
+      "issues": 3
+    },
+    "blankImageAudit": {
+      "geometryMeasured": false,
+      "technical": false
+    },
+    "uncaughtErrors": [],
+    "horizontalOverflow": false
+  }
+]

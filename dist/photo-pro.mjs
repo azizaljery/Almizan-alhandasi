@@ -3,6 +3,7 @@
 // وإن ضعف التطابق تُعاد المحاولة مرة واحدة ببذرة أخرى ويُعرض الأفضل مع تنبيه صريح.
 // الزر يُخفى بصمت إن لم تكن الخدمة مهيأة في الخادم.
 import { fidelityScore, FIDELITY } from './photo-fidelity.mjs';
+import { auditImageUrls, imageQualityMessage } from './architect/image-quality.mjs';
 import { rememberPhoto, makeThumb } from './photo-keep.mjs';
 export { fidelityScore, FIDELITY };
 
@@ -197,13 +198,10 @@ export async function initPhotoPro({ button, capture, describe, designKey = () =
   const say = (text, cls = '') => { note.className = 'pp-note' + (cls ? ' ' + cls : ''); note.textContent = text; };
   function showResult(r) {
     S.result = r; after.src = r.image; after.hidden = false; range.disabled = false; range.value = 50; setP(50); tagA.hidden = false; stamp.hidden = false;
-    const f = r.fidelity;
-    if (!f) say('تعذّر فحص مطابقة الصورة لمجسمك آليًا؛ قارنها بالمجسم بسحب الشريط.', 'warn');
-    else if (!f.ok) say((interior && f.openingLost ? 'تنبيه: يبدو أن باب أو نافذة تغيّرت أو اختفت في هذه الصورة. ' : '') + 'تنبيه: هذه الصورة قد تختلف عن تصميمك في بعض التفاصيل (فحص آلي لخطوط الكتلة والفتحات' + (r.attempts > 1 ? '، بعد محاولتين وعرض الأقرب' : '') + '). قارنها بالمجسم بسحب الشريط، أو أعد التوليد.', 'warn');
-    else say(interior ? 'فحص آلي تقريبي: الأبواب والنوافذ والقطع الرئيسية في الصورة قريبة من مجسمك. اسحب الشريط لتتأكد بنفسك.' : 'فحص آلي تقريبي: خطوط الكتلة والفتحات في الصورة قريبة من مجسمك. اسحب الشريط لتتأكد بنفسك.');
+    say(imageQualityMessage(r.quality), !r.quality || r.quality.status === 'needs-revision' || !r.quality.geometryMeasured ? 'warn' : '');
   }
   async function keep(best) {
-    try { if (!store) return; const thumb = await makeThumb(best.image); if (thumb) rememberPhoto(store, { key: designKey(), kind: interior ? 'interior:' + S.room : 'exterior', thumb, lighting: best.lighting, ok: best.fidelity?.ok ?? null, score: best.fidelity?.score ?? null, at: new Date().toISOString() }); } catch { /* المصغّرة اختيارية */ }
+    try { if (!store) return; const thumb = await makeThumb(best.image); if (thumb) rememberPhoto(store, { key: S.capturedDesignKey, kind: interior ? 'interior:' + S.room : 'exterior', thumb, lighting: best.lighting, ok: best.quality ? best.quality.geometryMeasured && best.quality.technicalPass : null, score: best.fidelity?.score ?? null, at: new Date().toISOString() }); } catch { /* المصغّرة اختيارية */ }
   }
   async function request(lighting, tier, seed, signal) {
     const body = { image: S.shot.dataUrl, width: S.shot.width, height: S.shot.height, tier, seed, description: interior ? describe({ lighting, room: S.room, extra: S.extra }) : describe({ lighting, view: S.view }), ...(interior ? { kind: 'interior' } : {}) };
@@ -218,14 +216,18 @@ export async function initPhotoPro({ button, capture, describe, designKey = () =
     after.hidden = true; tagA.hidden = true; range.disabled = true; setP(100);
     const ctl = S.ctl = new AbortController(), kill = setTimeout(() => ctl.abort('timeout'), P.clientTimeoutMs);
     try {
-      if (recapture || !S.shot) {
+      if (recapture || !S.shot || S.capturedDesignKey !== designKey()) {
         waiting(UI.waitCapture);
+        S.capturedDesignKey = designKey();
         const c = await capture({ room: S.room, lighting: S.lighting, onProgress: k => { waitMsg.textContent = `${UI.waitCapture.replace('…', '')}… ${Math.round(k * 100)}٪`; } });
         if (!c?.blob) throw new Error('تعذّر التقاط المجسم. انتظر اكتمال العرض ثم أعد المحاولة.');
         S.shot = await prepareShot(c.blob, P); S.view = c.view === 'model' ? 'model' : 'facade'; S.landmarks = c.landmarks || null; S.extra = c.extra || null;
         if (c.night && S.lighting === 'golden') S.lighting = 'night';
         before.src = S.shot.dataUrl; cmp.style.setProperty('--pp-ar', String(S.shot.width / S.shot.height));
       }
+      let captureAudit = null;
+      try { captureAudit = await auditImageUrls(S.shot.dataUrl, S.shot.dataUrl, { kind, capturedDesignKey: S.capturedDesignKey, currentDesignKey: designKey() }); } catch { /* measurement unavailable; do not invent a pass */ }
+      if (captureAudit?.checks.find(c => c.id === 'reference-evidence')?.state === 'unknown') throw Error('لقطة المجسم لا تُظهر خطوطًا هندسية كافية. غيّر زاوية الكاميرا لتظهر الغرفة وفتحاتها ثم أعد التقاطها قبل طلب صورة احترافية.');
       paintSeg();
       waiting(UI.waitGen);
       let best = null;
@@ -233,13 +235,16 @@ export async function initPhotoPro({ button, capture, describe, designKey = () =
         const seed = (Math.random() * 0xFFFFFFFF) >>> 0;
         let data; try { data = await request(S.lighting, S.tier, seed, ctl.signal); } catch (e) { if (best && e.message !== 'closed') break; throw e; }
         let fidelity = null; try { fidelity = interior && fidelityFn ? await fidelityFn(S.shot.dataUrl, data.image, S.landmarks || []) : await checkFidelity(S.shot.dataUrl, data.image); } catch { /* يُعرض التنبيه العام */ }
-        const cand = { image: data.image, fidelity, lighting: S.lighting, tier: data.tier || S.tier, model: data.model || '', seed: data.seed ?? seed, attempts: attempt };
-        if (!best || (cand.fidelity?.score ?? -1) > (best.fidelity?.score ?? -1)) best = { ...cand }; else best.attempts = attempt;
-        if (!fidelity || fidelity.ok) break;
+        let quality = null;
+        try { quality = await auditImageUrls(S.shot.dataUrl, data.image, { fidelity, kind, capturedDesignKey: S.capturedDesignKey || '', currentDesignKey: designKey() }); } catch { /* unavailable measurement remains unknown */ }
+        const cand = { image: data.image, fidelity, quality, lighting: S.lighting, tier: data.tier || S.tier, model: data.model || '', seed: data.seed ?? seed, attempts: attempt };
+        const rank = c => c.quality?.technicalPass === true ? 2 : c.quality?.technicalPass === false ? 0 : 1;
+        if (!best || rank(cand) > rank(best) || (rank(cand) === rank(best) && (cand.fidelity?.score ?? -1) > (best.fidelity?.score ?? -1))) best = { ...cand }; else best.attempts = attempt;
+        if ((!fidelity || fidelity.ok) && quality?.technicalPass !== false) break;
         if (attempt <= P.autoRetry) waiting('الصورة الأولى ابتعدت عن خطوط مجسمك؛ أعيد المحاولة مرة واحدة لأقرب نتيجة…');
       }
       idle(); showResult(best);
-      saveLastPhoto({ key: designKey(), image: best.image, lighting: best.lighting, tier: best.tier, score: best.fidelity?.score ?? null, ok: best.fidelity?.ok ?? null, at: new Date().toISOString(), disclaimer: UI.disclaimer, ...(interior ? { room: S.room } : {}) }, UI.slot);
+      saveLastPhoto({ key: S.capturedDesignKey, image: best.image, lighting: best.lighting, tier: best.tier, score: best.fidelity?.score ?? null, ok: best.quality ? best.quality.geometryMeasured && best.quality.technicalPass : null, at: new Date().toISOString(), disclaimer: UI.disclaimer, ...(interior ? { room: S.room } : {}) }, UI.slot);
       keep(best); // مصغّرة تُحفظ مع المشروع (غلاف «مشاريعي السابقة»)
     } catch (e) {
       idle(); if (e.message !== 'closed') say(e.message || 'تعذّر توليد الصورة.', 'err');
@@ -256,7 +261,7 @@ export async function initPhotoPro({ button, capture, describe, designKey = () =
   bDown.addEventListener('click', async () => {
     if (!S.result) return; bDown.disabled = true;
     try {
-      const warn = S.result.fidelity && !S.result.fidelity.ok ? 'قد تختلف عن التصميم في بعض التفاصيل' : '';
+      const warn = S.capturedDesignKey !== designKey() || S.result.quality?.status === 'needs-revision' || (S.result.fidelity && !S.result.fidelity.ok) ? 'تحتاج الصورة مراجعة الجودة ومطابقتها للتصميم' : '';
       const blob = await stampedBlob(S.result.image, warn, UI.disclaimer), a = el('a', { href: URL.createObjectURL(blob), download: UI.file });
       document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
     } catch (e) { say(e.message || 'تعذّر تجهيز الصورة للتحميل.', 'err'); }

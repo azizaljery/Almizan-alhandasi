@@ -44,11 +44,11 @@ export function parsePoolSize(t) {
   if (/مسبح[^،.]{0,10}(?:عائلي|متوسط|عادي)/.test(t)) return { poolW: 3.5, poolD: 7 };
   return null;
 }
-export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], land = null, skipped = [] } = {}) {
+export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], land = null, skipped = [], familyOverride = null } = {}) {
   const idea = String(text || '').trim();
   const t = normalizeAr(idea);
   const mentions = findSpaces(idea);
-  const fam = parseFamily(idea);
+  const fam = { ...parseFamily(idea), ...(familyOverride || {}) };
   const inferred = inferFromFamily(fam);
   const notes = [...inferred.notes], unsupported = [], questions = [];
 
@@ -69,7 +69,7 @@ export function buildBrief(text, { ai = null, disabledCustoms = [], edits = [], 
   const add = (id, count, source, reason, extra = {}) => { if (count > 0) rows.push({ id, label: ROW_LABEL(id), count, source, reason, area: ROW_AREA(id), floor: ROW_FLOOR(id), ...extra }); };
 
   // «بس/فقط» بعد قائمة صريحة: لا أفترض ما لم يُذكر (المجلس والمقلط من الأعراف)
-  const exclusive = /(?<![؀-ۿ])(?:بس|فقط|لا غير)(?![؀-ۿ])/.test(t) && !saidCount('majlis_men') && !saidCount('majlis') && !saidCount('majlis_women') && rows.length === 0;
+  const exclusive = /(?<![؀-ۿ])(?:بس|فقط|لا غير)(?![؀-ۿ])/.test(t) && !/(?:زياره|يسكن|اسكن|تسكن|نزور|يزور|تزور|زوجتي|زوجي)[^،.]{0,12}(?:بس|فقط|لا غير)/.test(t) && !saidCount('majlis_men') && !saidCount('majlis') && !saidCount('majlis_women') && rows.length === 0;
   if (exclusive) notes.push('قلتَ «بس/فقط»: لم أفترض مجلسًا ولا مقلطًا؛ أضفهما من «أضف فراغًا» إن احتجتهما.');
   // المجالس: «مجلسين» = رجال ونساء؛ «مجلس رجال ومجلس نساء» صريح
   const genericMajlis = saidCount('majlis');
