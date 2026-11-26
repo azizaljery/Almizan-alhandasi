@@ -40,7 +40,7 @@ export function parseFamily(raw) {
     if (!hit && dualWord && re(`${B}و?${dualWord}${END}`).test(t)) { n = 2; hit = true; }
     return hit ? n : null;
   };
-  const girls = sum(GIRLS, 'بنتين'), boys = sum(BOYS, 'ولدين'), generic = sum(KIDS_GENERIC, null);
+  const girls = sum(GIRLS, 'بنتين'), boys = sum(BOYS, 'ولدين'), generic = sum(KIDS_GENERIC, '(?:طفلين|طفلان)');
   if (girls !== null) f.girls = girls;
   if (boys !== null) f.boys = boys;
   // «4 اولاد و3 بنات»: الأولاد هنا بنون. «6 اولاد» وحدها: أبناء غير محددي الجنس.
@@ -76,7 +76,7 @@ export function parseFamily(raw) {
 }
 
 /** غرف الأبناء من عددهم وأعمارهم: الصغار اثنان في الغرفة، الكبار غرفة لكل واحد؛ لا يجمع بنين وبنات في غرفة. */
-function roomsFor(n, ages) { if (!n) return 0; const per = ages === 'older' ? 1 : 2; return Math.min(10, Math.ceil(n / per)); }
+function roomsFor(n, ages, sharing) { if (!n) return 0; const per = sharing === 'individual' || ages === 'older' ? 1 : 2; return Math.min(10, Math.ceil(n / per)); }
 
 /**
  * يستنتج من تركيبة الأسرة بنودًا للبرنامج مع تعليل كل بند، وأسئلة لما يغيّر التصميم فعلًا.
@@ -87,11 +87,11 @@ export function inferFromFamily(f) {
   const rows = [], prefs = {}, questions = [], notes = [];
   if (!f.mentioned) return { rows, prefs, questions, notes };
   const ages = f.ages;
-  const perRoom = ages === 'older' ? 'غرفة لكل واحد لأنهم كبار' : ages === 'young' ? 'كل غرفة لاثنين لأنهم صغار' : 'افتراض: كل غرفة لاثنين (إن كانوا كبارًا زد الغرف)';
-  if (f.boys) rows.push({ id: 'bedroom_boys', count: roomsFor(f.boys, ages), reason: `${f.boys} ${f.boys === 1 ? 'ولد' : 'بنين'} ← ${perRoom}` });
-  if (f.girls) rows.push({ id: 'bedroom_girls', count: roomsFor(f.girls, ages), reason: `${f.girls} ${f.girls === 1 ? 'بنت' : 'بنات'} ← ${perRoom}؛ غرف البنات مستقلة عن البنين` });
+  const perRoom = f.sharing === 'individual' ? 'طلبتَ غرفة مستقلة لكل ابن/ابنة' : ages === 'older' ? 'غرفة لكل واحد لأنهم كبار' : ages === 'young' ? 'كل غرفة لاثنين لأنهم صغار' : 'افتراض: كل غرفة لاثنين (إن كانوا كبارًا زد الغرف)';
+  if (f.boys) rows.push({ id: 'bedroom_boys', count: roomsFor(f.boys, ages, f.sharing), reason: `${f.boys} ${f.boys === 1 ? 'ولد' : 'بنين'} ← ${perRoom}` });
+  if (f.girls) rows.push({ id: 'bedroom_girls', count: roomsFor(f.girls, ages, f.sharing), reason: `${f.girls} ${f.girls === 1 ? 'بنت' : 'بنات'} ← ${perRoom}؛ غرف البنات مستقلة عن البنين` });
   if (f.kids) {
-    const n = roomsFor(f.kids, ages);
+    const n = roomsFor(f.kids, ages, f.sharing);
     rows.push({ id: 'bedroom_boys', count: n, reason: `${f.kids} من الأبناء ← ${perRoom}` });
     if (f.kids >= 2) questions.push({ id: 'kids_gender', text: `الأبناء ${f.kids === 2 ? 'الاثنان' : 'الـ' + f.kids}: بنون أم بنات أم الاثنان معًا؟`, reason: 'أسأل لأن البنين والبنات لا يتشاركون غرفة، وفصل غرفهم يحدد عدد الغرف وتقسيم جناح النوم.', options: [{ id: 'boys', label: 'كلهم بنون', text: `كلهم ${f.kids} بنين` }, { id: 'girls', label: 'كلهن بنات', text: `كلهن ${f.kids} بنات` }, { id: 'mixed', label: 'بنون وبنات', text: '', free: true, placeholder: 'مثال: 4 أولاد و2 بنات' }], free: true });
     if (!ages) questions.push({ id: 'kids_ages', text: 'أعمار الأبناء تقريبًا: صغار أم كبار؟', reason: 'أسأل لأن الكبار يحتاج كل منهم غرفة، والصغار يكفيهم غرفة لكل اثنين؛ هذا يغيّر عدد الغرف ومساحة الدور العلوي.', options: [{ id: 'young', label: 'صغار (دون 10)', text: 'الأبناء صغار' }, { id: 'older', label: 'كبار (مراهقون فأكبر)', text: 'الأبناء كبار' }, { id: 'mixed', label: 'صغار وكبار', text: 'الأبناء صغار وكبار' }] });

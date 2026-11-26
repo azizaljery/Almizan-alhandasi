@@ -420,14 +420,15 @@ function renderProgram(m) {
 function edit(op) { try { render(session.answer('program', op)); } catch (err) { fail(err); } }
 function step(id, value) { try { render(session.answer(id, value)); } catch (err) { fail(err); } }
 function beginChat() {
-  chat.replaceChildren(); tlog = []; session = new SharaSession({ land: confirmedLand }); render(session.start());
+  chat.replaceChildren(); tlog = []; session = new SharaSession({ land: confirmedLand, interview: 'adaptive' }); render(session.start());
 }
 /** جلسة حوار من جلسة تصميم سابقة لهذا الحفظ (لا نص حوار محفوظ لها): تُبنى من نص الطلب وأعداده المحفوظة فيها. */
 function sharaFromDesign(ds) {
   const req = ds.input.requirements || {}, counts = {};
   for (const k of ['bedrooms', 'majlis', 'baths', 'kitchens', 'halls', 'dining']) if (Number.isInteger(req.counts?.[k])) counts[k] = req.counts[k];
   const texts = String(ds.input.idea || '').split('\n').map(t => t.trim()).filter(t => t.length >= 3);
-  return SharaSession.restore({ v: 1, mode: 'free', phase: 'ready', texts: texts.length ? texts : ['بيت لأسرة'], countOverrides: counts }, { land: confirmedLand });
+  return SharaSession.restore({ v: 1, interview: req.architect?.enabled ? 'adaptive' : 'legacy', architectAnswers: req.architect?.interviewState?.answers,
+    architectSkips: req.architect?.interviewState?.skips, mode: 'free', phase: 'ready', texts: texts.length ? texts : ['بيت لأسرة'], countOverrides: counts }, { land: confirmedLand });
 }
 /**
  * يعيد صفحة شرعاء إلى حالها عند الرجوع إليها: نص الحوار السابق كما كان، ثم — إن وُجد تصميم — بطاقة فيها
@@ -552,6 +553,13 @@ async function build() {
     location.href = './design.html';
   } catch (err) {
     stop(); setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
+    if (err.code === 'ARCHITECT_QUALITY_NOT_MET') {
+      const box = $('buildReport'); box.replaceChildren(); box.hidden = false;
+      box.append(el('h3', '', 'بنود تحتاج تعديل التوزيع'));
+      for (const issue of err.architectIssues || []) box.append(el('p', '', issue.title + ': ' + issue.reason));
+      box.append(el('p', '', 'ارجع إلى شرعاء لتعديل احتياجك صراحة، أو أكمل توزيعًا يدويًا مع المهندس. لم أغيّر عدد الغرف أو أخفف أهداف الجودة تلقائيًا.'));
+      $('buildText').textContent = ''; $('buildBusy').hidden = true; return;
+    }
     stop = ticking($('buildText'), 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…');
     try { renderReport(await diagnoseInWorker({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); stop(); $('buildText').textContent = ''; }
     catch (e2) { stop(); $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }

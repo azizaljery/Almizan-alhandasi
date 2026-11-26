@@ -2585,6 +2585,8 @@ export function referenceKit() {
 
 // ------------------------------------------------------------------------------------------ مفتاح المحرك المرجعي (الافتراضي: القديم وحده)
 import { generateReferenceDesigns, engineMode } from './villa-reference.mjs';
+import { selectSaudiDesigns } from './architect/saudi-quality.mjs';
+import { improveServingDoors } from './architect/serving-doors.mjs';
 /** حصيلة بحث المولّد (تُقرأ لعرض قرار المراجعة): ما بُني وما استُبعد للتشابه وما لم يُختر وسبب كل منها من سجل التنفيذ. أرقام فعلية لا تقديرات. */
 /** عدد التصاميم بالعربية الصحيحة: 1 تصميمًا واحدًا، 2 تصميمين، 3-10 تصاميم، فوقها تصميمًا. */
 export const designsAr = n => (n === 1 ? 'تصميمًا واحدًا' : n === 2 ? 'تصميمين' : n >= 3 && n <= 10 ? `${n} تصاميم` : `${n} تصميمًا`);
@@ -2607,5 +2609,27 @@ function viaReference(args, floors, legacy) {
   if (!ref) return { ...old, engine: (old.engine || 'legacy') + '+fallback' };
   return { ...old, designs: [...ref.designs, ...old.designs].slice(0, args.keep ?? old.designs.length), engine: 'hybrid' };
 }
-export function generateVillaDesigns(args) { return viaReference(args, 1, generateVillaDesignsLegacy); }
-export function generateVillaTwoFloors(args) { return viaReference(args, 2, generateVillaTwoFloorsLegacy); }
+function architectSelection(args, floors, legacy) {
+  const contract = args.requirements?.architect;
+  if (!contract?.enabled) return viaReference(args, floors, legacy);
+  const keep = args.keep ?? 5;
+  const raw = viaReference({ ...args, keep: Math.max(keep, 12) }, floors, legacy);
+  const enhanced = raw.designs.map(d => {
+    const change = improveServingDoors(d.doc, contract, { locks: args.requirements?.locks || [] });
+    // Re-run the existing independent geometry/fixtures checks as well as the new contract.
+    if (change.doc === d.doc) return { ...d, architectChanges: [] };
+    const q = quality(change.doc), old = quality(d.doc), entry = args.land?.entries?.[0] || 's';
+    const ledger = verifyRequest(change.doc, { ...args.requirements, counts: args.requirements?.counts || args.counts }, { entry });
+    if (q.reject || q.cost > old.cost + .01 || splitFails(ledger,args.requirements).hard > splitFails(d.ledger,args.requirements).hard) return d;
+    return { ...d, doc: change.doc, ledger, issues: q.issues, quality: d.quality + q.cost - old.cost, architectChanges: change.changes };
+  });
+  const picked = selectSaudiDesigns(enhanced, contract, keep);
+  if (!picked.designs.length && contract.enforce !== false) {
+    const e = Error('لم أجد ضمن المرشحين توزيعًا يحقق أهداف الصالة والمداخل ومسارات الطعام معًا. لن أخفف هذه الأهداف أو أحذف غرفًا تلقائيًا؛ يلزم تعديل البرنامج أو توزيع يدوي.');
+    e.code = 'ARCHITECT_QUALITY_NOT_MET'; e.architectQuality = { checked: picked.checked, rejected: picked.rejected }; throw e;
+  }
+  return { ...raw, designs: picked.designs.length ? picked.designs : enhanced.map(d => ({ ...d, architectQuality: picked.rejected.find(r => r.pat === d.pat)?.report })),
+    architectSearch: { checked: picked.checked, passed: picked.designs.length, rejected: picked.rejected } };
+}
+export function generateVillaDesigns(args) { return architectSelection(args, 1, generateVillaDesignsLegacy); }
+export function generateVillaTwoFloors(args) { return architectSelection(args, 2, generateVillaTwoFloorsLegacy); }

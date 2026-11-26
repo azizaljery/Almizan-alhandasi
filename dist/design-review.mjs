@@ -6,6 +6,7 @@
 // لا شروط إلزامية جديدة هنا: الإلزامي هو ما كان إلزاميًا أصلًا في المدقّق المستقل (design-impact.auditDoc) وسجل الطلب وقيود عزيز الصلبة.
 // نقي: بلا DOM ولا شبكة.
 import { analyzeDoc } from './draw/digest.mjs';
+import { evaluateSaudiQuality } from './architect/saudi-quality.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { getById, parseDoc } from './draw/doc.mjs';
 import { checkDoc, quality, PLAN_LIMITS } from './villa-layout.mjs';
@@ -80,7 +81,7 @@ export function planFingerprintInput(doc, { lockedLabelIds = [] } = {}) {
 }
 /** يحسب نسخة المخطط: بصمة هندسته (geometryHash) ثم بصمة النسخة الكاملة planVersion التي تضم المتطلبات والأرض والأقفال. */
 export function planVersion(doc, ctx = {}) {
-  const lockedLabelIds = (ctx.locks || []).map(l => l.labelId).filter(Boolean);
+  const lockedLabelIds = [...(ctx.locks || []).map(l => l.labelId).filter(Boolean), ...(ctx.requirements?.architect?.enabled ? (doc.labels || []).map(l => l.id) : [])];
   const geometryHash = 'geo:' + sha256(stable(planFingerprintInput(doc, { lockedLabelIds })));
   const requirementsHash = sha256(stable({ requirements: ctx.requirements || null, land: ctx.land || null, entry: ctx.entry || null, locks: (ctx.locks || []).map(l => l.key).sort() }));
   return { geometryHash, requirementsHash: 'req:' + requirementsHash, planVersion: 'pv:' + sha256(geometryHash + '|' + requirementsHash) };
@@ -161,7 +162,7 @@ export function reviewDesign(doc, ctx = {}) {
   let model; try { model = analyzeDoc(doc); } catch (e) { model = null; findings.push(base('geometry', 'analyze', SEVERITY.MANDATORY, STATE.UNVERIFIED, 'تحليل المخطط', 'تعذّر تحليل المخطط: ' + (e.message || e), {}, { scope: 'plan', levelId: null, levelName: null, roomIds: [], wallIds: [], openingIds: [], stairIds: [], shapes: [], label: 'المخطط كله', bbox: null })); }
   function base(source, code, severity, state, title, reason, evidence, location) {
     let id = `${source}:${code}`, k = 2; while (used.has(id)) id = `${source}:${code}#${k++}`; used.add(id);
-    return { id, source, sourceLabel: SOURCE_AR[source] || source, severity, severityAr: SEVERITY_AR[severity], state, stateAr: STATE_AR[state], title, reason, evidence: evidence ?? {}, location };
+    return { id, source, sourceLabel: SOURCE_AR[source] || (source === 'architect' ? 'جودة التوزيع السكني' : source), severity, severityAr: SEVERITY_AR[severity], state, stateAr: STATE_AR[state], title, reason, evidence: evidence ?? {}, location };
   }
   const L = model ? makeLocator(doc, model) : null;
   const add = (source, code, severity, state, title, reason, evidence, location) => findings.push(base(source, code, severity, state, title, reason, evidence, location));
@@ -169,6 +170,12 @@ export function reviewDesign(doc, ctx = {}) {
   const guard = (source, label, severity, fn) => { try { fn(); } catch (e) { add(source, 'error', severity, STATE.UNVERIFIED, label, `تعذّر القياس: ${e.message || e}. لا يُحسب هذا الفحص متحققًا.`, {}, planLoc(label)); } };
 
   if (model) {
+    if (req.architect?.enabled) guard('architect', 'جودة التوزيع المتفق عليها', SEVERITY.MANDATORY, () => {
+      const report = evaluateSaudiQuality(doc, req.architect, { model });
+      for (const c of report.checks.filter(c => c.state !== 'na')) add('architect', c.id, SEVERITY.MANDATORY,
+        c.state === 'pass' ? STATE.VERIFIED : c.state === 'fail' ? STATE.VIOLATED : STATE.UNVERIFIED, c.title, c.reason, c.evidence,
+        c.roomIds.length ? L.loc({ roomIds: c.roomIds, label: c.title }) : planLoc(c.title));
+    });
     // 1) سلامة الرسم (إلزامي: كما في المدقّق المستقل)
     guard('geometry', 'سلامة الرسم', SEVERITY.MANDATORY, () => {
       const c = checkDoc(doc);
