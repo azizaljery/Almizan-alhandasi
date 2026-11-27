@@ -78,11 +78,11 @@ $('landForm').addEventListener('submit', e => {
   e.preventDefault();
   try { const { land: ok } = normalizeLand(readLand()); confirmedLand = ok; setError($('landError'), ''); }
   catch (err) { setError($('landError'), err.message); return; }
-  show('Shara'); beginChat();
+  show('Shara'); if (adaptiveHandle && session) { session.changeLand(confirmedLand); adaptiveHandle.changeLand(session.brief.land, session.brief); refreshPanels(); } else beginChat();
 });
 
 // ------------------------------------------------------------------------------------------------ شرعاء
-let session = null;
+let session = null, adaptiveHandle = null;
 const chat = $('chat');
 function bubble(text, who = 'shara') {
   const row = document.createElement('div'); row.className = 'row' + (who === 'me' ? ' me' : '');
@@ -196,7 +196,7 @@ function beginChat() {
 function buildPathSwitch() {
   const box = $('pathSwitch'); box.replaceChildren();
   const adaptive = el0('button','chip','شرعاء V3 (تجريبي)'); adaptive.type='button';
-  adaptive.addEventListener('click',()=>{ if(document.getElementById('adaptiveInterview'))return; const panel=el0('section','card');panel.id='adaptiveInterview';chat.hidden=true;box.hidden=true;chat.after(panel);mountAdaptive(panel,session.brief.land,session.brief,{onClose:()=>{panel.remove();chat.hidden=false;box.hidden=false}}); }); box.append(adaptive);
+  adaptive.addEventListener('click',()=>{ if(document.getElementById('adaptiveInterview'))return; const panel=el0('section','card');panel.id='adaptiveInterview';chat.hidden=true;box.hidden=true;chat.after(panel);adaptiveHandle=mountAdaptive(panel,session.brief.land,session.brief,{onClose:()=>{adaptiveHandle=null;panel.remove();chat.hidden=false;box.hidden=false}}); }); box.append(adaptive);
   for (const [id, label] of [['free', 'أشرح فكرتي'], ['guided', 'أسئلة موجهة'], ['decide', 'ساعدني أقرر']]) {
     const b = el0('button', 'chip', label); b.type = 'button'; b.addEventListener('click', () => { clearControls(); step('mode', id); refreshPanels(); }); box.append(b);
   }

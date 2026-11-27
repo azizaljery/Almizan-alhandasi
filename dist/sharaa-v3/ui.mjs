@@ -1,9 +1,9 @@
 import {bank,createBrief,answer,nextQuestion,readiness,defer,reviseLand,ingest,gateMatches} from './core.mjs';
-import {parseFree} from './quality.mjs';
+import {parseFree,qualityReview} from './quality.mjs';
 import {previewProjection} from './native-bridge.mjs';
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n};
 export function mountAdaptive(host,land,nativeBrief,{onClose}={}){
- let b=createBrief(land),editing=null,notice='',original=[],projection=null;
+ let b=createBrief(land),editing=null,notice='',original=[],projection=null,quality=null;
  const qBy=id=>bank.find(q=>q.id===id);
  const btn=(text,fn,cls='chip')=>{const n=el('button',text,cls);n.type='button';n.addEventListener('click',()=>{try{fn()}catch(e){notice=e.message;draw()}});return n};
  function draw(){host.replaceChildren();host.append(el('h3','شرعاء V3 — مقابلة معمارية تجريبية'),el('p','أرضك موروثة من المرحلة السابقة. الأسئلة تتغير حسب إجاباتك. لا يُعتمد أي شرط غير مثبت في المحرك.','hint'));
@@ -24,7 +24,8 @@ export function mountAdaptive(host,land,nativeBrief,{onClose}={}){
  const review=el('details');review.append(el('summary','ملف القرارات وتعديل الإجابات'));for(const [id,f] of Object.entries(b.facts)){const row=el('div');row.append(el('p',qBy(id).text+' — '+String(f.value)+(f.recheck?' (مراجعة مطلوبة)':'')));if(gateMatches(qBy(id).gate,b))row.append(btn('تعديل',()=>{editing=id;draw()}));review.append(row)}host.append(review);
  host.append(btn('مراجعة التوافق مع المحرك',()=>{projection=previewProjection(b,nativeBrief);draw()},'cta ghost'));
  if(projection){host.append(el('p','بنود مرسلة للمحوّل: '+projection.sent.length+' · غير مرسلة: '+projection.withheld.length));for(const id of projection.withheld)host.append(el('p','غير مطبق: '+qBy(id).text,'hint'));for(const item of projection.engineInput.blockers||[])host.append(el('p',item.text_ar||item.type,'error'));host.append(el('p','هذه معاينة للعقد وليست تصريحًا بالتوليد.','hint'))}
+ const evidence=el('input');evidence.type='file';evidence.accept='.json,application/json';evidence.setAttribute('aria-label','ملف أدلة هندسية JSON');evidence.addEventListener('change',async()=>{try{const f=evidence.files[0];if(!f||f.size>1000000)throw Error('ملف غير صالح أو كبير');quality=qualityReview(JSON.parse(await f.text()));notice='تم تحليل البيانات المدخلة؛ لم يتحقق النظام من مصدرها.';draw()}catch(e){notice=e.message;draw()}});host.append(el('h4','مراجعة جودة التصميم من ملف أدلة'),el('p','تجريبية: لا تعتمد على صورة أو على قياسات غير موثقة.','hint'),evidence);if(quality)for(const f of quality.findings)host.append(el('p',f.id+' — '+f.status+' — '+f.reason));
  host.append(btn('تصدير ملف المقابلة',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({brief:b,originalText:original,readiness:r},null,2)],{type:'application/json'}));const a=el('a');a.href=url;a.download='sharaa-v3-brief.json';a.click();URL.revokeObjectURL(url)}),btn('العودة إلى شرعاء الحالي',()=>onClose?.()));
  }
- draw();return {snapshot:()=>structuredClone(b),changeLand:l=>{b=reviseLand(b,l);projection=null;draw()}};
+ draw();return {snapshot:()=>structuredClone(b),changeLand:(l,n)=>{b=reviseLand(b,l);nativeBrief=n;projection=null;quality=null;draw()}};
 }
