@@ -610,10 +610,14 @@ body.studio-experience {
   font-size: 13px;
   gap: 7px 12px;
   color: #52665d;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
 }
 .studio-experience .kv b {
   color: #214d36;
   font-weight: 600;
+  min-width: 0;
+  text-align: start;
+  overflow-wrap: anywhere;
 }
 .studio-experience .side .acts {
   display: flex;
