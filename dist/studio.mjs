@@ -10,6 +10,7 @@ import { computeDocQuantities, GRADES } from './draw/quantities-doc.mjs';
 import { computeStructure, DEFAULT_ASSUMPTIONS } from './draw/structure.mjs';
 import { structureSheetSvg } from './draw/structure-sheet.mjs';
 import { applyCommand } from './draw/doc.mjs';
+import { mountStudioExperience } from './studio-experience.mjs';
 import { Editor } from './draw/editor/editor.mjs';
 import { docBounds } from './draw/editor/render2d.mjs';
 import { reviewDoc } from './draw/review.mjs';
@@ -23,7 +24,7 @@ import { openExportStudio } from './draw/export-studio-ui.mjs';
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? '' : v); } for (const c of kids.flat()) if (c != null) n.append(c.nodeType ? c : document.createTextNode(String(c))); return n; };
 const KEY = 'mizan.studio.doc.v1';
-const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } }, sget(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, sset(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } } };
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } }, sget(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, sset(k, v) { try { sessionStorage.setItem(k, v); } catch { /* ignore */ } } };
 
 // ------------------------------------------------------------------------------------------------ start
 let initial = null, homeHandoff = null;
@@ -31,7 +32,10 @@ let initial = null, homeHandoff = null;
 try { homeHandoff = consumeHandoff(sessionStorage, localStorage); if (homeHandoff) initial = homeHandoff.doc; } catch { homeHandoff = null; }
 try { if (!initial) { const saved = store.get(KEY); if (saved) initial = parseDoc(saved); } } catch { initial = null; }
 const startedEmpty = !initial;
+let studioExperience = null;
 const editor = new Editor($('planCanvas'), { doc: initial || createDoc({ title: 'مشروع جديد' }), onEvent: onEditorEvent });
+Object.assign(editor.opts, { grid: false, dims: false, autoDims: false, axes: false, plot: false, underlay: false, floors: false, labelPlates: false, quietGuides: true, theme: { paper: '#ffffff', wall: '#536153', wallExt: '#354637', ink: '#263e2d', inkSoft: '#566c59', accent: '#176b55', accent2: '#8caa8c', select: '#176b55' } });
+editor.canvas.tabIndex = 0;
 globalThis.__mizanStudio = editor; // للاختبارات الحية
 $('docTitle').value = editor.doc.title;
 
@@ -64,7 +68,7 @@ function onEditorEvent(ev) {
     case 'error': toast(ev.message, true); break;
     case 'hint': toast(ev.message); break;
     case 'doc': onDocChanged(); break;
-    case 'selection': renderProps(); updateOptbarActions(); break;
+    case 'selection': renderProps(); updateOptbarActions(); studioExperience?.selectionChanged(); break;
     case 'tool': syncTool(); break;
     case 'level': renderLevels(); renderRooms(); renderProps(); sync3DLevel(); scheduleReview(); updateStats(); break;
     case 'cursor': $('stCoord').textContent = `x ${ev.p.x.toFixed(2)}  y ${ev.p.y.toFixed(2)}`; $('stSnap').textContent = { node: 'نقطة', inter: 'تقاطع', mid: 'منتصف', edge: 'على الجدار', align: 'محاذاة', ortho: 'زاوية', grid: 'شبكة', free: '' }[editor.snap?.kind] || ''; break;
@@ -87,12 +91,13 @@ async function roomDialog(label, room = null) {
   else if (room) editor.exec({ type: 'add-label', level: editor.levelId, name, roomType: r.type, seed: { x: Math.round((room.space.inside?.x ?? room.centroid.x) * 1000) / 1000, y: Math.round((room.space.inside?.y ?? room.centroid.y) * 1000) / 1000 } }, 'اسم الغرفة');
 }
 function onDocChanged() {
+  studioExperience?.saveState('saving');
   $('undo').disabled = !editor.history.canUndo; $('redo').disabled = !editor.history.canRedo;
   if (document.activeElement !== $('docTitle')) $('docTitle').value = editor.doc.title;
   renderLevels(); renderRooms(); if ($('tab-finish').classList.contains('on') && !($('tab-finish').contains(document.activeElement) && /INPUT/.test(document.activeElement.tagName))) renderFinish(); updateStats(); autosave(); schedule3D(); scheduleReview(); updateWelcome(); if ($('tab-dna').classList.contains('on')) renderDna(); if ($('tab-qty').classList.contains('on')) scheduleQty(); scheduleStr();
   if (!(document.activeElement && $('side').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName))) renderProps();
 }
-const autosave = debounce(() => store.set(KEY, serialize(editor.doc)), 500);
+const autosave = debounce(() => { studioExperience?.saveState(store.set(KEY, serialize(editor.doc)) ? 'saved' : 'error'); }, 500);
 function updateWelcome() { const empty = !editor.doc.walls.length && !editor.doc.fixtures.length; $('welcome').hidden = !(empty && !editor.draft && editor.tool !== 'wall' && editor.tool !== 'rect'); }
 function updateStats() {
   const s = editor.stats();
@@ -115,7 +120,7 @@ const HINTS = {
 };
 function syncTool() {
   document.querySelectorAll('#rail [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === editor.tool));
-  $('stHint').textContent = HINTS[editor.tool] || ''; renderOptbar(); updateWelcome();
+  $('stHint').textContent = HINTS[editor.tool] || ''; renderOptbar(); updateWelcome(); studioExperience?.toolChanged();
 }
 document.querySelectorAll('#rail [data-tool]').forEach(b => b.addEventListener('click', () => editor.setTool(b.dataset.tool)));
 function renderOptbar() {
@@ -131,8 +136,7 @@ function renderOptbar() {
   } else if (t === 'room') {
     bar.append(el('label', {}, 'نوع الغرفة', el('select', { onchange: e => editor.setOpts({ roomType: e.target.value }) }, ...Object.entries(ROOM_TYPES).map(([k, v]) => el('option', { value: k, selected: k === o.roomType }, v.ar)))), el('span', { class: 'hint' }, 'انقر داخل الغرفة؛ انقر مرتين على اسمها لتغييره'));
   } else if (t === 'fixture') {
-    const pal = el('div', { class: 'palette' }, ...Object.entries(FIXTURES).map(([k, v]) => chip(v.ar, o.fixtureKind === k, () => { editor.setOpts({ fixtureKind: k, fixtureRot: 0, autoRot: true }); renderOptbar(); }, `${v.w}×${v.d} م`)));
-    bar.append(pal, el('label', {}, el('input', { type: 'checkbox', checked: o.autoRot !== false, onchange: e => editor.setOpts({ autoRot: e.target.checked }) }), 'التصاق بالجدار'));
+    bar.append(el('span', { class: 'studio-picked-label' }, FIXTURES[o.fixtureKind]?.ar || 'قطعة أثاث'), el('button', { class: 'chip', onclick: () => setTab('furniture') }, 'اختر قطعة'), el('label', {}, el('input', { type: 'checkbox', checked: o.autoRot !== false, onchange: e => editor.setOpts({ autoRot: e.target.checked }) }), 'محاذاة مع الجدار'), el('span', { class: 'hint' }, 'انقر للوضع · R للتدوير'));
   } else if (t === 'stair') {
     bar.append(...Object.entries(STAIR_KINDS).map(([k, v]) => chip(v, o.stairKind === k, () => { editor.setOpts({ stairKind: k }); renderOptbar(); })), el('span', { class: 'hint' }, 'اتجاه الصعود حسب السهم · R للتدوير'));
   } else if (t === 'select') {
@@ -145,9 +149,9 @@ function selectActions() {
   return acts;
 }
 function updateOptbarActions() { if (editor.tool === 'select') renderOptbar(); }
-$('tgSnap').addEventListener('click', e => { editor.setOpts({ snap: !editor.opts.snap }); e.currentTarget.classList.toggle('on', editor.opts.snap); });
-$('tgGrid').addEventListener('click', e => { editor.setOpts({ grid: !editor.opts.grid }); e.currentTarget.classList.toggle('on', editor.opts.grid); });
-$('tgDims').addEventListener('click', e => { editor.setOpts({ dims: !editor.opts.dims }); e.currentTarget.classList.toggle('on', editor.opts.dims); });
+$('tgSnap').addEventListener('click', e => { editor.setOpts({ snap: !editor.opts.snap }); e.currentTarget.classList.toggle('on', editor.opts.snap); e.currentTarget.setAttribute('aria-pressed', String(editor.opts.snap)); });
+$('tgGrid').addEventListener('click', e => { editor.setOpts({ grid: !editor.opts.grid }); e.currentTarget.classList.toggle('on', editor.opts.grid); e.currentTarget.setAttribute('aria-pressed', String(editor.opts.grid)); });
+$('tgDims').addEventListener('click', e => { const on = !editor.opts.dims; editor.setOpts({ dims: on, autoDims: on, axes: on }); e.currentTarget.classList.toggle('on', on); e.currentTarget.setAttribute('aria-pressed', String(on)); });
 $('zoomIn').addEventListener('click', () => editor.zoomAt(1.3, editor.W / 2, editor.H / 2));
 $('zoomOut').addEventListener('click', () => editor.zoomAt(.77, editor.W / 2, editor.H / 2));
 $('zoomFit').addEventListener('click', () => editor.fit());
@@ -181,17 +185,19 @@ function field(label, type, value, onChange, { step = '.01', min, max, unit = ''
 const upd = (id, patch, label = 'تعديل') => editor.exec({ type: 'update', id, patch }, label, { key: 'p:' + id + Object.keys(patch).join() });
 const deg = r => Math.round(((r || 0) * 180 / Math.PI % 360 + 360) % 360 * 10) / 10;
 function renderProps() {
+  queueMicrotask(() => studioExperience?.decorateProperties());
   const box = $('tab-props'); box.replaceChildren();
   const items = editor.selectedItems();
   const doc = editor.doc;
   if (!items.length) {
     const lvl = editor.level();
-    box.append(el('div', { class: 'sec' }, el('h4', {}, 'الدور'), field('الاسم', 'text', lvl.name, v => upd(lvl.id, { name: v })), field('ارتفاع الدور', 'number', lvl.height, v => upd(lvl.id, { height: v }), { step: '.05', unit: 'م', min: 2, max: 8 })));
+    box.append(el('div', { class: 'sec' }, el('h4', {}, 'الدور'), field('الاسم', 'text', lvl.name, v => upd(lvl.id, { name: v })), field('إظهار الدور المجاور للمحاذاة', 'check', editor.opts.underlay, v => editor.setOpts({ underlay: v })), field('ارتفاع الدور', 'number', lvl.height, v => upd(lvl.id, { height: v }), { step: '.05', unit: 'م', min: 2, max: 8 })));
     const b = docBounds(doc, editor.levelId), s = editor.stats();
     box.append(el('div', { class: 'sec' }, el('h4', {}, 'ملخص الدور'), el('div', { class: 'kv' }, 'الجدران', el('b', {}, s.walls), 'الغرف المغلقة', el('b', {}, s.rooms), 'المساحة الصافية', el('b', {}, num(s.area, 1) + ' م²'), 'أبعاد البناء', el('b', {}, s.walls ? `${num(b.x1 - b.x0, 2)} × ${num(b.y1 - b.y0, 2)} م` : '—'))));
     const plot = doc.plot?.polygon, pb = plot ? { w: Math.max(...plot.map(p => p.x)) - Math.min(...plot.map(p => p.x)), l: Math.max(...plot.map(p => p.y)) - Math.min(...plot.map(p => p.y)) } : { w: 20, l: 25 };
     let pw = pb.w, pl = pb.l;
     box.append(el('div', { class: 'sec' }, el('h4', {}, 'الأرض والاتجاه'),
+      field('إظهار حدود الأرض', 'check', editor.opts.plot, v => editor.setOpts({ plot: v })),
       field('عرض الأرض', 'number', pw, v => { pw = v; }, { step: '.5', unit: 'م', min: 4 }), field('طول الأرض', 'number', pl, v => { pl = v; }, { step: '.5', unit: 'م', min: 4 }),
       el('div', { class: 'acts' }, el('button', { onclick: () => { const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2; editor.exec({ type: 'set-plot', polygon: [{ x: cx - pw / 2, y: cy - pl / 2 }, { x: cx + pw / 2, y: cy - pl / 2 }, { x: cx + pw / 2, y: cy + pl / 2 }, { x: cx - pw / 2, y: cy + pl / 2 }] }, 'حدود الأرض'); } }, 'رسم الأرض حول البناء'), plot ? el('button', { onclick: () => editor.exec({ type: 'set-plot', polygon: null }, 'حذف الأرض') }, 'إزالة') : null),
       el('div', { style: 'height:8px' }), field('اتجاه الشمال', 'number', doc.north || 0, v => editor.exec({ type: 'set-plot', north: v }, 'الشمال'), { step: '1', unit: '°', min: 0, max: 359 }),
@@ -299,8 +305,8 @@ function renderFinish() {
   for (const t of used) floors.append(field(roomTypeName(t), 'select', (f.floors || {})[t] || ROOM_TYPES[t].floor, v => setFinish({ floors: { [t]: v } }), { options: Object.entries(FLOOR_NAMES) }));
   box.append(floors, el('div', { class: 'acts' }, el('button', { onclick: () => { editor.exec({ type: 'set-meta', finish: { facade: { base: 'render', accent: 'entry', plinth: true, color: null, accentColor: null, plinthColor: null, copingColor: null }, aluminium: null, entryDoor: null, fence: null, roof: null, floors: Object.fromEntries(used.map(t => [t, null])) } }, 'إعادة المواد'); } }, 'إعادة الافتراضي')), el('p', { class: 'muted' }, 'التغيير يظهر فورًا في المجسم ثلاثي الأبعاد ويُحفظ مع المشروع.'));
 }
-function setTab(name) { document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); if (name === 'qty') renderQty(); if (name === 'str') renderStr(); }
-document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); if (b.dataset.tab === 'review') runReview(); }));
+function setTab(name) { studioExperience?.tab(name); if (name !== 'review') editor.setMarkers([]); document.querySelectorAll('.tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === name)); document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + name)); if (name === 'ai') refreshAiSees(); if (name === 'finish') renderFinish(); if (name === 'dna') renderDna(); if (name === 'qty') renderQty(); if (name === 'str') renderStr(); if (name === 'review') runReview(); }
+document.querySelectorAll('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); }));
 
 // ------------------------------------------------------------------------------------------------ review
 let issues = [];
@@ -329,7 +335,7 @@ function runReview() {
       i.fix ? el('button', { onclick: () => { editor.exec({ type: 'batch', commands: i.fix.commands }, i.fix.label); toast('طُبّق: ' + i.fix.label); } }, i.fix.label) : null)));
   }
   const markers = []; for (const i of issues) { if (i.severity === 'info' || markers.length > 30) continue; const w = i.targetIds.map(locate).find(x => x && x.level === editor.levelId); if (w) markers.push({ at: w.p, severity: i.severity }); }
-  editor.setMarkers(markers);
+  editor.setMarkers($('tab-review').classList.contains('on') ? markers : []); $('studioReviewBadge').textContent = serious || '';
   mizanReviewSection(box);
 }
 // مراجعة الميزان الموحّدة (مسار «يدوي»): كل تعديل على المرسم يمرّ بالبوابة نفسها، والتقرير يخص نسخة المخطط المعروضة فقط.
@@ -396,7 +402,7 @@ async function ensureViewer() {
     try {
       const [{ loadThreeRuntime }, { DrawViewer }] = await Promise.all([import('./three-runtime.mjs'), import('./draw/viewer-draw.mjs')]);
       const THREE = await loadThreeRuntime();
-      viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 1024, maxPixelRatio: 1.5, interior: false, onState: ev => { if (ev.type === 'mode') syncModeSeg(); } });
+      viewer = new DrawViewer($('threeHost'), { THREE, shadowSize: 1024, maxPixelRatio: 1.5, interior: false, richFurniture: true, furnitureStyle: 'contemporary', onState: ev => { if (ev.type === 'mode') syncModeSeg(); } });
       globalThis.__mizanViewer = viewer; $('threeHost').addEventListener('pointerdown', () => { userOrbited = true; }); return viewer;
     } catch (e) { $('threeMsg').hidden = false; $('threeMsg').textContent = 'تعذّر تشغيل العرض ثلاثي الأبعاد على هذا الجهاز (WebGL غير متاح). المخطط ثنائي الأبعاد يعمل كاملًا.'; viewerLoading = null; return null; }
   })();
@@ -409,7 +415,7 @@ async function rebuild3D() {
   const msg = $('threeMsg');
   if (!editor.doc.walls.length) { msg.hidden = false; msg.textContent = 'ارسم جدرانًا في المخطط لتظهر هنا ثلاثية الأبعاد فورًا.'; built3D = false; return; }
   msg.hidden = true;
-  try { const before = built3D ? v.radius() : 0; v.setDoc(editor.doc, { keepCamera: built3D }); if (before && (v.radius() / before > 1.35 || v.radius() / before < .72) && !userOrbited) v.frameBuilding(); built3D = true; v.resize(); sync3DLevel(); } catch (e) { msg.hidden = false; msg.textContent = 'تعذّر بناء المجسم: ' + (e.message || 'خطأ'); }
+  try { const firstBuild = !built3D; const before = built3D ? v.radius() : 0; v.setDoc(editor.doc, { keepCamera: built3D }); if (before && (v.radius() / before > 1.35 || v.radius() / before < .72) && !userOrbited) v.frameBuilding(); built3D = true; if (firstBuild) { v.setMode('dollhouse', { animate: false }); syncModeSeg(); } v.resize(); sync3DLevel(); } catch (e) { msg.hidden = false; msg.textContent = 'تعذّر بناء المجسم: ' + (e.message || 'خطأ'); }
 }
 const schedule3D = debounce(rebuild3D, 380);
 function sync3DLevel() { if (!viewer?.built) return; if ($('isoLevel').checked) viewer.isolateLevel(editor.levelId); else viewer.showLevel('all'); }
@@ -662,3 +668,6 @@ if (globalThis.matchMedia?.('(max-width:760px)').matches && $('app').dataset.vie
 if (threeVisible()) rebuild3D();
 if (startedEmpty) $('welcome').hidden = false;
 if (homeHandoff) toast('فُتح تصميمك الأولي من شرعاء. عدّل عليه كما تشاء.' + (homeHandoff.backedUp ? ' نُسخ مشروعك السابق احتياطيًا.' : '') + (homeHandoff.meta?.note ? ' ' + homeHandoff.meta.note : ''));
+
+studioExperience = mountStudioExperience({ editor, openTab: setTab, renderOptions: renderOptbar });
+globalThis.__mizanStudioExperience = studioExperience;

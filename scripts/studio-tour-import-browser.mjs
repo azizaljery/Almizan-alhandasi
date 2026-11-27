@@ -48,7 +48,7 @@ const shot = n => page.screenshot({ path: join(outDir, n + '.png') });
 const toastText = () => page.locator('#toast').innerText().catch(() => '');
 const fresh = async () => { await page.goto(base + '/studio.html'); await page.evaluate(() => localStorage.clear()); await page.goto(base + '/studio.html'); await page.waitForFunction(() => window.__mizanStudio, null, { timeout: 30000 }); };
 const openViaWelcome = async file => { const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('#welcome [data-start=import]')]); await chooser.setFiles(file); };
-const openViaButton = async file => { const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('#btnOpen')]); await chooser.setFiles(file); };
+const openViaButton = async file => { const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.locator('#studioProjectMenu summary').click().then(() => page.click('#btnOpen'))]); await chooser.setFiles(file); };
 
 // ================================================================================================ 1. import
 await fresh();

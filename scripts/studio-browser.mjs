@@ -63,14 +63,14 @@ await page.click('#optbar .chip:has-text("نافذة"):not(:has-text("كبيرة
 await click(2, 0.02); await click(6, 6.02);
 s = await st(); ok('door + 2 windows placed on walls', s.openings === 3, 'openings=' + s.openings);
 // ---- name rooms
-await page.click('[data-tool=room]');
+await page.click('#studioMoreTools summary'); await page.click('[data-tool=room]');
 await page.selectOption('#optbar select', 'bedroom'); await click(2, 3);
 await page.selectOption('#optbar select', 'majlis'); await click(6, 3);
 s = await st(); ok('two rooms labelled', s.labels === 2, 'labels=' + s.labels);
 // ---- furniture snaps to wall
 await page.click('[data-tool=fixture]');
-await page.click('#optbar .chip:has-text("سرير مزدوج")'); await click(2, 5.2);
-await page.click('#optbar .chip:has-text("جلسة عربية")'); await click(6.2, 0.8);
+await page.click('[data-fixture=bed-double]'); await click(2, 5.2);
+await page.click('[data-fixture=majlis-sofa]'); await click(6.2, 0.8);
 s = await st(); ok('furniture placed', s.fixtures === 2, 'fixtures=' + s.fixtures);
 const bed = await page.evaluate(() => __mizanStudio.doc.fixtures[0]);
 ok('bed pushed against the north wall and facing away from it', Math.abs(bed.y - 4.85) < .05 && Math.abs(Math.cos(bed.rot) + 1) < 1e-3, JSON.stringify(bed));
@@ -120,7 +120,7 @@ const w0 = await page.evaluate(() => __mizanViewer?.built?.stats?.walls ?? null)
 await page.click('[data-view="3d"]'); await page.waitForTimeout(1500); await shot('07-3d-only');
 await page.click('[data-view="plan"]');
 // ---- example, level add, export
-await page.click('#btnExample'); await page.waitForTimeout(400);
+await page.click('#studioProjectMenu summary'); await page.click('#btnExample'); await page.waitForTimeout(400);
 s = await st(); ok('example villa loads and has rooms', s.rooms >= 8, 'rooms=' + s.rooms);
 await page.click('[data-view="split"]'); await page.waitForTimeout(2500); await page.evaluate(() => __mizanStudio.fit()); await shot('08-villa-split');
 await page.click('[data-tab=rooms]'); await shot('09-rooms');

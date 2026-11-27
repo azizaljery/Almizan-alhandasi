@@ -1,4 +1,5 @@
 /* بطاقة مراجعة الميزان الآلية: تتبع ألوان الصفحة (currentColor/متغيرات) وتعمل على الجوال دون تمرير أفقي */
+:root{--mzr-ink:#213b3a;--mzr-soft:#526864;--mzr-ink2:#3f5450;--mzr-bad:#b03a22;--mzr-warn:#7d5208;--mzr-ok:#1a7049;--mzr-mint:#0f5e52;--mzr-mint2:#0f5e52;--mzr-gold:#7a5410;--mzr-gold2:#7a5410;--mzr-coral:#a2402c}
 .mz-review{--mzr-line:var(--lx-line,var(--line,#e4eae7));direction:rtl;overflow-wrap:anywhere}
 .mz-review .mzr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .mz-review .mzr-head h2{margin:0}
@@ -27,7 +28,10 @@
 /* ---- رموز دلالية للنص الثانوي: الألوان الفاتحة الثابتة (الليلية) كانت تُقرأ على السطح الأبيض نهارًا بتباين 1.1 إلى 2.0.
    الآن تأتي الرموز من ambient-cycle (--ambient-fit-*): يبدأ كل لون من قيمته الليلية ويُمزج نحو نظيره النهاري حتى 4.5:1 على سطح الساعة، فلا يتغير الليل إن كان يحقق النسبة أصلًا. ---- */
 body.mizan-review{--mzr-ink:#213b3a;--mzr-soft:#526864;--mzr-ink2:#3f5450;--mzr-bad:#b03a22;--mzr-warn:#7d5208;--mzr-ok:#1a7049;--mzr-mint:#0f5e52;--mzr-mint2:#0f5e52;--mzr-gold:#7a5410;--mzr-gold2:#7a5410;--mzr-coral:#a2402c}
-body.mizan-review[data-ambient]{--mzr-ink:var(--ambient-fit-ink);--mzr-soft:var(--ambient-fit-soft);--mzr-ink2:var(--ambient-fit-ink2);--mzr-bad:var(--ambient-fit-bad);--mzr-warn:var(--ambient-fit-warn);--mzr-ok:var(--ambient-fit-ok);--mzr-mint:var(--ambient-fit-mint);--mzr-mint2:var(--ambient-fit-mint2);--mzr-gold:var(--ambient-fit-gold);--mzr-gold2:var(--ambient-fit-gold2);--mzr-coral:var(--ambient-fit-coral)}
+body.mizan-review[data-ambient]{--mzr-ink:var(--ambient-fit-sky-ink);--mzr-soft:var(--ambient-fit-sky-soft);--mzr-ink2:var(--ambient-fit-sky-ink2);--mzr-bad:var(--ambient-fit-sky-bad);--mzr-warn:var(--ambient-fit-sky-warn);--mzr-ok:var(--ambient-fit-sky-ok);--mzr-mint:var(--ambient-fit-sky-mint);--mzr-mint2:var(--ambient-fit-sky-mint2);--mzr-gold:var(--ambient-fit-sky-gold);--mzr-gold2:var(--ambient-fit-sky-gold2);--mzr-coral:var(--ambient-fit-sky-coral)}
+body.mizan-review[data-ambient] :is(.card,.sec,.ph,.fh,.bar,.spec,.stat,.mz-review-sidebar){--mzr-ink:var(--ambient-fit-ink);--mzr-soft:var(--ambient-fit-soft);--mzr-ink2:var(--ambient-fit-ink2);--mzr-bad:var(--ambient-fit-bad);--mzr-warn:var(--ambient-fit-warn);--mzr-ok:var(--ambient-fit-ok);--mzr-mint:var(--ambient-fit-mint);--mzr-mint2:var(--ambient-fit-mint2);--mzr-gold:var(--ambient-fit-gold);--mzr-gold2:var(--ambient-fit-gold2);--mzr-coral:var(--ambient-fit-coral)}
+body.mizan-review[data-ambient] .titlebar .sub{color:var(--mzr-soft)}
+body.mizan-review[data-ambient] .titlebar h1{color:var(--mzr-ink)!important;-webkit-text-fill-color:currentColor!important;background:none!important}
 /* ---- تصحيح التباين (قائم قبل المراجعة): سطح الصفحة داكن (review-theme) بينما مكونات present.css بخلفيات فاتحة ونصها موروث فاتح.
    نثبّت حبرًا داكنًا على كل سطح فاتح، وألوانًا فاتحة على الأسطح الداكنة. القيم تُقاس في tests/design-contrast.test.mjs. ---- */
 body.mizan-review{--ink-on-light:#26251f;--ink-soft-on-light:#4a483e}

@@ -1,0 +1,41 @@
+PASS Empty project starts with a clear guided entry
+PASS Grid, axes and dimension chains are optional at startup
+PASS Draw a closed room using actual canvas pointer events
+PASS Selected wall length is editable in metres
+PASS Undo restores the closed room after editing
+PASS Furniture search filters real catalog cards
+PASS Rotate furniture through the normal editing history
+PASS Duplicate furniture
+PASS Deleting and undoing preserve editable furniture
+PASS Engineering display enables all dimension layers together
+PASS Review is reachable and annotations appear only while reviewing
+PASS Review markers leave the working plan clean
+PASS Less frequent drawing tools remain discoverable
+PASS Help dialog closes and restores keyboard focus
+PASS Changing tools, view flags and panels never changes project geometry
+PASS Downloaded JSON retains the complete editable document
+PASS Reopening the downloaded project preserves all geometry and identifiers
+PASS 3D uses detailed furniture with identical saved dimensions and no extra dressing
+PASS First 3D view exposes the furnished interior
+PASS 360px: full-width plan fits the viewport without overflow
+PASS 360px: header touch targets are at least 44px
+PASS 360px: all six canvas controls remain fully reachable
+PASS 360px: choosing furniture returns to the canvas
+PASS 360px: touch selection and movement keep the plan usable
+PASS 360px: explicit details button opens the sheet
+PASS 360px: drawing help is available from the project menu
+PASS 390px: full-width plan fits the viewport without overflow
+PASS 390px: header touch targets are at least 44px
+PASS 390px: all six canvas controls remain fully reachable
+PASS 390px: choosing furniture returns to the canvas
+PASS 390px: touch selection and movement keep the plan usable
+PASS 390px: explicit details button opens the sheet
+PASS 390px: drawing help is available from the project menu
+PASS 820px: full-width plan fits the viewport without overflow
+PASS 820px: header touch targets are at least 44px
+PASS 820px: all six canvas controls remain fully reachable
+PASS 820px: choosing furniture returns to the canvas
+PASS 820px: touch selection and movement keep the plan usable
+PASS 820px: explicit details button opens the sheet
+PASS 820px: drawing help is available from the project menu
+PASS No unhandled browser errors in the studio journeys

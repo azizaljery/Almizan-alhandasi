@@ -14,7 +14,7 @@ const ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, acceptD
 p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::|404/.test(m.text())) errs.push(m.text()); });
 const res = []; const check = (n, ok, d = '') => { res.push(ok); console.log((ok ? 'PASS ' : 'FAIL ') + n + (d ? ' — ' + d : '')); };
 await p.goto(`http://127.0.0.1:${server.address().port}/studio.html`); await p.waitForTimeout(800);
-await p.fill('#docTitle', 'villa'); await p.dispatchEvent('#docTitle', 'change'); await p.click('#btnExport'); await p.click('[data-export=bundle]');
+await p.fill('#docTitle', 'villa'); await p.dispatchEvent('#docTitle', 'change'); await p.click('#studioProjectMenu summary'); await p.click('#btnExport'); await p.click('[data-export=bundle]');
 await p.waitForSelector('dialog.export-studio .dna-table');
 const txt = await p.locator('dialog.export-studio').innerText();
 check('المحتويات والبصمة تظهر', txt.includes('manifest.json') && txt.includes('plan.dxf') && txt.includes('quantities.csv') && txt.includes('بصمة الهندسة'));

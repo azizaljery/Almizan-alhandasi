@@ -3,6 +3,7 @@
 // بأسلوب المخطط المهني: سماكات أقلام بنسب 0.18/0.35/0.5/0.7، جدران خارجية مصمتة وداخلية مهشّرة (في وضع اللوحة)،
 // أبواب بأقواس ونوافذ بخط مزدوج، سلاسل أبعاد ثلاثية المستويات، محاور، تسميات بالمساحة مرتّبة بلا تراكب، درج بسهم وعدد قوائم.
 // flags.sheet = «وضع لوحة»: أسود على أبيض للطباعة، بلا شبكة ولا تلوين، مع مفتاح رموز.
+import { drawFurnitureAppearance } from './fixture-appearance2d.mjs';
 import { ROOM_TYPES } from '../catalog.mjs';
 import { swingSectors, wallRect } from '../review.mjs';
 import { dist, sub, add, mul, norm, perp } from '../geom.mjs';
@@ -79,7 +80,7 @@ export function renderPlan(ctx, st) {
   }
 
   // ------------------------------------------------------------------ plot
-  if (doc.plot?.polygon?.length > 2) {
+  if (flags.plot !== false && doc.plot?.polygon?.length > 2) {
     ctx.save(); ctx.setLineDash([10, 6]); ctx.strokeStyle = T.accent2; ctx.lineWidth = sheet ? pen.medium : 1.6; ctx.fillStyle = sheet ? 'transparent' : 'rgba(198,161,91,.05)';
     ctx.beginPath(); doc.plot.polygon.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); if (!sheet) ctx.fill(); ctx.stroke(); ctx.restore();
   }
@@ -205,7 +206,7 @@ export function renderPlan(ctx, st) {
 
   // ------------------------------------------------------------------ fixtures (thin lines) and columns (solid)
   const fixBoxes = [];
-  if (flags.fixtures) for (const f of doc.fixtures) {
+  if (flags.fixtures) for (const f of [...doc.fixtures].sort((a, b) => Number(b.kind === 'rug') - Number(a.kind === 'rug'))) {
     if (f.level !== levelId) continue;
     drawFixture(ctx, f, S, k, sel.has(f.id), st.hover?.id === f.id, T, pen);
     if (!['rug', 'tree', 'plant', 'pool', 'waterfall', 'lawn', 'planter', 'carport', 'pergola', 'bbq', 'fountain'].includes(f.kind)) fixBoxes.push({ x: f.x, y: f.y, w: Math.max(f.w, f.d), h: Math.max(f.w, f.d), soft: true });
@@ -237,7 +238,7 @@ export function renderPlan(ctx, st) {
     st.labelLayout = lay; // للاختبارات الحية: عدد التراكبات
     const roomById = new Map(rooms.map(r => [r.id, r]));
     // لوحات التسميات نصف الشفافة كلها في مسار واحد وتعبئة واحدة: تُبقي الاسم والمساحة مقروءين فوق الأثاث وبلاط الأرضية دون هالة سميكة حول كل حرف
-    if (!sheet) { ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); for (const p of lay.placed) { const c = S({ x: p.x, y: p.y }), pw = p.w * k + 10, ph = p.h * k + 6; ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); } ctx.fill(); }
+    if (!sheet && flags.labelPlates !== false) { ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); for (const p of lay.placed) { const c = S({ x: p.x, y: p.y }), pw = p.w * k + 10, ph = p.h * k + 6; ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); } ctx.fill(); }
     for (const p of lay.placed) {
       const it = lay.items.get(p.id), r = roomById.get(p.id); if (!it || !r) continue;
       const c = S({ x: p.x, y: p.y }); let y = c.y - (p.h * k) / 2 + it.lines[0].size * p.scale * k * .55;
@@ -308,7 +309,7 @@ export function renderPlan(ctx, st) {
   }
 
   // ------------------------------------------------------------------ guides, ghost, snap marker, selection box
-  for (const g of st.snap?.guides || []) {
+  for (const g of flags.guides === false ? [] : st.snap?.guides || []) {
     ctx.save(); ctx.strokeStyle = 'rgba(214,40,140,.65)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
     ctx.beginPath(); if (g.axis === 'x') { const sx = S({ x: g.v, y: 0 }).x; ctx.moveTo(sx, 0); ctx.lineTo(sx, H); } else { const sy = S({ x: 0, y: g.v }).y; ctx.moveTo(0, sy); ctx.lineTo(W, sy); } ctx.stroke(); ctx.restore();
   }
@@ -438,7 +439,8 @@ function drawDimension(ctx, a, b, offset, text, S, k, color, T = THEME) {
 }
 
 /** الأثاث بخط رفيع من الرمز المشترك (نفس الهندسة في لوحة الكتاب). */
-function drawFixture(ctx, f, S, k, picked, hover, T = THEME, pen = pens(k)) {
+export function drawFixture(ctx, f, S, k, picked, hover, T = THEME, pen = pens(k)) {
+  if (T !== SHEET_THEME && k > 14 && drawFurnitureAppearance(ctx, f, S, k, picked, hover)) return;
   const sym = fixtureSymbol(f);
   ctx.save();
   const trace = q => { ctx.beginPath(); q.forEach((p, i) => { const s = S(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y); }); ctx.closePath(); };

@@ -9,3 +9,11 @@ test('one continuous, periodic cycle follows dawn, sunrise, day, sunset and nigh
 test('text remains readable throughout the light-to-dark transition',()=>{
  for(let i=0;i<=1000;i++){const s=cycleState(i/1000);assert.ok(contrast(s.ink,s.surface)>=4.5);assert.ok(contrast(s.muted,s.surface)>=4.5);assert.ok(contrast(s.skyInk,s.sky)>=4.5);assert.ok(s.night>=0&&s.night<=1);}
 });
+test('semantic review colours remain AA on both page and card backgrounds across the cycle',()=>{
+ for(let i=0;i<=1000;i++){
+  const s=cycleState(i/1000);
+  for(const [name,palette,bg] of [['surface',s.fitted,s.surface],['sky',s.fittedSky,s.sky]]){
+   for(const [role,colour] of Object.entries(palette))assert.ok(contrast(colour,bg)>=4.5,`${name}/${role} phase ${i/1000}`);
+  }
+ }
+});

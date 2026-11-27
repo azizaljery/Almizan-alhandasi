@@ -25,10 +25,10 @@ return out})()`;
 
 // الخلفيات المتدرجة خارج القياس (كما في design-contrast)، فلا تُقاس عناصرها هنا.
 // طور الساعة: 0.45 نهارًا (وسط النهار، لا حدّ)، و0.85 ليلًا.
-const CLOCKS = [{ phase: 0.45, name: 'النهار' }, { phase: 0.85, name: 'الليل' }];
+const CLOCKS = [{phase:0,name:'الفجر'},{phase:.14,name:'شروق الشمس'},{phase:.45,name:'النهار'},{phase:.64,name:'غروب الشمس'},{phase:.85,name:'الليل'}];
 
 test('تباين نصوص صفحة التصميم >= AA في النهار والليل (ساعة مثبّتة)', { timeout: 300000 }, async t => {
-  let chromium; try { ({ chromium } = await import('/opt/npm-tools/node_modules/playwright/index.mjs')); } catch { return t.skip('Playwright غير متاح في هذه البيئة'); }
+  let chromium; try { ({ chromium } = await import('playwright')); } catch(e) { if(process.env.MIZAN_REQUIRE_BROWSER_TESTS)throw e;return t.skip('Playwright غير متاح في هذه البيئة'); }
   const text = '3 غرف نوم ومجلس رجال ومجلس نساء ومطبخ وصالة', land = { width: 20, length: 30, floors: 2, streets: ['s'], entries: ['s'] }, brief = buildBrief(text, { land });
   const first = await generateInitialDesign({ land, rooms: [], discovery: brief.discovery, idea: text, counts: brief.counts, requirements: brief.requirements });
   const session = createSession({ land, counts: brief.counts, requirements: brief.requirements, discovery: brief.discovery, idea: text, result: first });
@@ -37,7 +37,7 @@ test('تباين نصوص صفحة التصميم >= AA في النهار وال
   const server = http.createServer((req, res) => { const f = normalize(join(root, decodeURIComponent(new URL(req.url, 'http://x').pathname))); if (!f.startsWith(root) || !existsSync(f) || extname(f) === '') { res.writeHead(404); return res.end('nf'); } res.writeHead(200, { 'content-type': MIME[extname(f)] || 'application/octet-stream' }); res.end(readFileSync(f)); });
   await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = `http://127.0.0.1:${server.address().port}`;
   const args = ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox']; let browser;
-  try { browser = await chromium.launch({ args }); } catch { try { browser = await chromium.launch({ args, executablePath: '/opt/pw-browsers/chromium' }); } catch { server.close(); return t.skip('تعذّر تشغيل Chromium'); } }
+  try { browser = await chromium.launch({ args, ...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{}) }); } catch(e) { server.close(); if(process.env.MIZAN_REQUIRE_BROWSER_TESTS)throw e; return t.skip('تعذّر تشغيل Chromium'); }
   try {
     for (const clock of CLOCKS) for (const width of [390, 1280]) {
       const ctx = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: 'light' });

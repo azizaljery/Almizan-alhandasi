@@ -99,7 +99,7 @@ export class Editor {
       doc, levelId: this.levelId, analysis: lv ? { rooms: lv.rooms, gaps: lv.analysis.gaps, exteriorWallIds: this.previewDoc ? exteriorWallIds(lv.analysis) : this.extWalls } : null,
       analysisRaw: lv ? lv.analysis : null, columns: this.opts.sheet && !this.previewDoc ? this.sheetColumns() : null,
       view: this.view, W: this.W, H: this.H, selection: this.selection, hover: this.hover, ghost: this.ghost, snap: this.snap, cursor: this.cursor,
-      overlay: this.overlay, selBox: this.selBox, markers: this.markers, flags: { grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures, autoDims: this.opts.autoDims, axes: this.opts.axes, sheet: this.opts.sheet },
+      theme: this.opts.theme, overlay: this.overlay, selBox: this.selBox, markers: this.markers, flags: { underlay: this.opts.underlay, plot: this.opts.plot, floors: this.opts.floors, labelPlates: this.opts.labelPlates, guides: !this.opts.quietGuides || !!this.drag || this.tool !== 'select', grid: this.opts.grid, dims: this.opts.dims, areas: this.opts.areas, fixtures: this.opts.fixtures, autoDims: this.opts.autoDims, axes: this.opts.axes, sheet: this.opts.sheet },
     };
     renderPlan(ctx, st);
     this.lastLayout = st.labelLayout || null; // ترتيب التسميات الأخير (عدد التراكبات) للاختبارات الحية
