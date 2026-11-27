@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {bank,siteFacts,gateMatches,createBrief,answer,conflicts,nextQuestion,readiness,acknowledge,defer,reviseLand,ingest,projectNative} from '../../dist/sharaa-v3/core.mjs';
+const land={"widthM":18,"depthM":30,"entries":["n"],"streets":[{"side":"n"}],"floors":1};
+const ok=x=>assert.ok(x);
+const throws=fn=>assert.throws(fn);
+test('146 unique questions',()=>ok(bank.length===146&&new Set(bank.map(q=>q.id)).size===146));
+for(const n of [0,1,2])test('children branch '+n,()=>assert.equal(gateMatches('household.children>0',answer(createBrief(land),'household.children',n)),n>0));
+test('AI cannot overwrite confirmed',()=>throws(()=>answer(answer(createBrief(land),'household.children',2),'household.children',0,{source:'ai_inference'})));
+test('mandatory unsupported cannot waive',()=>{const b=answer(createBrief(land),'privacy.entrySight',true,{priority:'mandatory'});ok(readiness(b).hard.includes('privacy.entrySight'));throws(()=>acknowledge(b,['privacy.entrySight']))});
+test('one design',()=>ok(answer(createBrief(land),'budget.count',1).facts['budget.count'].value===1));
+test('corner',()=>ok(siteFacts({...land,streets:[{side:'n'},{side:'e'}]})['@corner']));
+test('conflict',()=>{let b=answer(createBrief(land),'hospitality.men',true);b=answer(b,'hospitality.typical',10);b=answer(b,'hospitality.peak',5);ok(nextQuestion(b).kind==='conflict')});
+test('land change',()=>{let b=answer(createBrief(land),'household.children',2);b=answer(b,'site.parking',2);b=reviseLand(b,{...land,widthM:20});ok(b.facts['site.parking'].recheck&&!b.facts['household.children'].recheck)});
