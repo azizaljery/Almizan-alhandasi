@@ -34,6 +34,14 @@ try { if (!initial) { const saved = store.get(KEY); if (saved) initial = parseDo
 const startedEmpty = !initial;
 let studioExperience = null;
 const editor = new Editor($('planCanvas'), { doc: initial || createDoc({ title: 'مشروع جديد' }), onEvent: onEditorEvent });
+// ترميز الفراغات: الفراغ الضيق الذي لا تتسع تسميته بلا تراكب يظهر برقم في المسقط، وتُسرد الأرقام وأسماؤها تحت التصميم
+const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+editor.opts.onRoomKey = key => {
+  const box = $('roomKeyBox'), list = $('roomKey'); if (!box || !list) return;
+  list.replaceChildren(...key.map(k => { const li = document.createElement('li'); li.dataset.room = k.id; li.textContent = `${String(k.n).replace(/\d/g, d => AR_DIGITS[d])}- ${k.name} · ${(Math.round(k.area * 10) / 10).toLocaleString('ar-SA')} م²`; return li; }));
+  box.hidden = !key.length;
+};
+editor.opts.onRoomKey(editor.roomKey || []);
 Object.assign(editor.opts, { grid: false, dims: false, autoDims: false, axes: false, plot: false, underlay: false, floors: false, labelPlates: false, quietGuides: true, theme: { paper: '#ffffff', wall: '#536153', wallExt: '#354637', ink: '#263e2d', inkSoft: '#566c59', accent: '#176b55', accent2: '#8caa8c', select: '#176b55' } });
 editor.canvas.tabIndex = 0;
 globalThis.__mizanStudio = editor; // للاختبارات الحية

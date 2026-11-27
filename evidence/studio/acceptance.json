@@ -95,9 +95,9 @@
       "detail": {
         "overflow": false,
         "canvasWidth": 342,
-        "canvasHeight": 426,
-        "houseWidth": 254,
-        "houseHeight": 296.33333333333337,
+        "canvasHeight": 338.609375,
+        "houseWidth": 226,
+        "houseHeight": 263.66666666666663,
         "panelOpen": "false",
         "targets": [
           44,
@@ -183,13 +183,13 @@
         },
         "after": {
           "x": 9.8,
-          "y": 7
+          "y": 8
         },
         "panelHidden": true,
         "hit": {
           "tag": "CANVAS",
           "tool": "select",
-          "scale": 21.166666666666668
+          "scale": 18.833333333333332
         }
       }
     },
@@ -207,9 +207,9 @@
       "detail": {
         "overflow": false,
         "canvasWidth": 372,
-        "canvasHeight": 426,
-        "houseWidth": 276,
-        "houseHeight": 322,
+        "canvasHeight": 363.40625,
+        "houseWidth": 256,
+        "houseHeight": 298.66666666666663,
         "panelOpen": "false",
         "targets": [
           44,
@@ -301,7 +301,7 @@
         "hit": {
           "tag": "CANVAS",
           "tool": "select",
-          "scale": 23
+          "scale": 21.333333333333332
         }
       }
     },
@@ -319,7 +319,7 @@
       "detail": {
         "overflow": false,
         "canvasWidth": 802,
-        "canvasHeight": 426,
+        "canvasHeight": 388.203125,
         "houseWidth": 245.1428571428571,
         "houseHeight": 286,
         "panelOpen": "false",

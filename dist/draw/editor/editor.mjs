@@ -79,7 +79,7 @@ export class Editor {
     this.canvas.width = Math.round(this.W * dpr); this.canvas.height = Math.round(this.H * dpr); this.markDirty();
   }
   /** هامش أوسع افتراضيًا لسلاسل الأبعاد والمحاور خارج المبنى. */
-  fit(margin = this.opts.autoDims || this.opts.axes ? 130 : 70) { if (this.W < 520) margin = Math.min(margin, Math.round(this.W * .13)); /* لوحة جوال: هامش 130px يترك للرسم ثلث العرض فقط */ this.view = fitView(docBounds(this.doc, this.levelId), this.W, this.H, margin); if (this.doc.plot?.polygon?.length && !this.doc.walls.some(w => w.level === this.levelId)) { const xs = this.doc.plot.polygon.map(p => p.x), ys = this.doc.plot.polygon.map(p => p.y); this.view = fitView({ x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, this.W, this.H, margin); } this.markDirty(); this.emit({ type: 'view' }); }
+  fit(margin = this.opts.autoDims || this.opts.axes ? 130 : 70) { if (this.W < 520) margin = Math.min(margin, Math.max(58, Math.round(this.W * .13))); /* لوحة جوال: هامش 130px يترك للرسم ثلث العرض فقط؛ وحد أدنى 58px كي لا تغطي شريحة الدور العائمة أعلى المسقط */ this.view = fitView(docBounds(this.doc, this.levelId), this.W, this.H, margin); if (this.doc.plot?.polygon?.length && !this.doc.walls.some(w => w.level === this.levelId)) { const xs = this.doc.plot.polygon.map(p => p.x), ys = this.doc.plot.polygon.map(p => p.y); this.view = fitView({ x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, this.W, this.H, margin); } this.markDirty(); this.emit({ type: 'view' }); }
   zoomAt(factor, sx, sy) {
     const before = toWorld(this.view, this.W, this.H, { x: sx, y: sy });
     this.view.scale = Math.max(4, Math.min(600, this.view.scale * factor));
@@ -103,6 +103,9 @@ export class Editor {
     };
     renderPlan(ctx, st);
     this.lastLayout = st.labelLayout || null; // ترتيب التسميات الأخير (عدد التراكبات) للاختبارات الحية
+    // ترميز الفراغات (رقم داخل المسقط وقائمة تحته): يُبلَّغ المستمع عند تغيّره فقط
+    const key = st.roomKey || [], sig = key.map(k => `${k.n}|${k.id}|${k.name}|${Math.round(k.area * 100)}`).join(';');
+    if (sig !== this._roomKeySig) { this._roomKeySig = sig; this.roomKey = key; this.opts.onRoomKey?.(key); }
   }
   /** أعمدة التحجيم الأولي لوضع اللوحة (تُحسب مرة لكل نسخة من المستند). */
   sheetColumns() {

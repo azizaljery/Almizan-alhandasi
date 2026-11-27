@@ -209,7 +209,11 @@ export function renderPlan(ctx, st) {
   if (flags.fixtures) for (const f of [...doc.fixtures].sort((a, b) => Number(b.kind === 'rug') - Number(a.kind === 'rug'))) {
     if (f.level !== levelId) continue;
     drawFixture(ctx, f, S, k, sel.has(f.id), st.hover?.id === f.id, T, pen);
-    if (!['rug', 'tree', 'plant', 'pool', 'waterfall', 'lawn', 'planter', 'carport', 'pergola', 'bbq', 'fountain'].includes(f.kind)) fixBoxes.push({ x: f.x, y: f.y, w: Math.max(f.w, f.d), h: Math.max(f.w, f.d), soft: true });
+    if (!['rug', 'tree', 'plant', 'pool', 'waterfall', 'lawn', 'planter', 'carport', 'pergola', 'bbq', 'fountain'].includes(f.kind)) {
+      // حدود القطعة الفعلية بعد الدوران (لا مربع بأكبر ضلع) حتى تبقى المساحات الخالية بجوار الأثاث متاحة للتسميات
+      const rot = f.rot || 0, c = Math.abs(Math.cos(rot)), s = Math.abs(Math.sin(rot));
+      fixBoxes.push({ x: f.x, y: f.y, w: f.w * c + f.d * s, h: f.w * s + f.d * c, soft: true });
+    }
   }
   const colBoxes = [];
   const drawCol = (c, proposed) => { const s = S(c), r = (c.size || .3) * k / 2; ctx.fillStyle = T.wall; ctx.strokeStyle = sel.has(c.id) ? T.select : proposed ? T.accent2 : T.wall; ctx.lineWidth = pen.thick; ctx.beginPath(); if (c.round) ctx.arc(s.x, s.y, r, 0, 7); else ctx.rect(s.x - r, s.y - r, r * 2, r * 2); ctx.fill(); ctx.stroke(); colBoxes.push({ x: c.x, y: c.y, w: c.size || .3, h: c.size || .3 }); };
@@ -227,7 +231,7 @@ export function renderPlan(ctx, st) {
       const measure = (text, size) => { ctx.font = `600 ${size * k}px ${FONT}`; return ctx.measureText(text).width / k; };
       const items = rooms.filter(r => Math.sqrt(r.area) * k >= 30).map(r => {
         const lines = [{ text: r.name, size: nameSize }];
-        if (r.rect && r.rect.w > .5 && r.shape === 'rectangle' && (flags.roomDims || r.area >= 9)) lines.push({ text: `${fmtDim(r.rect.l)} × ${fmtDim(r.rect.w)}`, size: subSize });
+        if (r.rect && r.rect.w > .5 && r.shape === 'rectangle' && (flags.roomDims || r.area >= 9)) lines.push({ text: `${fmtDim(r.rect.l)} × ${fmtDim(r.rect.w)}`, size: subSize, optional: true });
         lines.push({ text: fmtArea(r.area), size: subSize });
         return { id: r.id, seed: r.label ? r.label.seed : (r.inside || r.centroid), ring: r.net, holes: r.space.holes || [], lines, areaHint: r.area };
       });
@@ -238,15 +242,30 @@ export function renderPlan(ctx, st) {
     st.labelLayout = lay; // للاختبارات الحية: عدد التراكبات
     const roomById = new Map(rooms.map(r => [r.id, r]));
     // لوحات التسميات نصف الشفافة كلها في مسار واحد وتعبئة واحدة: تُبقي الاسم والمساحة مقروءين فوق الأثاث وبلاط الأرضية دون هالة سميكة حول كل حرف
-    if (!sheet && flags.labelPlates !== false) { ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); for (const p of lay.placed) { const c = S({ x: p.x, y: p.y }), pw = p.w * k + 10, ph = p.h * k + 6; ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); } ctx.fill(); }
+    // ترميز الفراغات: الفراغ الذي لا تتسع تسميته بلا تراكب مع الأثاث يُرمَّز برقم داخل المسقط، وتُعرض قائمة الأرقام تحت التصميم (st.roomKey)
+    const keyed = new Map();
+    if (!sheet && flags.roomKey !== false) {
+      const need = lay.placed.filter(p => lay.items.has(p.id) && (p.onFurniture || p.forced)).sort((a, b) => a.y - b.y || b.x - a.x);
+      need.forEach((p, i) => keyed.set(p.id, i + 1));
+    }
+    st.roomKey = [...keyed].map(([id, n]) => ({ n, id, name: roomById.get(id)?.name || '', area: roomById.get(id)?.area || 0 }));
+    if (!sheet && flags.labelPlates !== false) { ctx.fillStyle = 'rgba(253,251,246,.76)'; ctx.beginPath(); for (const p of lay.placed) { if (keyed.has(p.id)) continue; const c = S({ x: p.x, y: p.y }), pw = p.w * k + 10, ph = p.h * k + 6; ctx.roundRect(c.x - pw / 2, c.y - ph / 2, pw, ph, Math.min(6, ph / 3)); } ctx.fill(); }
     for (const p of lay.placed) {
       const it = lay.items.get(p.id), r = roomById.get(p.id); if (!it || !r) continue;
-      const c = S({ x: p.x, y: p.y }); let y = c.y - (p.h * k) / 2 + it.lines[0].size * p.scale * k * .55;
+      if (keyed.has(p.id)) {
+        const c = S({ x: p.x, y: p.y }), rad = Math.max(9, Math.min(12, k * .26)), digits = '٠١٢٣٤٥٦٧٨٩';
+        ctx.fillStyle = T.accent; ctx.beginPath(); ctx.arc(c.x, c.y, rad, 0, 7); ctx.fill(); ctx.strokeStyle = T.paper; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = `700 ${Math.round(rad * 1.15)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(keyed.get(p.id)).replace(/\d/g, d => digits[d]), c.x, c.y + 1);
+        if (r.label && sel.has(r.label.id)) { ctx.strokeStyle = T.select; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(c.x, c.y, rad + 3, 0, 7); ctx.stroke(); }
+        continue;
+      }
+      const c = S({ x: p.x, y: p.y }), lines = p.lines || it.lines; let y = c.y - (p.h * k) / 2 + lines[0].size * p.scale * k * .55;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      it.lines.forEach((t, i) => {
-        const px = t.size * p.scale * k, font = `${i === 0 ? 700 : i === it.lines.length - 1 ? 400 : 500} ${px}px ${FONT}`;
+      lines.forEach((t, i) => {
+        const px = t.size * p.scale * k, font = `${i === 0 ? 700 : i === lines.length - 1 ? 400 : 500} ${px}px ${FONT}`;
         ctx.font = font; if (sheet) { ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.strokeText(t.text, c.x, y); }
-        ctx.fillStyle = i === 0 ? (r.unlabelled ? T.inkSoft : T.ink) : (sheet ? '#000' : i === it.lines.length - 1 ? T.inkSoft : T.ink); ctx.fillText(t.text, c.x, y);
+        ctx.fillStyle = i === 0 ? (r.unlabelled ? T.inkSoft : T.ink) : (sheet ? '#000' : i === lines.length - 1 ? T.inkSoft : T.ink); ctx.fillText(t.text, c.x, y);
         y += px * 1.25;
       });
       if (r.label && sel.has(r.label.id)) { ctx.strokeStyle = T.select; ctx.lineWidth = 1.5; ctx.strokeRect(c.x - p.w * k / 2, c.y - p.h * k / 2, p.w * k, p.h * k); }
