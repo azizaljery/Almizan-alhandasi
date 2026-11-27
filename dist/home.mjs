@@ -9,6 +9,7 @@ import { requestBrief, assistantOpen } from './assistant.mjs';
 import { SharaFlow, landBar, liveProfile, READINESS_AR } from './sharaa/flow.mjs';
 import { classifyOutcome, buildAlternatives, retryWith, OUTCOME } from './sharaa/alternatives.mjs';
 import { supportLabel } from './sharaa/ui-text.mjs';
+import { mountAdaptive } from './sharaa-v3/ui.mjs';
 
 const $ = id => document.getElementById(id);
 const home = $('home');
@@ -194,6 +195,8 @@ function beginChat() {
 }
 function buildPathSwitch() {
   const box = $('pathSwitch'); box.replaceChildren();
+  const adaptive = el0('button','chip','شرعاء V3 (تجريبي)'); adaptive.type='button';
+  adaptive.addEventListener('click',()=>{ if(document.getElementById('adaptiveInterview'))return; const panel=el0('section','card');panel.id='adaptiveInterview';chat.hidden=true;box.hidden=true;chat.after(panel);mountAdaptive(panel,session.brief.land,session.brief,{onClose:()=>{panel.remove();chat.hidden=false;box.hidden=false}}); }); box.append(adaptive);
   for (const [id, label] of [['free', 'أشرح فكرتي'], ['guided', 'أسئلة موجهة'], ['decide', 'ساعدني أقرر']]) {
     const b = el0('button', 'chip', label); b.type = 'button'; b.addEventListener('click', () => { clearControls(); step('mode', id); refreshPanels(); }); box.append(b);
   }
