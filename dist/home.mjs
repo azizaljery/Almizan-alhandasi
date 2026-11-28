@@ -14,6 +14,7 @@ import { mountSteps } from './journey-steps.mjs';
 import { writeHandoff } from './draw/handoff.mjs';
 import { displayOr, landFieldErrors, hasLandErrors } from './field-guards.mjs';
 import { requestBrief } from './assistant.mjs';
+import { mountAdaptive } from './sharaa-v3/ui.mjs';
 import { REGIONS, cityById, normalizeGeo, GEO_KEY, northText } from './geo-land.mjs';
 import { landBrief, landBriefSvg, normalizeStreetWidths, DISCLAIMER, SOURCE as MUNICIPAL_SOURCE } from './municipal-rules.mjs';
 
@@ -231,6 +232,7 @@ $('landForm').addEventListener('submit', e => {
   // تصميم محفوظ على الأرض نفسها: موقعها وعروض شوارعها (لا يدخلان التوليد) يُحدَّثان فيه، فتتبعهما بطاقتا الاشتراطات والشمس بلا إعادة توليد
   { const ds = designSession(); if (ds && sameLand(ds.input.land, confirmedLand) && JSON.stringify([ds.input.land.geo, ds.input.land.streetWidths]) !== JSON.stringify([confirmedLand.geo, confirmedLand.streetWidths])) { ds.input.land = { ...ds.input.land, geo: confirmedLand.geo, streetWidths: confirmedLand.streetWidths }; saveSession(localStorage, ds); } }
   if (session) session.setLand(confirmedLand); // حوار قائم: يبقى، ويُعاد حساب البرنامج على الأرض الجديدة
+  v3?.changeLand(confirmedLand); // مقابلة V3 قائمة: معلومات الأسرة تبقى وما يتأثر بالأرض يُعاد فحصه
   chatFor = null; saveHome(); go('Shara');
 });
 
@@ -276,6 +278,8 @@ function renderAll(messages) {
         b.addEventListener('click', () => { clearControls(); bubble(o.label, 'me'); step(m.id, o.id); });
         wrap.append(b);
       }
+      // خيار اختياري صريح التسمية: مقابلة V3 المعمارية. لا يمسّ مسار شرعاء الحالي ولا يبدّل جلسته إلا بإرسال صريح من العميل.
+      if (m.id === 'mode' && session?.phase === 'mode') { modeOptions = m.options; wrap.append(v3Chip()); }
       control(wrap);
     } else if (m.kind === 'multi') {
       const wrap = document.createElement('div'); wrap.className = 'pick'; const chosen = new Set();
@@ -319,6 +323,38 @@ function renderAll(messages) {
       control(wrap);
     }
   }
+}
+
+// ------------------------------------------------------------------------------------------------ شرعاء V3 (تجريبي)
+let v3 = null, modeOptions = [];
+function v3Chip() {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.id = 'v3Open'; b.textContent = 'مقابلة معمارية موسّعة (تجريبي)';
+  b.addEventListener('click', openV3); return b;
+}
+function modeWrap() {
+  const wrap = document.createElement('div'); wrap.className = 'pick';
+  for (const o of modeOptions) { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = o.label; b.addEventListener('click', () => { clearControls(); bubble(o.label, 'me'); step('mode', o.id); }); wrap.append(b); }
+  wrap.append(v3Chip()); return wrap;
+}
+function openV3() {
+  if (!confirmedLand) return fail(Error('أكّد الأرض أولًا.'));
+  clearControls(); bubble('أريد المقابلة المعمارية الموسّعة (تجريبي)', 'me');
+  const panel = el('section', 'v3-panel'); panel.id = 'v3Panel'; panel.setAttribute('aria-label', 'شرعاء V3 (تجريبي)');
+  const close = () => { v3 = null; panel.remove(); control(modeWrap()); };
+  try {
+    v3 = mountAdaptive(panel, confirmedLand, {
+      onClose: close,
+      onApply: async text => {
+        try {
+          // النص يمر بفهم شرعاء الحالي (ما فهمته / ما لن أطبّقه) ولا يتجاوزه
+          const understood = await interpretFree(text);
+          const id = session.phase === 'mode' ? (session.answer('mode', 'free'), 'free') : 'more';
+          v3 = null; panel.remove(); clearControls(); bubble(text, 'me'); render(session.answer(id, understood));
+        } catch (err) { fail(err); }
+      },
+    });
+  } catch (err) { v3 = null; return fail(err); }
+  control(panel);
 }
 
 /** نموذج الحديث الحر (أول مرة، أو إضافة لاحقة «more»). الذكاء المتصل اختياري برمز دخول. */
@@ -420,7 +456,7 @@ function renderProgram(m) {
 function edit(op) { try { render(session.answer('program', op)); } catch (err) { fail(err); } }
 function step(id, value) { try { render(session.answer(id, value)); } catch (err) { fail(err); } }
 function beginChat() {
-  chat.replaceChildren(); tlog = []; session = new SharaSession({ land: confirmedLand }); render(session.start());
+  v3 = null; chat.replaceChildren(); tlog = []; session = new SharaSession({ land: confirmedLand }); render(session.start());
 }
 /** جلسة حوار من جلسة تصميم سابقة لهذا الحفظ (لا نص حوار محفوظ لها): تُبنى من نص الطلب وأعداده المحفوظة فيها. */
 function sharaFromDesign(ds) {
@@ -436,7 +472,7 @@ function sharaFromDesign(ds) {
 function resumeChat() {
   const ds = designSession(), key = JSON.stringify([confirmedLand, ds?.createdAt || 0, ds?.designs.length || 0]);
   if (chatFor === key && chat.childElementCount) return; // المحادثة المعروضة هي الحالية
-  chatFor = key; regen = false; chat.replaceChildren(); setError($('chatError'), '');
+  chatFor = key; regen = false; v3 = null; chat.replaceChildren(); setError($('chatError'), '');
   const saved = store.get(HOME_KEY);
   if (!session && saved?.shara) { session = SharaSession.restore(saved.shara, { land: confirmedLand }); tlog = Array.isArray(saved.tlog) ? saved.tlog.filter(x => x && typeof x.text === 'string') : []; }
   if (!session && ds) {

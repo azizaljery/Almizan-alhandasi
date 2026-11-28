@@ -1377,3 +1377,6 @@ export function factSupport(b){
   }
   return out;
 }
+
+// سحب استنتاج غير مؤكد: لا يُسحب إلا ما لم يؤكده العميل؛ المؤكد يُعدَّل بمراجعة صريحة لا بالسحب.
+export function retract(b,id){const f=b.facts[id];if(!f)throw Error("Unknown fact");if(f.verification==="confirmed")throw Error("Confirmed facts need explicit revision");const n=JSON.parse(JSON.stringify(b));delete n.facts[id];n.revision++;n.history.push({id,before:f,after:null,revision:n.revision});n.acknowledged=[];return n}
