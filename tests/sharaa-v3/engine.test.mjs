@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {bank,siteFacts,gateMatches,createBrief,answer,nextQuestion,readiness,projectNative,siteFacts as sf} from '../../dist/sharaa-v3/core.mjs';
 import {depthOf,askable} from '../../dist/sharaa-v3/policy.mjs';
+import {previewProjection} from '../../dist/sharaa-v3/native-bridge.mjs';
 
 const LAND={widthM:18,depthM:30,entries:['n'],streets:[{side:'n'}],floors:1};
 const PROFILES={
@@ -89,9 +90,7 @@ test('mandatory unsupported requirement is withheld, listed as hard, never silen
   let b=answer(createBrief(LAND),'privacy.entrySight',true,{priority:'mandatory',source:'client_confirmed'});
   const r=readiness(b);
   assert.ok(r.hard.includes('privacy.entrySight'));
-  const native={spaces:[],fields:{},relations:[]};
-  const api={upsertSpace:(n)=>n,setField:(n)=>n,addRelation:(n)=>n};
-  const p=projectNative(b,native,api);
+  const p=previewProjection(b);
   assert.ok(p.withheld.includes('privacy.entrySight'));
   assert.ok(!p.sent.includes('privacy.entrySight'));
   assert.equal(r.canGenerate,false);
@@ -106,7 +105,8 @@ test('factSupport: every fact appears with a status; mandatory unmapped is never
   const pe=rows.find(r=>r.id==='privacy.entrySight');
   assert.equal(pe.mandatory,true);
   assert.notEqual(pe.support,'candidate');
-  assert.ok(rows.every(r=>['candidate','unmapped','unconfirmed','not_applicable'].includes(r.support)&&r.consumer));
+  assert.equal(rows.find(r=>r.id==='household.children').support,'context','demographics guide questions without pretending to be generated space');
+  assert.ok(rows.every(r=>['candidate','context','unmapped','unconfirmed','not_applicable'].includes(r.support)&&r.consumer));
 });
 test('factSupport: unconfirmed AI inference is reported, not treated as supported', () => {
   const b=answer(createBrief(LAND),'household.children',2,{source:'ai_inference'});

@@ -1,0 +1,10 @@
+✔ V3 manual approval cannot waive a confirmed hard requirement while legacy review remains advisory (522.264417ms)
+✔ V3 irregular plot cannot silently become its bounding rectangle (70.595198ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1338.609275

@@ -5,6 +5,8 @@
 // التقرير مربوط بنسخة المخطط (planVersion = بصمة هندسية ثابتة): أي تعديل هندسي يُبطله؛ تغيير اللون أو التسمية لا يبطله.
 // لا شروط إلزامية جديدة هنا: الإلزامي هو ما كان إلزاميًا أصلًا في المدقّق المستقل (design-impact.auditDoc) وسجل الطلب وقيود عزيز الصلبة.
 // نقي: بلا DOM ولا شبكة.
+import { v3RequestPriorityResolver } from './sharaa-v3/provenance.mjs';
+import { reviewV3 } from './sharaa-v3/quality.mjs';
 import { analyzeDoc } from './draw/digest.mjs';
 import { reviewDoc } from './draw/review.mjs';
 import { getById, parseDoc } from './draw/doc.mjs';
@@ -32,7 +34,7 @@ export const SEVERITY = Object.freeze({ MANDATORY: 'mandatory', WARNING: 'warnin
 export const STATE = Object.freeze({ VIOLATED: 'violated', VERIFIED: 'verified', UNVERIFIED: 'unverified' });
 export const SEVERITY_AR = Object.freeze({ mandatory: 'إلزامي', warning: 'تحذير', info: 'معلومة' });
 export const STATE_AR = Object.freeze({ violated: 'مخالف', verified: 'متحقق', unverified: 'غير متحقق' });
-export const SOURCE_AR = Object.freeze({ geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', daily: 'الحياة اليومية', review: 'المراجعة' });
+export const SOURCE_AR = Object.freeze({ 'sharaa-v3': 'متطلبات شرعاء V3', geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', daily: 'الحياة اليومية', review: 'المراجعة' });
 /** مسارات التصميم الخمسة التي يجب أن تمرّ كلها عبر البوابة. */
 export const ROUTES = Object.freeze(['first', 'alternative', 'merge', 'manual', 'chat']);
 export const ROUTE_AR = Object.freeze({ first: 'التوليد الأول', alternative: 'بديل', merge: 'دمج', manual: 'تعديل يدوي', chat: 'تعديل بالمحادثة' });
@@ -83,7 +85,10 @@ export function planVersion(doc, ctx = {}) {
   const lockedLabelIds = (ctx.locks || []).map(l => l.labelId).filter(Boolean);
   const geometryHash = 'geo:' + sha256(stable(planFingerprintInput(doc, { lockedLabelIds })));
   const requirementsHash = sha256(stable({ requirements: ctx.requirements || null, land: ctx.land || null, entry: ctx.entry || null, locks: (ctx.locks || []).map(l => l.key).sort() }));
-  return { geometryHash, requirementsHash: 'req:' + requirementsHash, planVersion: 'pv:' + sha256(geometryHash + '|' + requirementsHash) };
+  // V3 binds semantic room roles too: renaming a male majlis as female changes
+  // the evidence even when its walls have not moved. Legacy versions stay stable.
+  const semanticHash = ctx.requirements?.sharaaV3 ? sha256(stable((doc.labels || []).map(l => [l.id,l.level,l.type,l.name]).sort(byId))) : null;
+  return { geometryHash, requirementsHash: 'req:' + requirementsHash, ...(semanticHash ? { semanticHash: 'sem:' + semanticHash } : {}), planVersion: 'pv:' + sha256(geometryHash + '|' + requirementsHash + (semanticHash ? '|' + semanticHash : '')) };
 }
 
 // ------------------------------------------------------------------------------------------ تحديد المواقع
@@ -212,12 +217,13 @@ export function reviewDesign(doc, ctx = {}) {
 
     // 4) سجل طلب العميل (إلزامي ما لم يكن قاعدة مخصّصة؛ الخصوصية تُقاس بقسمها)
     guard('request', 'طلب العميل', SEVERITY.MANDATORY, () => {
+      const v3Priority = v3RequestPriorityResolver(req);
       const ledger = verifyRequest(doc, req, { entry }), soft = new Set((req.rules || []).filter(r => r.custom).map(r => r.id));
       for (const x of ledger) {
         if (/^PV-/.test(x.id || '')) continue;
         const state = x.unverified ? STATE.UNVERIFIED : x.ok ? STATE.VERIFIED : STATE.VIOLATED;
         const ids = (x.where || []).map(w => L.roomIdByName(w.name, w.level)).filter(Boolean);
-        add('request', String(x.id || x.text), soft.has(x.id) ? SEVERITY.WARNING : SEVERITY.MANDATORY, state, x.text, x.ok ? (x.evidence || 'متحقق من الرسم.') : (x.why || 'لم يتحقق.'), { kind: x.kind || null }, ids.length ? L.loc({ roomIds: ids, label: x.text }) : planLoc(x.text));
+        add('request', String(x.id || x.text), v3Priority(x) || (soft.has(x.id) ? SEVERITY.WARNING : SEVERITY.MANDATORY), state, x.text, x.ok ? (x.evidence || 'متحقق من الرسم.') : (x.why || 'لم يتحقق.'), { kind: x.kind || null }, ids.length ? L.loc({ roomIds: ids, label: x.text }) : planLoc(x.text));
       }
     });
 
@@ -334,6 +340,14 @@ export function reviewDesign(doc, ctx = {}) {
       }
     });
   }
+
+  if (req.sharaaV3 && model) guard('sharaa-v3', 'طلبات المقابلة المعمارية', SEVERITY.MANDATORY, () => {
+    for (const item of reviewV3(doc, req.sharaaV3).checks) {
+      const severity = item.priority === 'mandatory' ? SEVERITY.MANDATORY : SEVERITY.WARNING;
+      const state = item.state === 'verified' ? STATE.VERIFIED : item.state === 'violated' ? STATE.VIOLATED : STATE.UNVERIFIED;
+      add('sharaa-v3', item.id, severity, state, item.title, item.reason, item.evidence, L.loc({ roomIds: item.roomIds || [], levelId: item.levelId || null, label: item.title }));
+    }
+  });
 
   // ------------------------------------------------------------------------------------------ الملخص
   const counts = { mandatory: { violated: 0, unverified: 0, verified: 0 }, warning: { violated: 0, unverified: 0, verified: 0 }, info: { violated: 0, unverified: 0, verified: 0 } };

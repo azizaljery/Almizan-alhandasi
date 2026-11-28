@@ -3,6 +3,8 @@
 import * as C from './core.mjs';
 import {depthOf} from './policy.mjs';
 import {generateVillaDesigns, checkDoc, quality} from '../villa-layout.mjs';
+import {generateInitialDesign} from '../home-flow.mjs';
+import {projectToProduction} from './native-bridge.mjs';
 
 const L=(width,length,entry,streets)=>({width,length,entries:[entry],streets});
 export const SCENARIOS=[
@@ -39,12 +41,14 @@ export const SCENARIOS=[
 ];
 // يحاكي الجلسة بإجابات السيناريو فقط
 export function interview(sc,depth='standard'){
-  let b=C.createBrief({widthM:sc.land.width,depthM:sc.land.length,entries:sc.land.entries,streets:sc.land.streets.map(s=>({side:s})),floors:sc.land.floors||1,...(sc.land.climate?{climate:sc.land.climate}:{})});
+  let b=C.createBrief({...sc.land,widthM:sc.land.width,depthM:sc.land.length,entries:sc.land.entries,streets:sc.land.streets.map(s=>({side:s})),floors:sc.land.floors||1,...(sc.land.climate?{climate:sc.land.climate}:{})});
   const asked=[],excluded=[];
   for(let i=0;i<200;i++){const q=C.nextQuestion(b,{depth});if(!q)break;
     if(q.kind==='conflict'){excluded.push('CONFLICT:'+q.fields.join('/'));break}
-    asked.push(q.id);const v=sc.answers[q.id]!==undefined?sc.answers[q.id]:defaultFor(q);
-    try{b=C.answer(b,q.id,v,{priority:'preferred'})}catch(e){b=C.defer(b,q.id)}}
+    asked.push(q.id);
+    if(sc.answers[q.id]===undefined&&q.tier!==1){b=C.defer(b,q.id);continue;}
+    const v=sc.answers[q.id]!==undefined?sc.answers[q.id]:({'household.adults':2,'household.children':0,'household.parents':'none'}[q.id]??defaultFor(q));
+    b=C.answer(b,q.id,v,{priority:q.defaultPriority});}
   for(const q of C.bank)if(!C.gateMatches(q.gate,b))excluded.push(q.id);
   return {brief:b,asked,excluded,depth};
 }
@@ -57,10 +61,12 @@ export function countsFrom(b){
 // بوابة التوليد: لا توليد مع تعارض أو مع معلومة إلزامية غير مدعومة أو سؤال أساسي مفقود.
 export function generationGate(b){
   const r=C.readiness(b);
+  if(r.landIssues.length)return 'UNSUPPORTED_SITE: '+r.landIssues.map(i=>i.code).join(',');
   if(r.status==='CONFLICT_REQUIRES_DECISION')return 'CONFLICT: '+r.conflicts.map(c=>c.id).join(',');
   if(r.missing.length)return 'MISSING_CORE: '+r.missing.join(',');
   if(r.pending.length)return 'PENDING_CONFIRMATION: '+r.pending.join(',');
   if(r.hard.length)return 'MANDATORY_UNSUPPORTED: '+r.hard.join(',');
+  if(!r.canGenerate)return 'LIMITATIONS_REQUIRE_CLIENT_DECISION: '+r.unaccepted.join(',');
   return null;
 }
 export function generate(sc,counts,keep=4){
@@ -72,17 +78,24 @@ export function generate(sc,counts,keep=4){
     return {ok:true,ms:Date.now()-t0,alternatives:designs.length,checks};
   }catch(e){return {ok:false,ms:Date.now()-t0,reason:String(e.message||e)}}
 }
-export function runScenario(sc){
+export async function runScenario(sc){
   const it=interview(sc,'standard');
   const full=interview(sc,'full');
-  const counts=countsFrom(it.brief);
+  const projection=projectToProduction(it.brief),counts=projection.counts;
   const baselineCounts={bedrooms:counts.bedrooms,majlis:0,baths:1,kitchens:1,halls:1,dining:1};
   const support=C.factSupport(it.brief);
   const contract={schemaVersion:it.brief.schemaVersion,readiness:C.readiness(it.brief).status,support:support.reduce((a,r)=>(a[r.support]=(a[r.support]||0)+1,a),{}),
+    contextFacts:support.filter(r=>r.support==='context').map(r=>r.id),consumers:projection.ledger.map(r=>({id:r.id,mode:r.mode,consumer:r.consumer})),
     unmappedRequested:support.filter(r=>r.support==='unmapped'&&r.importance!=='flexible').map(r=>r.id)};
   const gate=generationGate(it.brief);
   const keep=it.brief.facts['budget.count']?.value??4;
-  const after=gate?{ok:false,blocked:gate}:generate(sc,counts,keep);
+  let after;
+  if(gate)after={ok:false,blocked:gate};
+  else{const t0=Date.now();try{
+    const result=await generateInitialDesign({land:projection.land,counts,requirements:projection.requirements,discovery:projection.discovery,idea:projection.idea,keep});
+    const designs=result.alternatives?.length?result.alternatives:[{doc:result.doc}],checks=designs.map(d=>({errors:checkDoc(d.doc).problems.length,eligible:d.sharaaQuality?.eligible??result.sharaaQuality?.eligible}));
+    after={ok:true,ms:Date.now()-t0,alternatives:designs.length,checks,requestedCounts:projection.requestedCounts,sharaaQuality:result.sharaaQuality};
+   }catch(e){after={ok:false,ms:Date.now()-t0,reason:e.message,code:e.code||null,findings:e.v3Findings||[]};}}
   return {id:sc.id,name:sc.name,land:sc.land,asked:it.asked.length,askedFull:full.asked.length,excludedCount:it.excluded.length,expect:sc.expect||null,contract,counts,keep,
     after,before:generate(sc,baselineCounts,4),baselineCounts};
 }

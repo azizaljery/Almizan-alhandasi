@@ -120,5 +120,7 @@ body.mizan-review[data-ambient] #stageWelcome .hero-showcase .scene{background:v
 body.mizan-review[data-ambient] #home .quiet{color:var(--ambient-ink)!important}
 body.mizan-review[data-ambient] .quiet{color:var(--ambient-ink);background:var(--ambient-surface);padding:5px 10px;border-radius:6px}
 @media(max-width:780px){body.mizan-review .hero-showcase .scene canvas{-webkit-mask-image:linear-gradient(#000 82%,transparent);mask-image:linear-gradient(#000 82%,transparent)}}
+/* mobile.css also anchors this control at the bottom. Keep one vertical
+   anchor on home, otherwise top + bottom stretch it over the interview. */
 @media(max-width:780px){body.mizan-review:has(#home) .ambient-motion{top:12px;bottom:auto!important}}
 @media print{body.mizan-review[data-ambient]{--ambient-sky:#fff;--ambient-surface:#fff;--ambient-ink:#000;--ambient-skyInk:#000;--ambient-muted:#333;--ambient-line:#999}.ambient-motion{display:none}}

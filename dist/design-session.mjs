@@ -10,6 +10,7 @@ import { visualSig, visualSim, macroSig, macroSim, MACRO_LIMIT, visualItems, ali
 import { fitStatement } from './fit-ladder.mjs';
 import { scorePlan, rankByScore } from './plan-score.mjs';
 import { solarSite } from './geo-land.mjs';
+import { reviewV3, validateV3Generation } from './sharaa-v3/quality.mjs';
 import { reviewGate, stampDesign, approveDesign, planVersion, ctxOfSession, reviewEnforced, DISCLAIMER as REVIEW_DISCLAIMER } from './design-review.mjs';
 export { scorePlan, rankByScore };
 
@@ -59,6 +60,12 @@ export function wantsAlternative(text = '') {
   const t = String(text).replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
   return /(?:تصميم|توزيع|مخطط|مسقط|فكره|شكل)\s*(?:ا?خر|بديل|مختلف|ثاني|جديد|غير)|(?:^|\s)(?:بديل|غيره|غيرها|غير التصميم|غير التوزيع|غيّره)(?:\s|$|[.،!؟])|ما (?:عجبني|اعجبني)|(?:ابي|ابغي|اريد|ودي) (?:شي|شيء) (?:ثاني|مختلف|جديد)/.test(t);
 }
+// V3 permits a new arrangement with the same confirmed program. A mixed or
+// unclassified request must return to the interview, even if it says "another".
+function v3AlternativeOnly(text) {
+  const t = String(text).replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/[،.!؟]/g, ' ').replace(/\s+/g, ' ').trim();
+  return /^(?:(?:ابي|ابغى|ابغي|اريد|اعطني|عطني|ورني|ممكن) )?(?:(?:تصميم|توزيع|مخطط|مسقط|فكره|شكل)(?: (?:اخر|بديل|مختلف|ثاني|جديد|غير)){1,3}|بديل|غيره|غيرها|غير التصميم|غير التوزيع|ما (?:عجبني|اعجبني))(?: (?:لو سمحت|من فضلك))?$/.test(t);
+}
 export function createSession({ land, counts, requirements, discovery, idea = '', result }) {
   const req = clone(requirements || extractRequirements(idea || '', { counts: counts || {}, discovery }));
   req.counts = { ...(req.counts || {}), ...(counts || {}) }; req.prefs ||= {}; req.extras ||= {}; req.areas ||= {}; req.tweaks ||= {};
@@ -103,6 +110,9 @@ export function carryOver(next, prev) {
  * يعيد { session, changes, reply } — reply: ما نُفّذ وما لم يُنفَّذ (بسببه) وما لم يُفهم، مقيسًا من المخطط الجديد.
  */
 export async function redesign(session, { picks = [], text = '', ai = null, auto = false, maxSim = undefined } = {}, { generate = generateInitialDesign } = {}) {
+  if (session?.input?.requirements?.sharaaV3 && (picks.some(id => id !== 'layout') || (String(text || '').trim() && !v3AlternativeOnly(text)) || ai)) {
+    const error = Error('هذا المشروع مرتبط بإجابات شرعاء V3؛ عدّل الطلب من «عدّل طلبي» لتأكيد الأعداد والقرارات الجديدة قبل التوليد.'); error.code = 'SHARAA_V3_EDIT_REQUIRED'; throw error;
+  }
   const s = clone(session), req = s.input.requirements, changes = [];
   req.prefs ||= {}; req.tweaks ||= {}; req.counts ||= {}; req.extras ||= {}; req.areas ||= {};
   let more = null;
@@ -354,6 +364,13 @@ export function approveReviewed(session, { decisions = null, enforce = null } = 
   const cur = session.designs[session.current], doc = currentDoc(session), ctx = ctxOfSession(session), enforced = enforce ?? reviewEnforced(session.input?.requirements);
   const pv = planVersion(doc, ctx).planVersion, dec = decisions ?? (session.reviewDecisions?.planVersion === pv ? session.reviewDecisions.ids : []);
   const result = approveDesign(doc, { ...ctx, route: cur.review?.route || null }, { report: cur.review || null, decisions: dec });
+  if (ctx.requirements?.sharaaV3) {
+    let checks;
+    try { validateV3Generation({ land: ctx.land, counts: ctx.requirements.counts, requirements: ctx.requirements }); checks = reviewV3(doc, ctx.requirements.sharaaV3).checks; }
+    catch (error) { checks = [{ id: 'brief', priority: 'mandatory', state: 'unverified', title: 'مقابلة شرعاء V3', reason: error.message || 'تعذرت قراءة القرارات المؤكدة؛ ارجع إلى المقابلة لمراجعتها.' }]; }
+    const unmet = checks.filter(c => c.priority === 'mandatory' && c.state !== 'verified');
+    if (unmet.length) return { session, status: 'refused', enforced: true, advisory: false, scope: 'sharaa-v3', result: { ...result, status: 'refused', refused: true, reasons: [{ code: 'SHARAA_V3_MANDATORY_NOT_VERIFIED', message: 'لم يثبت المخطط شروط المقابلة الإلزامية؛ أصلح المخطط أو عدّل القرار صراحة في شرعاء.', findings: unmet.map(c => ({ id: 'sharaa-v3:' + c.id, title: c.title, reason: c.reason })) }] } };
+  }
   if (result.refused && enforced) return { session, status: 'refused', enforced, advisory: false, result };
   const s = approve(session);
   s.designs[s.current].approval = result.refused ? { advisory: true, planVersion: result.report.planVersion, reasons: result.reasons.map(r => r.code), disclaimer: REVIEW_DISCLAIMER } : result.approval;

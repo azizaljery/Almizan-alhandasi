@@ -12,7 +12,7 @@ function boot() {
     worker.addEventListener('message', ev => {
       const w = waiting.get(ev.data?.id); if (!w) return; waiting.delete(ev.data.id);
       if (ev.data.ok) w.resolve(ev.data.result);
-      else { const e = Error(ev.data.error?.message || 'خطأ غير معروف'); if (ev.data.error?.code) e.code = ev.data.error.code; if (ev.data.error?.unclear) e.unclear = ev.data.error.unclear; w.reject(e); }
+      else { const e = Error(ev.data.error?.message || 'خطأ غير معروف'); if (ev.data.error?.code) e.code = ev.data.error.code; if (ev.data.error?.unclear) e.unclear = ev.data.error.unclear; if (Array.isArray(ev.data.error?.v3Findings)) e.v3Findings = ev.data.error.v3Findings; w.reject(e); }
     });
     // تعذّر تحميل العامل أو تعطّل: ما كان ينتظر يُنفَّذ في الخيط الرئيسي، وما بعده كذلك
     const down = () => { dead = true; try { worker?.terminate(); } catch { /* انتهى */ } worker = null; failAll('worker-error'); };
