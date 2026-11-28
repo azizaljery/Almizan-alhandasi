@@ -245,6 +245,8 @@ test('V3 manual approval cannot waive a confirmed hard requirement while legacy 
  const legacy=createSession({land,requirements:{},result:{doc:architectVilla({longHall:true}).doc}});assert.equal(approveReviewed(legacy).status,'approved');
 });
 test('V3 irregular plot cannot silently become its bounding rectangle',()=>{
- const irregular={...land,engineLand:{polygon:[{x:0,y:0},{x:20,y:0},{x:16,y:30},{x:0,y:30}]}},b=complete({},irregular),r=readiness(b);
- assert.equal(r.canGenerate,false);assert.ok(r.landIssues.length);assert.throws(()=>validateV3Generation({land,counts:projectToProduction(b).counts,requirements:projectToProduction(b).requirements}),e=>e.code==='SHARAA_V3_NOT_READY');
+ const polygon=[{x:0,y:0},{x:20,y:0},{x:16,y:30},{x:0,y:30}];
+ for(const geometry of [{engineLand:{polygon}},{geo:{polygon}},{polygon},{engineLand:{polygon:[]},polygon},{engineLand:{polygon:[]},geo:{polygon}},{geo:{polygon:[]},polygon}]){
+  const b=complete({},{...land,...geometry}),r=readiness(b);assert.equal(gateMatches('@irregular=true',b),true);assert.equal(r.canGenerate,false);assert.ok(r.landIssues.length);assert.throws(()=>validateV3Generation({land,counts:projectToProduction(b).counts,requirements:projectToProduction(b).requirements}),e=>e.code==='SHARAA_V3_NOT_READY');
+ }
 });

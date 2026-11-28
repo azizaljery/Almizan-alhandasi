@@ -46,11 +46,11 @@ export function environmentalContext(land, facts = {}) {
 }
 export function factsForSite(land, facts = {}) {
   const l = normalizeV3Land(land), context = environmentalContext(l, facts), sides = context.streets;
-  const polygon = l.engineLand?.polygon || l.geo?.polygon || l.polygon;
+  const hasPolygon = [l.engineLand?.polygon,l.geo?.polygon,l.polygon].some(p=>Array.isArray(p)&&p.length>2);
   return {
     '@corner': sides.some(a => sides.some(b => ['n', 's'].includes(a) !== ['n', 's'].includes(b))),
     '@narrow': context.depthM / context.frontageM >= 1.7, '@wide': context.frontageM / context.depthM >= 1.2,
-    '@irregular': Array.isArray(polygon) && polygon.length > 2,
+    '@irregular': hasPolygon,
     '@multi': l.floors > 1, '@west': context.westExposed,
     // Missing in the inherited land: answering must not make the question
     // inapplicable to its own saved answer or prevent a later correction.

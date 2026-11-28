@@ -102,8 +102,8 @@ export function factSupport(q,f){
  return{...c,limited,status:c.mode==='context'?'context':!execution?'not_requested':limited?'requires_review':'requested'};
 }
 export function readiness(b){
- const polygon=b.land.engineLand?.polygon||b.land.geo?.polygon||b.land.polygon;
- const landIssues=Array.isArray(polygon)&&polygon.length?[{code:'SITE_POLYGON_NOT_SUPPORTED',message:'حدود الأرض المضلعة تحتاج دراسة مطابقة للمساحة؛ مولّد المقابلة الحالي يعتمد أبعادًا مستطيلة، ولن يحوّل الحدود إلى مستطيل بصمت.'}]:[];
+ const hasPolygon=[b.land.engineLand?.polygon,b.land.geo?.polygon,b.land.polygon].some(p=>Array.isArray(p)&&p.length>0);
+ const landIssues=hasPolygon?[{code:'SITE_POLYGON_NOT_SUPPORTED',message:'حدود الأرض المضلعة تحتاج دراسة مطابقة للمساحة؛ مولّد المقابلة الحالي يعتمد أبعادًا مستطيلة، ولن يحوّل الحدود إلى مستطيل بصمت.'}]:[];
  const applies=q=>gateMatches(q.gate,b),complete=q=>b.facts[q.id]?.verification==='confirmed'&&!b.facts[q.id].recheck;
  const missing=bank.filter(q=>q.tier===1&&applies(q)&&!complete(q)).map(q=>q.id);
  const pending=bank.filter(q=>applies(q)&&b.facts[q.id]?.priority==='mandatory'&&!complete(q)).map(q=>q.id);
