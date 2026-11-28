@@ -62,5 +62,14 @@ jobs:
         run: |
           node scripts/home-journey-smoke.mjs
           node scripts/ambient-browser-smoke.mjs
+          node scripts/sharaa-v3-browser.mjs
         env:
           EXPECTED_COMMIT: ${{ github.sha }}
+          SITE_URL: https://almizan-handasi.aljeryabod.workers.dev
+          SHARAA_LIVE_SMOKE: '1'
+          QUALITY_EVIDENCE_DIR: ${{ runner.temp }}/sharaa-v3-live-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sharaa-v3-live-evidence
+          path: ${{ runner.temp }}/sharaa-v3-live-evidence

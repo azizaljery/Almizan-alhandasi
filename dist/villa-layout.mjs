@@ -60,12 +60,13 @@ export function buildProgram(counts = {}, req = {}) {
   let baths = B;
   const pr0 = req.prefs || {}, ex0 = req.extras || {};
   // دورات المياه بالترتيب: الرجال، النساء، الرئيسية، ثم بقية الغرف (مشتركة كل غرفتين ما لم يُطلب حمام لكل غرفة)
-  const menWc = M > 0 && baths > 0 ? 1 : 0; baths -= menWc;
-  const womenWc = M > 1 && baths > 0 ? 1 : 0; baths -= womenWc;
+  const receptionRoles = Array.isArray(pr0.receptionRoles) && pr0.receptionRoles.length === M ? pr0.receptionRoles : null;
+  const menWc = (receptionRoles ? receptionRoles.includes('men') : M > 0) && baths > 0 ? 1 : 0; baths -= menWc;
+  const womenWc = (receptionRoles ? receptionRoles.includes('women') : M > 1) && baths > 0 ? 1 : 0; baths -= womenWc;
   const guestWc = menWc + womenWc;
   const masterBath = baths > 0 ? 1 : 0; baths -= masterBath;
   // الخادمة والسائق إن طلبا حمامًا يُحجز لهما قبل غرف النوم
-  const reserve = (ex0.maid?.bath ? 1 : 0) + (ex0.driver?.bath ? 1 : 0), forRooms = Math.max(0, baths - reserve);
+  const reserve = (ex0.maid?.bath ? 1 : 0) + (ex0.driver?.bath ? 1 : 0) + (ex0.guestRoom?.reserveBath ? 1 : 0), forRooms = Math.max(0, baths - reserve);
   const others = N - 1;
   let ensuite = 0, shared = 0;
   if (pr0.sharedBaths && !pr0.allEnsuite) shared = Math.min(forRooms, Math.ceil(others / 2));
@@ -74,8 +75,8 @@ export function buildProgram(counts = {}, req = {}) {
   baths -= ensuite + shared;
   const attached = masterBath + ensuite;
   for (let i = 0; i < M; i++) {
-    const men = i === 0, women = i === 1;
-    blocks.push({ id: 'majlis' + (i + 1), kind: 'majlis', rank: i ? .5 : 0, area: T.majlis * (i ? .85 : 1), name: M > 1 ? (women ? 'مجلس النساء' : men ? 'مجلس الرجال' : 'مجلس ' + (i + 1)) : 'المجلس', men, women, guestWc: (men && menWc === 1) || (women && womenWc === 1) });
+    const men = receptionRoles ? receptionRoles[i] === 'men' : i === 0, women = receptionRoles ? receptionRoles[i] === 'women' : i === 1;
+    blocks.push({ id: 'majlis' + (i + 1), kind: 'majlis', rank: i ? .5 : 0, area: T.majlis * (i ? .85 : 1), name: M > 1 || receptionRoles ? (women ? 'مجلس النساء' : men ? 'مجلس الرجال' : 'مجلس ' + (i + 1)) : 'المجلس', men, women, guestWc: (men && menWc === 1) || (women && womenWc === 1) });
   }
   for (let i = 0; i < Dn; i++) blocks.push({ id: 'dining' + (i + 1), kind: 'dining', rank: 1, area: T.dining, name: Dn > 1 ? 'صالة طعام ' + (i + 1) : 'صالة الطعام' });
   for (let i = 0; i < K; i++) blocks.push({ id: 'kitchen' + (i + 1), kind: 'kitchen', rank: 1.5 + i * .05, area: i ? T.kitchen2 : T.kitchen, name: i ? 'مطبخ تحضيري' : 'المطبخ' });

@@ -1,5 +1,6 @@
 // منطق الصفحة الرئيسية: الأرض (طول وعرض وشوارع ومداخل) ← شرعاء ← تصميم أولي داخل المرسم.
 // وحدة نقية بلا DOM: كل ما فيها قابل للاختبار بـ node. الواجهة في home.mjs.
+import { enforceV3Result, validateV3Generation } from './sharaa-v3/quality.mjs';
 import { validatePlot, defaultRooms } from './planner.mjs';
 import { footprintDiagnostics } from './claude/planner.mjs';
 import { rankByDNA, geometryFingerprint } from './design-dna.mjs';
@@ -290,7 +291,13 @@ const PASS_CODES = ['VILLA_EXHAUSTED', 'VILLA_NO_BLEND'];
  * `fit` (ما خُفّف، والحقائق بالأرقام) لتُعرض على العميل بيانًا صريحًا. الطلب الأصلي لا يُعدَّل: سجل التنفيذ يبقى يقيس عليه.
  * strict: السلوك الدقيق بلا سلّم (للتشخيص والاختبار)؛ engine='legacy' كذلك. fitHint: درجات سلّم سبق نجاحها لهذا الطلب.
  */
+const V3_CHECKED = Symbol('sharaa-v3-generation');
 export async function generateInitialDesign(args) {
+  if (args.requirements?.sharaaV3 && !args[V3_CHECKED]) {
+    validateV3Generation(args);
+    const output = await generateInitialDesign({ ...args, [V3_CHECKED]: true });
+    return enforceV3Result(output, args.requirements);
+  }
   const { strict = false, fitHint = null, ...a } = args;
   if (strict || a.engine === 'legacy') return generateExact(a);
   normalizeLand(a.land); // أخطاء الإدخال تُرمى كما هي
@@ -365,7 +372,7 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
   // حتى خمسة بدائل مختلفة مرئيًا من المرة الأولى
   const out = generateVillaDesigns({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, shownMacro, blend });
   const best = out.designs[0], notes = [...new Set(best.notes)];
-  let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes }));
+  let dna = null; const alternatives = out.designs.map((d, i) => ({ index: i, strategy: 'villa-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, mirror: d.mirror, same: d.same, fit: d.fit }));
   // «تصميم آخر» (light) لا يحتاج بصمة المقارنة: تُحسب للتصميم الأول وحده، فلا تُهدر ثانية على كل بديل
   if (!light) try {
     const models = out.designs.map(d => ({ ...docToLegacy(d.doc).model, strategy: 'villa-' + d.mode }));
@@ -380,7 +387,7 @@ function villaDesign({ plot, land, rooms, discovery, idea, counts, requirements,
 function villaTwoFloors({ land, counts, requirements, exclude = [], prefer = null, shown = [], shownMacro = [], blend = null, keep = undefined, light = false, maxFails = null, maxSim = undefined }) {
   const out = generateVillaTwoFloors({ land, counts, requirements, keep: blend ? 1 : keep || (light ? 3 : 5), pick: light ? 1 : undefined, maxFails, maxSim, exclude, prefer, shown, shownMacro, blend });
   const best = out.designs[0];
-  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, search: out.search || null, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
+  return { doc: best.doc, report: { areaMismatch: [], unmatched: [] }, notes: [...best.notes, 'بصمة التصميم المقارنة تُحسب لدور واحد؛ البدائل متاحة.'], dna: null, alternatives: out.designs.map((d, i) => ({ index: i, strategy: 'villa2-' + d.mode, doc: d.doc, pat: d.pat, summary: d.summary, notes: d.notes, mirror: d.mirror, same: d.same, fit: d.fit })), alternativesCount: out.designs.length, selectedIndex: 0, strategy: 'villa2-' + best.mode, floors: 2, engine: out.engine, search: out.search || null, summary: best.summary, pat: best.pat, ledger: best.ledger || [], same: !!best.same, mirror: !!best.mirror };
 }
 
 /** دوران: الأرضي والعلوي بسلم متطابق (انظر multi-floor.mjs). بلا بصمة تصميم ولا بدائل: تُقدَّم لدور واحد فقط. */

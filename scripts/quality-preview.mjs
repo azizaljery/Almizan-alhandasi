@@ -10,7 +10,8 @@ db.batch = async statements => {
   try { const result = statements.map(s => { const r = db.sqlite.prepare(s.sql).run(...s.values); return { success: true, meta: { changes: Number(r.changes) } }; }); db.sqlite.exec('COMMIT'); return result; }
   catch (e) { db.sqlite.exec('ROLLBACK'); throw e; }
 };
-const root = resolve('dist'), before = resolve('/tmp/almizan-quality-before/dist');
+const root = resolve('dist'), before = resolve(process.env.QUALITY_BEFORE_ROOT || '/tmp/almizan-quality-before/dist');
+const port = Number(process.env.QUALITY_PREVIEW_PORT || 4317);
 const mime = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.hdr': 'application/octet-stream', '.woff2': 'font/woff2' };
 const assets = { async fetch(request) {
   let path = decodeURIComponent(new URL(request.url).pathname), base = root;
@@ -33,4 +34,4 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(response.status, Object.fromEntries(response.headers)); res.end(Buffer.from(await response.arrayBuffer()));
   } catch (e) { console.error(e); res.writeHead(500); res.end('local preview failed'); }
 });
-server.listen(4317, '127.0.0.1', () => console.log('QUALITY_PREVIEW http://127.0.0.1:4317 (isolated SQLite, no provider keys)'));
+server.listen(port, '127.0.0.1', () => console.log(`QUALITY_PREVIEW http://127.0.0.1:${port} (isolated SQLite, no provider keys)`));

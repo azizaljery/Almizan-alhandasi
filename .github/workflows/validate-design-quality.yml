@@ -45,6 +45,7 @@ jobs:
           node scripts/client-quality-browser.mjs
           node scripts/ambient-browser-smoke.mjs
           node scripts/client-tools-browser.mjs
+          node scripts/sharaa-v3-browser.mjs
         env:
           SITE_URL: http://127.0.0.1:4317
           AFTER_ONLY: '1'

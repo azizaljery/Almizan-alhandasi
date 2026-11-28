@@ -453,6 +453,7 @@ export async function sharaTurn(session, text, { page = 'design', redesign = red
     if (away) parts.push('التصميم المعدّل يحتاج أن تراه وتعتمده قبل أن يتحدث العرض ثلاثي الأبعاد والمخططات.');
     return { kind: 'changed', changed: !r.unchanged, session: out.session, text: parts.join(' '), actions: away ? [{ label: 'عرض التصميم المعدّل', href: './design.html' }] : [] };
   } catch (e) {
+    if (e.code === 'SHARAA_V3_EDIT_REQUIRED') return { kind: 'unclear', text: e.message, actions: [{ label: 'تعديل إجابات المقابلة المعمارية', href: './home.html#shara' }] };
     if (e.code === 'SHARA_UNCLEAR' || e.code === 'VILLA_EXHAUSTED') return { kind: 'unclear', text: e.message };
     return { kind: 'unclear', text: 'تعذّر تنفيذ الطلب: ' + (e.message || 'خطأ غير معروف') + ' لم أغيّر شيئًا في تصميمك.' };
   }

@@ -23,7 +23,7 @@ export const OPS = {
 };
 /** النتيجة بيانات صِرفة كما تُحفظ في التخزين (JSON)، فتطابق ما تقرؤه الصفحات بعد الحفظ حرفيًا. */
 export const plain = v => (v === undefined ? null : JSON.parse(JSON.stringify(v)));
-export const errorData = e => ({ message: e?.message || String(e), code: e?.code || null, unclear: e?.unclear || null, name: e?.name || 'Error' });
+export const errorData = e => ({ message: e?.message || String(e), code: e?.code || null, unclear: e?.unclear || null, v3Findings: e?.v3Findings || null, name: e?.name || 'Error' });
 
 if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typeof document === 'undefined') {
   self.addEventListener('message', async ev => {

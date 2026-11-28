@@ -1,4 +1,6 @@
 // واجهة الصفحة الرئيسية: استقبال ← الأرض ← شرعاء ← توليد ← المرسم. المنطق كله في home-flow.mjs.
+import { AdaptiveSharaSession as SharaSession } from './sharaa-v3/session.mjs';
+import { renderAdaptiveTurn } from './sharaa-v3/ui.mjs';
 import { ambientCycle } from './ambient-cycle.mjs';
 import { visit } from './fresh-visit.mjs'; // أولًا: الدخول الجديد يبدأ مشروعًا نظيفًا قبل أن تقرأ أي وحدة حالة المشروع
 import { startNewProject, hasProject, listPast, restorePast, deletePast, takeNotice } from './project-lifecycle.mjs';
@@ -6,7 +8,7 @@ import { coverOfSnapshot } from './photo-keep.mjs';
 import { loadThreeRuntime } from './three-runtime.mjs';
 import { createArchitecturalScene } from './cinematic-entry.mjs';
 import { saveSession, loadSession, carryOver, sameLand } from './design-session.mjs';
-import { normalizeLand, SharaSession, interpretFree, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
+import { normalizeLand, interpretFree, friendlyBuildError, landPreviewSvg, SIDE_LABELS } from './home-flow.mjs';
 import { generateInWorker, diagnoseInWorker, warm as warmGenerator, ticking } from './design-client.mjs';
 import { createDesignSeed } from './delivery-ui.mjs';
 import { HOME_KEY } from './journey-nav.mjs';
@@ -265,6 +267,10 @@ function render(messages, { record = true } = {}) {
 }
 function renderAll(messages) {
   for (const m of messages) {
+    if (m.kind === 'adaptive') {
+      const frame = renderAdaptiveTurn(m, { answer: (id, value, label) => { try { const next = session.answer(id, value); clearControls(); if (label) bubble(label, 'me'); render(next); } catch (err) { fail(err); } }, onGenerate: () => { if (!session.generationReady()) return fail(Error('احسم القرارات المطلوبة أولًا.')); clearControls(); build(); } });
+      control(frame); continue;
+    }
     if (m.kind === 'program') { renderProgram(m); continue; }
     const row = bubble(m.text, 'shara', m.kind === 'list' ? { kind: 'list', items: m.items || [] } : m.kind === 'note' ? { kind: 'note' } : m.kind === 'ask' ? { reason: m.reason } : null);
     if (m.kind === 'list' || m.kind === 'note') continue;
@@ -424,6 +430,7 @@ function beginChat() {
 }
 /** جلسة حوار من جلسة تصميم سابقة لهذا الحفظ (لا نص حوار محفوظ لها): تُبنى من نص الطلب وأعداده المحفوظة فيها. */
 function sharaFromDesign(ds) {
+  if (ds.input.requirements?.sharaaV3) return SharaSession.restore({ adaptive: ds.input.requirements.sharaaV3, texts: ['استعادة المقابلة المعمارية من المشروع'], proposals: [] }, { land: confirmedLand });
   const req = ds.input.requirements || {}, counts = {};
   for (const k of ['bedrooms', 'majlis', 'baths', 'kitchens', 'halls', 'dining']) if (Number.isInteger(req.counts?.[k])) counts[k] = req.counts[k];
   const texts = String(ds.input.idea || '').split('\n').map(t => t.trim()).filter(t => t.length >= 3);
@@ -532,16 +539,18 @@ function renderReport({ facts: f, options }, err) {
 
 let building = false;
 async function build() {
+  if (session?.generationReady && !session.generationReady()) return fail(Error('احسم القرارات المطلوبة في شرعاء أولًا.'));
   if (building) return; building = true;
   show('Build'); setError($('buildError'), ''); $('buildRetry').hidden = true; $('buildReport').hidden = true; $('buildBusy').hidden = false;
   // التوليد يجري في عامل خارج الخيط الرئيسي: الصفحة تبقى حيّة والمؤشر يعدّ الثواني الفعلية
   let stop = ticking($('buildText'), 'يبحث المحرك بين البدائل ويختار الأنسب لقيودك…');
   session.requirements.tweaks ||= {};
   session.requirements.tweaks.designSeed ||= createDesignSeed();
-  const input = { land: confirmedLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements };
+  const generationLand = session.adaptive ? session.projection.land : confirmedLand;
+  const input = { land: generationLand, rooms: session.rooms(), discovery: session.discovery(), idea: session.idea, counts: session.counts, requirements: session.requirements, ...(session.adaptive ? { keep: session.adaptive.facts['budget.count']?.value || 3 } : {}) };
   const prev = regen ? designSession() : null;
   try {
-    const out = await generateInWorker(input, { land: confirmedLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea });
+    const out = await generateInWorker(input, { land: generationLand, counts: session.counts, requirements: session.requirements, discovery: input.discovery, idea: input.idea });
     // التصميم الأولي يُعرض على العميل أولًا (اعتماد / تصميم آخر / تعديل في المرسم)؛ عند «عدّل طلبي» تبقى تصاميمه السابقة بعد الجديدة
     const ds = carryOver(out.session, prev).session;
     saveHome();
@@ -552,6 +561,12 @@ async function build() {
     location.href = './design.html';
   } catch (err) {
     stop(); setError($('buildError'), friendlyBuildError(err)); $('buildRetry').hidden = false;
+    if (String(err.code || '').startsWith('SHARAA_V3_')) {
+      $('buildBusy').hidden = true; $('buildText').textContent = '';
+      const report = $('buildReport'); report.replaceChildren(); report.hidden = false;
+      for (const item of err.v3Findings || []) { const p = document.createElement('p'); p.textContent = item.title + ': ' + item.reason; report.append(p); }
+      return;
+    }
     stop = ticking($('buildText'), 'أحلّل الصعوبات وأجرّب الخيارات على المحرك…');
     try { renderReport(await diagnoseInWorker({ land: confirmedLand, counts: session.counts, discovery: input.discovery, idea: input.idea }), err); stop(); $('buildText').textContent = ''; }
     catch (e2) { stop(); $('buildText').textContent = 'تعذّر التحليل التفصيلي.'; console.warn(e2); }
