@@ -54,6 +54,11 @@ try{
  const seen=await interview(page);check('couple has no child/parent follow-up questions',!seen.some(id=>/^(children|parents)\./.test(id)));
  check('question explains architectural purpose',(await page.locator('.sv3-why').innerText()).length>25);
  check('confirmed essentials enable generation',await page.locator('#sv3Generate').isEnabled());
+ await page.getByRole('combobox',{name:'تفاصيل المقابلة',exact:true}).selectOption('core');
+ check('basic interview can end without forcing optional questions',await page.locator('.sv3-question').count()===0&&await page.locator('#sv3Generate').isEnabled());
+ await page.getByRole('combobox',{name:'تفاصيل المقابلة',exact:true}).selectOption('full');
+ check('expanded interview exposes applicable further questions',await page.locator('.sv3-question').count()===1);
+ await page.getByRole('combobox',{name:'تفاصيل المقابلة',exact:true}).selectOption('standard');
  await free(page,'لازم عزل صوتي');await free(page,'أريد 3 غرف نوم');
  check('later description preserves pending hard acoustic wish',await page.locator('.sv3-proposal').filter({hasText:'عزل صوتي'}).count()===1);
  check('unconfirmed free text blocks generation',!(await page.locator('#sv3Generate').isEnabled()));

@@ -78,3 +78,6 @@ export function enforceV3Result(result,requirements){
   sharaaQuality:chosen.sharaaQuality,selectionSource:changed?'sharaa-eligibility-filter':result.selectionSource,
   notes:[...(changed?chosen.notes||[]:result.notes||[]),...(changed?['استُبعد الاختيار الأول لعدم إثبات شرط إلزامي، وعُرض أول بديل مستوفٍ وفق ترتيب المحرك القائم.']:[]),...chosen.sharaaQuality.checks.filter(c=>c.state!=='verified'&&c.priority!=='mandatory').map(c=>'يُراجع: '+c.title+' — '+c.reason)]};
 }
+
+// Preserve the standalone evidence-file API; live proof uses reviewV3 above.
+export {normalizeArabic,parseFree,qualityReview} from './evidence-quality.mjs';

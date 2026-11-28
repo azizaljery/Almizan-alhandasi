@@ -46,9 +46,12 @@ jobs:
           node scripts/ambient-browser-smoke.mjs
           node scripts/client-tools-browser.mjs
           node scripts/sharaa-v3-browser.mjs
+          node --test tests/design-contrast-tone.test.mjs
+          node scripts/studio-experience-browser.mjs
         env:
           SITE_URL: http://127.0.0.1:4317
           AFTER_ONLY: '1'
+          MIZAN_REQUIRE_BROWSER_TESTS: '1'
           QUALITY_EVIDENCE_DIR: ${{ runner.temp }}/quality-evidence
       - uses: actions/upload-artifact@v4
         if: always()

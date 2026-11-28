@@ -11,6 +11,8 @@ export function renderAdaptiveTurn(packet,{answer,onGenerate}){
  const env=packet.projection.environment;
  if(env.cityName){const place=node('p',`${env.cityName} · ${packet.brief.land.widthM} × ${packet.brief.land.depthM} م · ${packet.brief.land.streets.length} جهة شارع`,'sv3-context');root.append(place);}
  const fire=(id,value,label)=>answer(id,value,label);
+ const depthLabel=node('label','تفاصيل المقابلة','sv3-priority'),depth=node('select');depth.setAttribute('aria-label','تفاصيل المقابلة');
+ for(const[value,label]of [['core','القرارات الأساسية'],['standard','الاحتياجات المعتادة'],['full','تفاصيل معمارية موسعة']]){const option=node('option',label);option.value=value;option.selected=value===packet.depth;depth.append(option);}depth.addEventListener('change',()=>fire('v3.depth',depth.value));depthLabel.append(depth);root.append(depthLabel);
  if(packet.proposals.length){
   const box=node('section',null,'sv3-proposals');box.append(node('h3','هذا ما فهمته من وصفك — أكّده أو صحّحه'));
   for(const p of packet.proposals){const q=questionById(p.id),row=node('div',null,'sv3-proposal');const before=packet.brief.facts[p.id];
@@ -68,3 +70,6 @@ export function renderAdaptiveTurn(packet,{answer,onGenerate}){
  const foot=node('div',null,'sv3-generate');const generate=button('توليد التصميم وفق الإجابات المؤكدة',onGenerate,'sv3-button primary');generate.id='sv3Generate';generate.disabled=!packet.readiness.canGenerate;foot.append(generate,node('p',packet.readiness.canGenerate?'الأساس جاهز. يمكنك التوليد الآن أو إكمال التفاصيل؛ النتيجة تُفحص هندسيًا قبل عرضها.':packet.readiness.missing.length?`بقي ${packet.readiness.missing.length} من القرارات الأساسية قبل التوليد.`:'احسم التعارضات والتأكيدات والنقاط الإلزامية قبل التوليد.'));root.append(foot);
  return root;
 }
+
+// Retain the previous standalone prototype for integrations that import it.
+export {mountAdaptive} from './prototype-ui.mjs';

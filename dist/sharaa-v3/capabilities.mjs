@@ -13,6 +13,9 @@ const native = {
 // These have a separate geometric evaluator, in addition to native guidance.
 const measured = new Set(['household.bedrooms','hospitality.men','hospitality.women','services.kitchens','living.count','living.diningCount','living.baths','hospitality.majlisDining','hospitality.kitchenDining','hospitality.maleEntry','hospitality.femaleEntry','privacy.familyEntry','privacy.bathSight','parents.ground','sleep.masterFloor','living.shape','privacy.entrySight','privacy.guestRoute','living.passage']);
 export function capability(id, value) {
+  if(['children.sharedRooms','children.teenZone','architecture.materials','architecture.reference'].includes(id))return{mode:'limited',consumer:'handoff.architecturalNotes',verifiable:false};
+  if(id==='architecture.concept'&&value==='courtyard')return{mode:'native',consumer:'requirements.prefs.courtyard',verifiable:false};
+  if(id==='services.kitchenStyle'&&value==='open_to_hall')return{mode:'native',consumer:'requirements.prefs.kitchenOpenHall',verifiable:false};
   if(['household.guestBedroom','sleep.guestBath'].includes(id))return{mode:'measured',consumer:'requirements.extras.guestRoom',verifiable:true};
   if(id==='architecture.style'&&['modern','classic'].includes(value))return{mode:'native',consumer:'requirements.prefs.style',verifiable:false};
   if(id==='budget.count')return{mode:'context',consumer:'generation.keep',verifiable:false};

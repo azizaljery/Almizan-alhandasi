@@ -160,30 +160,35 @@ export function layoutLabels(labels, { measure = approxTextWidth, obstacles = []
   let overlaps = 0, moved = 0, shrunk = 0;
   const order = [...labels].sort((a, b) => (b.areaHint || 0) - (a.areaHint || 0));
   for (const l of order) {
-    const boxAt = (x, y, scale) => {
-      const w = Math.max(...l.lines.map(t => measure(t.text, t.size * scale))) + pad * 2, h = l.lines.reduce((s, t) => s + t.size * scale * lineGap, 0) + pad;
-      return { id: l.id, x, y, w, h, scale };
-    };
     // العوائق «اللينة» (الأثاث مثلًا) تُحترم أولًا؛ فإن ضاق الفراغ يُسمح بالكتابة فوقها (النص أولى من رسم الأثاث الرفيع)
     const free = (b, hard) => !boxes.some(o => (!hard || !o.soft) && boxesOverlap(b, o, .02));
     const fits = b => !l.ring || boxInside(b, l.ring, l.holes || []);
-    let best = null;
-    for (const scale of [1, .85, .72, minScale]) {
-      for (const hard of [false, true]) {
-        const seedBox = boxAt(l.seed.x, l.seed.y, scale);
-        if (fits(seedBox) && free(seedBox, hard)) { best = seedBox; break; }
-        for (let r = step; r <= maxR && !best; r += step) {
-          for (let k = 0; k < 16; k++) {
-            const a = k * Math.PI / 8, b = boxAt(r3(l.seed.x + Math.cos(a) * r), r3(l.seed.y + Math.sin(a) * r), scale);
-            if (fits(b) && free(b, hard)) { best = b; break; }
-          }
+    // النسخة الكاملة أولًا، ثم المختصرة (بلا السطر الاختياري «optional» كأبعاد الغرفة المكررة مع المساحة)
+    const variants = [l.lines, l.lines.filter(t => !t.optional)].filter((v, i, all) => v.length && (i === 0 || v.length < all[0].length));
+    const boxFor = lines => (x, y, scale) => {
+      const w = Math.max(...lines.map(t => measure(t.text, t.size * scale))) + pad * 2, h = lines.reduce((s, t) => s + t.size * scale * lineGap, 0) + pad;
+      return { id: l.id, x, y, w, h, scale, lines };
+    };
+    let best = null, usedLines = variants[0];
+    // الترتيب: أولًا بلا تراكب مع الأثاث (النسخة الكاملة ثم المختصرة عند كل حجم)، ثم يُسمح بالتراكب مع الأثاث اللين
+    const attempts = [];
+    for (const hard of [false, true]) for (const scale of (hard ? [1, .85, .72, minScale] : [1, .85, .72])) for (const lines of variants) attempts.push({ hard, scale, lines });
+    for (const { hard, scale, lines } of attempts) {
+      const boxAt = boxFor(lines);
+      const seedBox = boxAt(l.seed.x, l.seed.y, scale);
+      if (fits(seedBox) && free(seedBox, hard)) best = seedBox;
+      for (let r = step; r <= maxR && !best; r += step) {
+        for (let k = 0; k < 16; k++) {
+          const a = k * Math.PI / 8, b = boxAt(r3(l.seed.x + Math.cos(a) * r), r3(l.seed.y + Math.sin(a) * r), scale);
+          if (fits(b) && free(b, hard)) { best = b; break; }
         }
-        if (best) break;
       }
-      if (best) break;
+      if (best) { usedLines = lines; break; }
     }
     if (best) { if (best.scale < 1) shrunk++; if (best.x !== l.seed.x || best.y !== l.seed.y) moved++; }
-    else { best = boxAt(l.seed.x, l.seed.y, minScale); best.forced = true; shrunk++; overlaps += boxes.filter(o => !o.soft && boxesOverlap(best, o)).length; }
+    else { const lines = variants[variants.length - 1]; best = boxFor(lines)(l.seed.x, l.seed.y, minScale); usedLines = lines; best.forced = true; shrunk++; overlaps += boxes.filter(o => !o.soft && boxesOverlap(best, o)).length; }
+    best.lines = usedLines;
+    best.onFurniture = boxes.some(o => o.soft && boxesOverlap(best, o, .02)); // التسمية تقع فوق أثاث لين: الواجهة قد ترمّز الفراغ برقم بدل النص
     boxes.push(best); placed.push(best);
   }
   return { placed, overlaps, moved, shrunk };

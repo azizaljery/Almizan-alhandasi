@@ -1,0 +1,435 @@
+{
+  "mode": "complete",
+  "checks": [
+    {
+      "name": "Empty project starts with a clear guided entry",
+      "pass": true
+    },
+    {
+      "name": "Grid, axes and dimension chains are optional at startup",
+      "pass": true
+    },
+    {
+      "name": "Draw a closed room using actual canvas pointer events",
+      "pass": true
+    },
+    {
+      "name": "Selected wall length is editable in metres",
+      "pass": true
+    },
+    {
+      "name": "Undo restores the closed room after editing",
+      "pass": true
+    },
+    {
+      "name": "Furniture search filters real catalog cards",
+      "pass": true
+    },
+    {
+      "name": "Rotate furniture through the normal editing history",
+      "pass": true
+    },
+    {
+      "name": "Duplicate furniture",
+      "pass": true
+    },
+    {
+      "name": "Deleting and undoing preserve editable furniture",
+      "pass": true
+    },
+    {
+      "name": "Engineering display enables all dimension layers together",
+      "pass": true
+    },
+    {
+      "name": "Review is reachable and annotations appear only while reviewing",
+      "pass": true
+    },
+    {
+      "name": "Review markers leave the working plan clean",
+      "pass": true
+    },
+    {
+      "name": "Less frequent drawing tools remain discoverable",
+      "pass": true
+    },
+    {
+      "name": "Help dialog closes and restores keyboard focus",
+      "pass": true
+    },
+    {
+      "name": "Changing tools, view flags and panels never changes project geometry",
+      "pass": true
+    },
+    {
+      "name": "Downloaded JSON retains the complete editable document",
+      "pass": true
+    },
+    {
+      "name": "Reopening the downloaded project preserves all geometry and identifiers",
+      "pass": true
+    },
+    {
+      "name": "3D uses detailed furniture with identical saved dimensions and no extra dressing",
+      "pass": true,
+      "detail": {
+        "rich": true,
+        "dressing": false,
+        "mode": "dollhouse",
+        "stats": {
+          "meshes": 83,
+          "triangles": 69525,
+          "rooms": 9,
+          "levels": 1
+        },
+        "boxes": 18
+      }
+    },
+    {
+      "name": "First 3D view exposes the furnished interior",
+      "pass": true
+    },
+    {
+      "name": "360px: full-width plan fits the viewport without overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "canvasWidth": 342,
+        "canvasHeight": 338.609375,
+        "houseWidth": 226,
+        "houseHeight": 263.66666666666663,
+        "panelOpen": "false",
+        "targets": [
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44
+        ]
+      }
+    },
+    {
+      "name": "360px: header touch targets are at least 44px",
+      "pass": true,
+      "detail": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    {
+      "name": "360px: all six canvas controls remain fully reachable",
+      "pass": true,
+      "detail": [
+        {
+          "id": "zoomIn",
+          "left": 273,
+          "right": 317,
+          "height": 44
+        },
+        {
+          "id": "zoomOut",
+          "left": 227,
+          "right": 271,
+          "height": 44
+        },
+        {
+          "id": "zoomFit",
+          "left": 181,
+          "right": 225,
+          "height": 44
+        },
+        {
+          "id": "tgSnap",
+          "left": 135,
+          "right": 179,
+          "height": 44
+        },
+        {
+          "id": "tgGrid",
+          "left": 89,
+          "right": 133,
+          "height": 44
+        },
+        {
+          "id": "tgDims",
+          "left": 43,
+          "right": 87,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "360px: choosing furniture returns to the canvas",
+      "pass": true
+    },
+    {
+      "name": "360px: touch selection and movement keep the plan usable",
+      "pass": true,
+      "detail": {
+        "before": {
+          "x": 10,
+          "y": 6.1
+        },
+        "after": {
+          "x": 9.8,
+          "y": 8
+        },
+        "panelHidden": true,
+        "hit": {
+          "tag": "CANVAS",
+          "tool": "select",
+          "scale": 18.833333333333332
+        }
+      }
+    },
+    {
+      "name": "360px: explicit details button opens the sheet",
+      "pass": true
+    },
+    {
+      "name": "360px: drawing help is available from the project menu",
+      "pass": true
+    },
+    {
+      "name": "390px: full-width plan fits the viewport without overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "canvasWidth": 372,
+        "canvasHeight": 363.40625,
+        "houseWidth": 256,
+        "houseHeight": 298.66666666666663,
+        "panelOpen": "false",
+        "targets": [
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44
+        ]
+      }
+    },
+    {
+      "name": "390px: header touch targets are at least 44px",
+      "pass": true,
+      "detail": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    {
+      "name": "390px: all six canvas controls remain fully reachable",
+      "pass": true,
+      "detail": [
+        {
+          "id": "zoomIn",
+          "left": 288,
+          "right": 332,
+          "height": 44
+        },
+        {
+          "id": "zoomOut",
+          "left": 242,
+          "right": 286,
+          "height": 44
+        },
+        {
+          "id": "zoomFit",
+          "left": 196,
+          "right": 240,
+          "height": 44
+        },
+        {
+          "id": "tgSnap",
+          "left": 150,
+          "right": 194,
+          "height": 44
+        },
+        {
+          "id": "tgGrid",
+          "left": 104,
+          "right": 148,
+          "height": 44
+        },
+        {
+          "id": "tgDims",
+          "left": 58,
+          "right": 102,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "390px: choosing furniture returns to the canvas",
+      "pass": true
+    },
+    {
+      "name": "390px: touch selection and movement keep the plan usable",
+      "pass": true,
+      "detail": {
+        "before": {
+          "x": 10,
+          "y": 6.1
+        },
+        "after": {
+          "x": 9.8,
+          "y": 7
+        },
+        "panelHidden": true,
+        "hit": {
+          "tag": "CANVAS",
+          "tool": "select",
+          "scale": 21.333333333333332
+        }
+      }
+    },
+    {
+      "name": "390px: explicit details button opens the sheet",
+      "pass": true
+    },
+    {
+      "name": "390px: drawing help is available from the project menu",
+      "pass": true
+    },
+    {
+      "name": "820px: full-width plan fits the viewport without overflow",
+      "pass": true,
+      "detail": {
+        "overflow": false,
+        "canvasWidth": 802,
+        "canvasHeight": 388.203125,
+        "houseWidth": 245.1428571428571,
+        "houseHeight": 286,
+        "panelOpen": "false",
+        "targets": [
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44,
+          44
+        ]
+      }
+    },
+    {
+      "name": "820px: header touch targets are at least 44px",
+      "pass": true,
+      "detail": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    {
+      "name": "820px: all six canvas controls remain fully reachable",
+      "pass": true,
+      "detail": [
+        {
+          "id": "zoomIn",
+          "left": 503,
+          "right": 547,
+          "height": 44
+        },
+        {
+          "id": "zoomOut",
+          "left": 457,
+          "right": 501,
+          "height": 44
+        },
+        {
+          "id": "zoomFit",
+          "left": 411,
+          "right": 455,
+          "height": 44
+        },
+        {
+          "id": "tgSnap",
+          "left": 365,
+          "right": 409,
+          "height": 44
+        },
+        {
+          "id": "tgGrid",
+          "left": 319,
+          "right": 363,
+          "height": 44
+        },
+        {
+          "id": "tgDims",
+          "left": 273,
+          "right": 317,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "name": "820px: choosing furniture returns to the canvas",
+      "pass": true
+    },
+    {
+      "name": "820px: touch selection and movement keep the plan usable",
+      "pass": true,
+      "detail": {
+        "before": {
+          "x": 10,
+          "y": 6.1
+        },
+        "after": {
+          "x": 9.8,
+          "y": 7
+        },
+        "panelHidden": true,
+        "hit": {
+          "tag": "CANVAS",
+          "tool": "select",
+          "scale": 20.428571428571427
+        }
+      }
+    },
+    {
+      "name": "820px: explicit details button opens the sheet",
+      "pass": true
+    },
+    {
+      "name": "820px: drawing help is available from the project menu",
+      "pass": true
+    },
+    {
+      "name": "No unhandled browser errors in the studio journeys",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

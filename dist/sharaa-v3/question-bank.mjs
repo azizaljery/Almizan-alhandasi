@@ -1,4 +1,4 @@
-// Original 146-question candidate, preserved as data; runtime contract adds validation and explanations.
+// Original question records plus additions from production 5d3b3ca.
 export const records = [
   {
     "id": "household.adults",
@@ -1103,7 +1103,7 @@ export const records = [
     "domain": "future",
     "text": "هل ترغب بحجز موقع مصعد مستقبلي؟",
     "type": "b",
-    "gate": "@multi=true;future.expand=true",
+    "gate": "@multi=true&future.expand=true",
     "tier": 2,
     "consumer": "architectural.future.elevator"
   },
@@ -1313,5 +1313,23 @@ export const records = [
     "gate": "",
     "tier": 4,
     "consumer": "architectural.budget.review"
+  },
+  {
+    "id": "hospitality.majlisBath",
+    "domain": "hospitality",
+    "text": "هل يحتاج مجلس الرجال إلى دورة مياه خاصة به؟",
+    "type": "b",
+    "gate": "hospitality.men=true",
+    "tier": 2,
+    "consumer": "architectural.hospitality.majlisBath"
+  },
+  {
+    "id": "daily.qibla",
+    "domain": "daily",
+    "text": "هل يحتاج المصلى أو المجلس توجيهًا محددًا لاتجاه القبلة؟",
+    "type": "b",
+    "gate": "daily.prayer=true",
+    "tier": 2,
+    "consumer": "architectural.daily.qibla"
   }
 ];

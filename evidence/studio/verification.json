@@ -1,0 +1,33 @@
+{
+  "branch": "feat/studio-experience-20261127",
+  "base": "345f55922b87742c4cac11ac5d74471757aba913",
+  "production_at_start": "4eb43b92e70835c65c76464185cbd53c74995852",
+  "build": "pass",
+  "suite": {
+    "total": 1878,
+    "pass": 1864,
+    "fail": 0,
+    "skip": 10,
+    "todo": 4,
+    "exit": 0
+  },
+  "focused": {
+    "pass": 54,
+    "fail": 0,
+    "skip": 0
+  },
+  "browser_acceptance": {
+    "pass": 41,
+    "fail": 0
+  },
+  "contrast": {
+    "executed": true,
+    "phases": 5,
+    "viewports": [
+      390,
+      1280
+    ]
+  },
+  "production_deployed": false,
+  "physical_phone_performance": "not measured"
+}

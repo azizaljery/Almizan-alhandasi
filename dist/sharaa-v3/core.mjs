@@ -3,6 +3,7 @@ import { records } from './question-bank.mjs';
 import { labels } from './labels.mjs';
 import { normalizeV3Land, factsForSite } from './context.mjs';
 import { capability, requestsExecution, DOMAIN_WHY } from './capabilities.mjs';
+import {askable} from './policy.mjs';
 export const SCHEMA='SHARAA-BRIEF/3.0.0';
 const clone=v=>JSON.parse(JSON.stringify(v));
 const SOURCES=['client_answer','client_confirmed','client_free_text','ai_inference','design_default','land_step'];
@@ -90,6 +91,12 @@ export function conflicts(b){
  return out;
 }
 export function factSupport(q,f){
+ if(f===undefined&&q?.schemaVersion===SCHEMA){const b=q;return Object.entries(b.facts).map(([id,fact])=>{
+  const question=byId.get(id),row={id,domain:question.domain,consumer:capability(id,fact.value).consumer,importance:fact.priority,verification:fact.verification,source:fact.source,revision:fact.revision,mandatory:fact.priority==='mandatory'};
+  if(!gateMatches(question.gate,b))return{...row,support:'not_applicable',reason:'لم تعد بوابة السؤال متحققة.'};
+  if(fact.verification!=='confirmed'||fact.recheck)return{...row,support:'unconfirmed',reason:'تحتاج المعلومة تأكيد العميل أو مراجعتها بعد تغيير مرتبط.'};
+  const support=factSupport(question,fact);return{...row,...support,support:support.mode==='context'?'context':support.limited?'unmapped':'candidate',reason:support.mode==='context'?'توجه سياق المقابلة؛ ليست وعدًا بتنفيذ هندسي.':support.limited?'موثقة للمراجعة المتخصصة.':'لها مستهلك في المحرك؛ التنفيذ يُراجع على المخطط.'};
+ });}
  const c=capability(q.id,f.value),execution=requestsExecution(q,f.value)||f.priority==='mandatory';
  const limited=c.mode!=='context'&&execution&&(c.mode==='limited'||(f.priority==='mandatory'&&!c.verifiable));
  return{...c,limited,status:c.mode==='context'?'context':!execution?'not_requested':limited?'requires_review':'requested'};
@@ -104,9 +111,9 @@ export function readiness(b){
  const status=c.length?'CONFLICT_REQUIRES_DECISION':missing.length||pending.length?'NEEDS_CLARIFICATION':limits.length?'LIMITED_SUPPORT':'READY_TO_GENERATE';
  return{status,missing,pending,limits,hard,conflicts:c,unaccepted,canGenerate:!c.length&&!missing.length&&!pending.length&&!hard.length&&!unaccepted.length,answered:Object.keys(activeFacts(b)).length,applicable:bank.filter(applies).length};
 }
-export function nextQuestion(b){
+export function nextQuestion(b,{depth='standard'}={}){
  const collision=conflicts(b)[0];if(collision)return collision;
- const chosen=bank.filter(q=>gateMatches(q.gate,b)&&(!b.facts[q.id]||b.facts[q.id].verification!=='confirmed'||b.facts[q.id].recheck)&&(!b.deferred.includes(q.id)||q.tier===1||b.facts[q.id]?.priority==='mandatory'));
+ const chosen=bank.filter(q=>(askable(q,depth)||b.facts[q.id]?.priority==='mandatory')&&gateMatches(q.gate,b)&&(!b.facts[q.id]||b.facts[q.id].verification!=='confirmed'||b.facts[q.id].recheck)&&(!b.deferred.includes(q.id)||q.tier===1||b.facts[q.id]?.priority==='mandatory'));
  const score=q=>{const f=b.facts[q.id],children=b.facts['household.children'],parents=b.facts['household.parents'];const timely=q.id==='children.ages'&&children?.value>0||q.id==='parents.ground'&&parents?.value!=='none'&&parents?.verification==='confirmed';return(f?.recheck?220:f?.verification==='needs_confirmation'?210:timely?180:q.tier===1?140:q.tier===2?70:20)+Math.min(15,bank.filter(n=>dependencies(n).includes(q.id)).length*2)+(f?.priority==='mandatory'?30:0)-q.index/1000;};
  const q=chosen.sort((a,c)=>score(c)-score(a))[0];return q?{...q,kind:'question',score:score(q),needsConfirmation:b.facts[q.id]?.verification==='needs_confirmation',previous:b.facts[q.id]||null}:null;
 }

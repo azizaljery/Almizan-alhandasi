@@ -1,38 +1,40 @@
-# SHARAA V3 — isolated development candidate
-Base: 6731067bbe712fc0cc91d81517f29310bda1d0a6 (staging-preview snapshot). No live integration or deployment authorized by this commit.
+# شرعاء V3 — الربط مع إنتاج الميزان
 
-146 question records, 15 domains; deterministic selector, conditional applicability, typed answer validation, provenance, revisions, conflict detection, conservative readiness and V2 projection seam. Question weights and site aspect thresholds are provisional heuristics, not Saudi regulations. Climate must be supplied, not guessed from device location. The native projection is deliberately incomplete: do not generate using it until every mandatory requirement is demonstrably consumed by generator and reviewer. No automatic waiver, no new engine claims.
+يحوّل هذا الإصدار الحزمة المستقلة إلى مقابلة اختيارية تعمل داخل الصفحة الرئيسية، ثم يولّد برنامجًا من آخر إجابات العميل المؤكدة ويعيد فحص المخطط الناتج. التشغيل: الصفحة الرئيسية ← الأرض ← «مقابلة معمارية متكيفة — شرعاء V3». مسارا النص الحر والمقابلة السابقة باقيان للجلسات القديمة.
 
-Executed 24 pure JS assertions in authoring runtime, not Node or actual repository. Node test file supplied but not executed there. No npm ci, build, browser, full regression or native bridge execution verified. This is NOT completion of all 17 requirements. Free text NLP, visual conversation, full consumer registry, native integration, climate dataset, architecture quality analyzers and human review remain outstanding. Labels and question phrasing require Saudi architectural review. No production merge/deploy.
+الحزمة الأصلية `06facf25` تضمنت 146 سؤالًا و10 اختبارات Node فعلية؛ تقرير مؤلفها ذكر 24 تحققًا يدويًا في بيئة أخرى. وصل تحديث الإنتاج `5d3b3ca` أثناء التطوير، فدُمج كاملًا مع تحسينات المرسم والتباين وسؤالَي حمام المجلس والقبلة وسياسة عمق المقابلة. البنك الآن 148 سؤالًا. لم ندمج فرع staging-preview غير المرتبط بالإنتاج.
 
-## Agent acceptance gates
-1. Run node --test tests/sharaa-v3/core.test.mjs; add all pure cases from authoring evidence as Node tests. Validate every gate and answer option; test all 146 nodes.
-2. Verify native field/space/relations mappings and precedence against actual V2, R21 shared brief and reviewer. Preserve existing confirmed V2 facts, never silently drop hard requirements. Resolve requested count, direct door vs near, parking, vestibule and shading with explicit consumer evidence. Do not infer a guest-link waiver.
-3. Integrate behind opt-in flag; maintain single authoritative brief and existing V2 fallback. Test free text, guided, decide, revision, confirmation, conflict, acknowledgment, Arabic RTL and browser journey. Do not send unsupported requirements as implemented.
-4. Implement missing quality/knowledge modules and calibrate with architects; no fake solar or privacy verification. Add full acceptance matrix and run locked npm ci/build/full regression. Keep inherited failures visible. No deployment until independent acceptance.
+## السلوك الذي تغيّر
 
-## Authoring assertions passed
-- 146 unique questions
-- all gates refer to known facts
-- no children branch before confirmation
-- zero children excluded
-- children active
-- parents absent
-- parents permanent
-- corner differs
-- opposite roads not corner
-- west facade uses depth as frontage
-- inference cannot be mandatory
-- inference cannot overwrite confirmed
-- explicit revision required
-- revision invalidates descendants
-- reject invalid number
-- reject zero requested designs
-- one requested design accepted
-- required question cannot defer
-- unsupported mandatory blocks
-- conflict takes precedence
-- land change preserves family
-- deterministic selector
-- batch rejects unknown and retains valid
-- no mutation
+- السؤال التالي يتبع الأبناء وأعمارهم، إقامة الوالدين، الشوارع والمناخ المصرح به. مستويات أساسي/معتاد/موسع تقلّل عبء الحوار، ولا تخفي قرارًا إلزاميًا يحتاج مراجعة.
+- الوصف الحر ينتج فهمًا معروضًا للتأكيد أو التصحيح. العدد الجديد يستبدل السابق؛ لا تُجمع «ثلاث غرف» مع «أربع غرف» إلى سبع. النص الأصلي وسجل التصحيحات محفوظان محليًا.
+- غرف الضيوف والوالدين داخل إجمالي غرف النوم، والتحضيري داخل إجمالي المطابخ. مجلس النساء وحده يصل إلى المولّد باسم ودور صحيحين.
+- لكل معلومة حالة ومستهلك: سياق للمقابلة، طلب للمحرك، شرط قابل للقياس، أو بند يحتاج مختصًا. لا يُحوّل الاستنتاج إلى حقيقة مؤكدة، ولا يُستثنى شرط إلزامي دون تعديل صريح من العميل.
+- تعديل الأسرة أو الموقع يبطل الإجابات التابعة ويطلب مراجعتها. الحفظ والاستعادة يشملان القرارات والفهم المعلّق والعمق. تغيير الطلب بعد التصميم يعود إلى المقابلة؛ البديل الصرف يحتفظ بالمتطلبات المؤكدة.
+- فحص الجودة الحي يقرأ الغرف والأبواب ومسارات الحركة في مستند المرسم نفسه. يراجع الأعداد، أدوار المجالس، الغرفة الأرضية للوالدين، تناسب الصالة، الباب المباشر للطعام وقرب خدمة المطبخ واستقلال المداخل. الجدار المشترك وحده ليس بابًا.
+- تُستبعد البدائل التي لا تثبت شرطًا إلزاميًا. عدم العثور على بديل ليس برهان استحالة هندسية، ولا يبرر خفض الشروط أو اختلاق عدد بدائل. عند تغيير الاختيار تنتقل الهندسة وسجل التنفيذ والبصمة والبيانات الوصفية معًا.
+
+## أهم الملفات
+
+| الغرض | الملف |
+| --- | --- |
+| البنك والعقود والتعارضات وإبطال الإجابات | `question-bank.mjs`, `core.mjs`, `policy.mjs` |
+| سجل الحالة والوصف الحر والاقتراحات السياقية | `session.mjs`, `intake.mjs`, `ideas.mjs` |
+| التحويل إلى عقد الإنتاج وإظهار حدود الدعم | `native-bridge.mjs`, `capabilities.mjs`, `provenance.mjs` |
+| إثبات الهندسة وفلترة البدائل | `quality.mjs`, `../architect/saudi-quality.mjs` |
+| الواجهة العربية داخل الحوار الحالي | `ui.mjs`, `ui.css`, `../home.mjs` |
+| نماذج الاختبار الثلاثون | `scenarios.mjs` |
+
+`evidence-quality.mjs` و`prototype-ui.mjs` يحفظان واجهة تجربة الوكيل السابقة للتوافق. فحص ملف JSON الذي يقدمه مستخدم ليس إثباتًا من مصدر موثوق، ولا يدخل في اعتماد الهندسة الحية. الاستيراد القديم `projectNative` إلى عقد V2 غير الموجود في الإنتاج استُبدل بمحوّل `projectToProduction`؛ لا تُستخدم واجهة mock لإثبات التوافق.
+
+## التحقق والتسليم
+
+الأوامر: `npm run build`، `node --test tests/sharaa-v3.test.mjs`، `node --test --test-concurrency=4 tests/*.test.mjs`. ملف الاختبار الجذري يكتشف الاختبارات الفرعية في CI، بما فيها السيناريوهات الثلاثون. اختبار المتصفح `scripts/sharaa-v3-browser.mjs` يستخدم رحلة فعلية وعامل التوليد؛ يُضاف إلى CI والفحص بعد النشر. يستخدم حالات أسرة صناعية في التخزين المحلي ولا يستدعي مزود ذكاء أو يحجز تسليمًا في قاعدة الإنتاج.
+
+النتائج الدقيقة وحالة الدمج والنشر في [STATUS.md](STATUS.md)، ومصفوفة العمل في [TRACE.md](TRACE.md). الملف `scenarios.json` من تسليم `5d3b3ca` لقطة تاريخية؛ لا يمثل نتائج مسار الربط الجديد. التقرير الحالي سيُحفظ منفصلًا في أدلة التسليم.
+
+## حدود هندسية باقية
+
+هذه أداة مقابلة وتوليد أولي ومراجعة، وليست اعتماد مهندس. جودة المناخ والإنارة والتهوية والصوتيات والإنشاء والتربة والكلفة الفعلية ووضوح الحركة بعد وضع الأثاث لا تزال تحتاج أدلة متخصصة. استقلال المدخلين لا يثبت جميع حالات خصوصية النظر أو حركة الضيوف. نسب الصالة وحدود قرب الخدمة أهداف تصميمية قابلة للمعايرة وليست اشتراطات كود.
+
+لا يحق لهذه الحزمة إعلان اكتمال البنود كلها أو اعتماد SBC. محرك عزيز وأوزان Mizan Score وحساباته وبوابة المراجعة والأنظمة البلدية محفوظة؛ يضاف إليها دليل V3 ولا تُخفّض مخالفاتها. يلزم تقييم معماريين سعوديين وجودة مخططات على عينة مستقلة، وأداء جهاز جوال حقيقي لم يُقَس بمجرد المحاكاة المتصفحية.

@@ -6,21 +6,22 @@ import { proposeFromText } from './intake.mjs';
 import { architecturalIdeas } from './ideas.mjs';
 const clone=v=>JSON.parse(JSON.stringify(v));
 export class AdaptiveSharaSession extends LegacySession{
- constructor(options={}){super(options);this.adaptive=null;this.proposals=[];this.focusQuestion=null;}
+ constructor(options={}){super(options);this.adaptive=null;this.proposals=[];this.focusQuestion=null;this.depth='standard';}
  start(){const messages=super.start();const choice=messages.find(m=>m.id==='mode');if(choice)choice.options.unshift({id:'adaptive',label:'مقابلة معمارية متكيفة — شرعاء V3'});return messages;}
  #sync(){const p=projectToProduction(this.adaptive);this.projection=p;this.counts=p.counts;this.requirements=p.requirements;this.brief=p.brief;this.idea=p.idea;return p;}
  #packet(){
   this.#sync();let question=this.focusQuestion?questionById(this.focusQuestion):null;
   if(question&&!gateMatches(question.gate,this.adaptive))question=null;
-  if(!question)question=nextQuestion(this.adaptive);
+  if(!question)question=nextQuestion(this.adaptive,{depth:this.depth});
   const r=readiness(this.adaptive);
   const rejected=new Set(this.adaptive.history.filter(e=>e.kind==='decline_idea').map(e=>e.key));
-  return[{kind:'adaptive',id:'v3',text:'شرعاء V3 — مقابلة تتبع احتياجاتك',question:question?clone(question):null,brief:clone(this.adaptive),readiness:{...r,canGenerate:r.canGenerate&&!this.proposals.length},proposals:clone(this.proposals),ideas:architecturalIdeas(this.adaptive).filter(i=>!rejected.has(i.key)),projection:{program:this.projection.brief.program,environment:this.projection.environment,ledger:this.projection.ledger,requestedCounts:this.projection.requestedCounts},canSkip:question?.kind!=='conflict'&&question?.tier!==1&&this.adaptive.facts[question?.id]?.priority!=='mandatory'}];
+  return[{kind:'adaptive',id:'v3',depth:this.depth,text:'شرعاء V3 — مقابلة تتبع احتياجاتك',question:question?clone(question):null,brief:clone(this.adaptive),readiness:{...r,canGenerate:r.canGenerate&&!this.proposals.length},proposals:clone(this.proposals),ideas:architecturalIdeas(this.adaptive).filter(i=>!rejected.has(i.key)),projection:{program:this.projection.brief.program,environment:this.projection.environment,ledger:this.projection.ledger,requestedCounts:this.projection.requestedCounts},canSkip:question?.kind!=='conflict'&&question?.tier!==1&&this.adaptive.facts[question?.id]?.priority!=='mandatory'}];
  }
  answer(id,value){
   if(id==='mode'&&value==='adaptive'){this.mode='adaptive';this.phase='adaptive';this.texts=['مقابلة معمارية متكيفة'];this.adaptive=createBrief(this.land);this.proposals=[];return this.#packet();}
   if(this.mode!=='adaptive')return super.answer(id,value);
-  if(id==='v3.answer'){
+  if(id==='v3.depth'){if(!['core','standard','full'].includes(value))throw Error('عمق مقابلة غير معروف.');this.depth=value;this.focusQuestion=null;
+  }else if(id==='v3.answer'){
    const q=questionById(value?.id);if(!q)throw Error('سؤال غير معروف.');
    this.adaptive=answer(this.adaptive,q.id,value.value,{priority:value.priority||q.defaultPriority,evidence:value.evidence||q.text,revise:!!this.adaptive.facts[q.id]});this.proposals=this.proposals.filter(p=>p.id!==q.id);this.focusQuestion=null;
   }else if(id==='v3.focus'){
@@ -58,7 +59,7 @@ export class AdaptiveSharaSession extends LegacySession{
  discovery(){return this.adaptive?this.projection.discovery:super.discovery();}
  rooms(){return this.adaptive?defaultRooms(this.counts):super.rooms();}
  resume(){return this.adaptive?this.#packet():super.resume();}
- toJSON(){return{...super.toJSON(),...(this.adaptive?{mode:'adaptive',phase:'adaptive',adaptive:clone(this.adaptive),proposals:clone(this.proposals),focusQuestion:this.focusQuestion}:{} )};}
+ toJSON(){return{...super.toJSON(),...(this.adaptive?{mode:'adaptive',phase:'adaptive',adaptive:clone(this.adaptive),proposals:clone(this.proposals),focusQuestion:this.focusQuestion,depth:this.depth}:{} )};}
  static restore(data,{land=null}={}){
   if(!data?.adaptive){const legacy=LegacySession.restore(data,{land});if(!legacy)return null;const session=new AdaptiveSharaSession({land:legacy.land});Object.assign(session,legacy);return session;}
   try{
@@ -67,7 +68,7 @@ export class AdaptiveSharaSession extends LegacySession{
    session.mode='adaptive';session.phase='adaptive';session.texts=Array.isArray(data.texts)?data.texts.filter(t=>typeof t==='string').slice(-80):['مقابلة معمارية متكيفة'];
    if(!session.texts.length)session.texts=['مقابلة معمارية متكيفة'];
    session.proposals=Array.isArray(data.proposals)?data.proposals.filter(p=>questionById(p?.id)&&typeof p.evidence==='string').slice(0,146):[];
-   session.focusQuestion=questionById(data.focusQuestion)?.id||null;session.#sync();return session;
+   session.focusQuestion=questionById(data.focusQuestion)?.id||null;session.depth=['core','standard','full'].includes(data.depth)?data.depth:'standard';session.#sync();return session;
   }catch{return null;}
  }
  generationReady(){return this.adaptive?readiness(this.adaptive).canGenerate&&!this.proposals.length:true;}

@@ -1,5 +1,8 @@
 // Root entry is intentional: npm test and both CI glob commands discover V3.
 import './sharaa-v3/core.test.mjs';
+import './sharaa-v3/engine.test.mjs';
+import './sharaa-v3/quality.test.mjs';
+import './sharaa-v3/scenarios.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {bank,createBrief,answer,validate,gateMatches,questionById,readiness,nextQuestion,reviseLand,restoreBrief,acknowledge,defer,ingest,removeAnswer} from '../dist/sharaa-v3/core.mjs';
@@ -177,7 +180,7 @@ test('V3 garden and parking requests carry actual native output parameters rathe
  b=set(b,'garden.type','rear');assert.ok(readiness(b).limits.includes('garden.type'),'rear placement is not falsely claimed from a generic lawn');
 });
 test('V3 future elevator reservation is never silently converted into an installed elevator',()=>{
- let b=complete({}, {...land,floors:2});b=set(b,'future.elevator',true,'mandatory');const p=projectToProduction(b);assert.ok(readiness(b).hard.includes('future.elevator'));assert.equal(p.requirements.prefs.elevator,undefined);
+ let b=complete({}, {...land,floors:2});b=set(b,'future.expand',true);b=set(b,'future.elevator',true,'mandatory');const p=projectToProduction(b);assert.ok(readiness(b).hard.includes('future.elevator'));assert.equal(p.requirements.prefs.elevator,undefined);
 });
 test('V3 native spatial-rule provenance survives renumbering and keeps preferred requests soft',()=>{
  let b=set(complete(),'hospitality.dining','separate');b=set(b,'hospitality.majlisDining','near','preferred');const p=projectToProduction(b),req=structuredClone(p.requirements);req.rules=mergeRules([],req.rules);
@@ -228,4 +231,9 @@ test('V3 alternate selection keeps the chosen geometry, evidence, fingerprint an
 test('V3 pending hard priority survives rephrasing; negated obligation is not promoted automatically',()=>{
  const s=new AdaptiveSharaSession({land});s.answer('mode','adaptive');s.answer('v3.free','لازم مطبخ مغلق');s.answer('v3.free','مطبخ مفتوح على الصالة');assert.equal(s.proposals.find(p=>p.id==='services.kitchenStyle').priority,'mandatory');
  assert.ok(proposeFromText('مو لازم مطبخ مفتوح').every(p=>p.priority!=='mandatory'));
+});
+test('V3 interview depth restores without hiding an unresolved mandatory dependent question',()=>{
+ const s=new AdaptiveSharaSession({land});s.answer('mode','adaptive');s.answer('v3.depth','full');const restored=AdaptiveSharaSession.restore(s.toJSON());assert.equal(restored.depth,'full');
+ let b=complete({'household.children':2});b=set(b,'children.ages','teen');b=set(b,'children.sharedRooms',true,'mandatory');b=set(b,'household.children',3);
+ assert.equal(nextQuestion(b,{depth:'core'}).id,'children.sharedRooms');assert.ok(readiness(b).pending.includes('children.sharedRooms'));
 });

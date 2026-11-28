@@ -16,7 +16,7 @@ const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } }))
 p.on('console', m => { if (m.type() === 'error' && !/ERR_FAILED|fonts\.g|net::/.test(m.text())) errs.push(m.text()); }); p.on('pageerror', e => errs.push(e.message)); p.on('dialog', d => d.accept());
 await p.goto(base + '/final.html'); await p.waitForSelector('.empty');
 check('بلا مشروع: رسالة واضحة', (await p.locator('.empty').innerText()).includes('لا يوجد تصميم'));
-await p.goto(base + '/studio.html'); await p.click('#btnExample'); await p.waitForTimeout(500);
+await p.goto(base + '/studio.html'); await p.click('#studioProjectMenu summary'); await p.click('#btnExample'); await p.waitForTimeout(500);
 check('زر اعتمد وأخرج ظاهر', await p.locator('#btnFinal').isVisible());
 await p.click('#btnFinal'); await p.waitForURL('**/view3d.html'); await p.waitForTimeout(2500); await p.click('#toFinal'); await p.waitForURL('**/final.html'); await p.waitForSelector('#summary');
 check('ملخص وأقسام', (await p.locator('.sec').count()) >= 6, String(await p.locator('.sec').count()));

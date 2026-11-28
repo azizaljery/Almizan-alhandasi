@@ -14,65 +14,37 @@
 <link rel="stylesheet" href="./lux-theme.css">
 <link rel="stylesheet" href="./design-review.css">
 <link rel="stylesheet" href="./mobile.css">
+<link rel="stylesheet" href="./studio-experience.css">
 </head>
-<body data-stage="studio">
-<div class="app" id="app" data-view="split">
+<body data-stage="studio" class="studio-experience">
+<div class="app" id="app" data-view="plan" data-panel-open="true">
   <header class="top">
-    <a class="brand mz-logo" href="./" title="العودة إلى الصفحة الرئيسية"><img src="./assets/mizan-logo.svg" alt="" width="30" height="30"><span><b>مرسم الميزان</b><small>AL MIZAN STUDIO</small></span></a>
-    <input class="title" id="docTitle" maxlength="80" aria-label="اسم المشروع" value="مشروع جديد">
-    <div class="group">
-      <button class="ib" id="undo" title="تراجع (Ctrl+Z)" disabled><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-3"/></svg></button>
-      <button class="ib" id="redo" title="إعادة (Ctrl+Y)" disabled><svg viewBox="0 0 24 24"><path d="m15 7 5 5-5 5M20 12H9a5 5 0 0 0 0 10h3"/></svg></button>
-    </div>
-    <div class="seg" role="group" aria-label="طريقة العرض">
-      <button data-view="plan">المخطط</button><button data-view="split" class="on">مقسوم</button><button data-view="3d">ثلاثي الأبعاد</button>
-    </div>
+    <a class="brand mz-logo" href="./home" aria-label="الميزان الهندسي، الرئيسية"><img src="./assets/mizan-logo.svg" alt="" width="34" height="34"><span><b>مرسم منزلك</b><small>الميزان الهندسي</small></span></a>
+    <div class="studio-project"><label for="docTitle" class="sr-only">اسم المشروع</label><input class="title" id="docTitle" maxlength="80" value="مشروع جديد"><span id="studioSaveState" class="studio-save" role="status">حفظ محلي تلقائي</span></div>
+    <div class="seg studio-view" role="group" aria-label="طريقة العرض"><button data-view="plan" class="on">المخطط</button><button data-view="3d">المجسم</button><button data-view="split">جنبًا إلى جنب</button></div>
     <div class="grow"></div>
-    <div class="group">
-      <button class="btn" id="btnNew">جديد</button>
-      <button class="btn" id="btnExample">مثال جاهز</button>
-      <button class="btn" id="btnOpen" title="فتح ملف مشروع من المرسم، أو مخططًا مولّدًا من النظام القديم (ملف المشروع .json)">فتح</button>
-      <button class="btn primary" id="btnSave">حفظ</button>
-      <button class="btn primary" id="btnFinal" title="اعتمد التصميم وانتقل إلى العرض ثلاثي الأبعاد ثم المخرجات">اعتمد ← العرض ثلاثي الأبعاد</button>
-      <div class="menu"><button class="btn" id="btnExport" aria-haspopup="true">تصدير ▾</button>
-        <div class="menu-list" id="exportMenu" hidden>
-          <button data-export="png">صورة المخطط (PNG)</button><button data-export="png3d">صورة المجسم (PNG)</button><button data-export="dxf">ملف CAD (DXF)</button><button data-export="bundle">استوديو التصدير (حزمة)</button><button data-export="json">ملف المشروع (JSON)</button>
-        </div></div>
-      <input type="file" id="fileInput" accept=".json,application/json" hidden>
-    </div>
+    <div class="group studio-history"><button class="ib" id="undo" title="تراجع (Ctrl+Z)" aria-label="تراجع" disabled><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-3"/></svg></button><button class="ib" id="redo" title="إعادة (Ctrl+Y)" aria-label="إعادة" disabled><svg viewBox="0 0 24 24"><path d="m15 7 5 5-5 5M20 12H9a5 5 0 0 0 0 10h3"/></svg></button></div>
+    <details class="studio-file-menu" id="studioProjectMenu"><summary>المشروع <span aria-hidden="true">⌄</span></summary><div class="studio-menu"><button class="btn" id="btnOpen">فتح مشروع</button><button class="btn" id="btnExample">تجربة منزل جاهز</button><button class="btn" id="btnNew">مشروع جديد</button><button class="btn" id="studioHelpMenu">شرح الرسم والتعديل</button><div class="menu"><button class="btn" id="btnExport" aria-haspopup="true" aria-expanded="false">تصدير المخطط والمجسم</button><div class="menu-list" id="exportMenu" hidden><button data-export="png">صورة المخطط (PNG)</button><button data-export="png3d">صورة المجسم (PNG)</button><button data-export="dxf">ملف CAD (DXF)</button><button data-export="bundle">حزمة المخرجات</button><button data-export="json">ملف المشروع (JSON)</button></div></div></div></details>
+    <button class="btn" id="btnSave" title="تنزيل نسخة قابلة للفتح والتعديل على جهازك">حفظ نسخة</button><button class="btn primary" id="btnFinal">مراجعة واعتماد</button>
+    <input type="file" id="fileInput" accept=".json,application/json" hidden>
   </header>
 
-  <aside class="rail" id="rail" aria-label="أدوات الرسم">
-    <button data-tool="select" class="on" title="تحديد وتحريك (V)"><svg viewBox="0 0 24 24"><path d="m5 3 14 8-6 2-2 6z"/></svg><span>تحديد</span></button>
-    <button data-tool="pan" title="تحريك الشاشة (H) — أو اسحب بالزر الأوسط"><svg viewBox="0 0 24 24"><path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-6.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V14c0 4-2 7-6 7-3 0-4-1.5-6-4l-2-3a1.6 1.6 0 0 1 2.5-2L8 14"/></svg><span>تحريك</span></button>
-    <i></i>
-    <button data-tool="wall" title="جدار (W) — اكتب الطول بالأرقام ثم Enter"><svg viewBox="0 0 24 24"><path d="M3 20 21 4M3 20l3-1M21 4l-1 3"/><rect x="3" y="17" width="4" height="4"/></svg><span>جدار</span></button>
-    <button data-tool="rect" title="غرفة مستطيلة"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12"/><path d="M4 12h6M14 12h6" stroke-dasharray="1 2"/></svg><span>غرفة</span></button>
-    <button data-tool="opening" title="باب / نافذة (D)"><svg viewBox="0 0 24 24"><path d="M3 18h6M15 18h6M9 18V6a9 9 0 0 1 6 12"/></svg><span>فتحة</span></button>
-    <button data-tool="room" title="تسمية الغرفة ونوعها"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 10h8M8 14h5"/></svg><span>تسمية</span></button>
-    <button data-tool="fixture" title="أثاث وتجهيزات"><svg viewBox="0 0 24 24"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M3 12h18v5H3zM6 17v2M18 17v2"/></svg><span>أثاث</span></button>
-    <button data-tool="stair" title="سلم"><svg viewBox="0 0 24 24"><path d="M3 20h5v-4h5v-4h5V8h3"/></svg><span>سلم</span></button>
-    <button data-tool="column" title="عمود"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" fill="currentColor"/></svg><span>عمود</span></button>
-    <i></i>
-    <button data-tool="dimension" title="قياس يبقى على المخطط"><svg viewBox="0 0 24 24"><path d="M3 8v8M21 8v8M3 12h18M6 10l-3 2 3 2M18 10l3 2-3 2"/></svg><span>قياس</span></button>
-    <button data-tool="measure" title="مسطرة (M) — لا تُحفظ"><svg viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20zM8 12l2 2M11 9l1.5 1.5M14 6l2 2"/></svg><span>مسطرة</span></button>
-    <button data-tool="text" title="نص (T)"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span>نص</span></button>
-    <button data-tool="erase" title="ممحاة (E)"><svg viewBox="0 0 24 24"><path d="m7 21-4-4a2 2 0 0 1 0-3L14 3a2 2 0 0 1 3 0l4 4a2 2 0 0 1 0 3L11 21zM9 9l7 7"/></svg><span>ممحاة</span></button>
-  </aside>
+  <nav class="rail" id="rail" aria-label="أدوات الرسم"><div class="studio-tools-primary"><button data-tool="select" class="on" title="تحديد وتحريك (V)"><svg viewBox="0 0 24 24"><path d="m5 3 14 8-6 2-2 6z"/></svg><span>تعديل</span></button><button data-tool="wall" title="جدار (W) — اكتب الطول بالأرقام ثم Enter"><svg viewBox="0 0 24 24"><path d="M3 20 21 4M3 20l3-1M21 4l-1 3"/><rect x="3" y="17" width="4" height="4"/></svg><span>جدار</span></button><button data-tool="rect" title="غرفة مستطيلة"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12"/><path d="M4 12h6M14 12h6" stroke-dasharray="1 2"/></svg><span>غرفة</span></button><button data-tool="opening" title="باب / نافذة (D)"><svg viewBox="0 0 24 24"><path d="M3 18h6M15 18h6M9 18V6a9 9 0 0 1 6 12"/></svg><span>باب ونافذة</span></button><button data-tool="fixture" title="أثاث وتجهيزات"><svg viewBox="0 0 24 24"><path d="M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M3 12h18v5H3zM6 17v2M18 17v2"/></svg><span>الأثاث</span></button><button data-tool="measure" title="مسطرة (M) — لا تُحفظ"><svg viewBox="0 0 24 24"><path d="m4 16 12-12 4 4L8 20zM8 12l2 2M11 9l1.5 1.5M14 6l2 2"/></svg><span>قياس</span></button></div><details class="studio-more-tools" id="studioMoreTools"><summary>المزيد <span aria-hidden="true">⌄</span></summary><div class="studio-more-list"><button data-tool="room" title="تسمية الغرفة ونوعها"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 10h8M8 14h5"/></svg><span>تسمية</span></button><button data-tool="stair" title="سلم"><svg viewBox="0 0 24 24"><path d="M3 20h5v-4h5v-4h5V8h3"/></svg><span>سلم</span></button><button data-tool="column" title="عمود"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" fill="currentColor"/></svg><span>عمود</span></button><button data-tool="dimension" title="قياس يبقى على المخطط"><svg viewBox="0 0 24 24"><path d="M3 8v8M21 8v8M3 12h18M6 10l-3 2 3 2M18 10l3 2-3 2"/></svg><span>قياس</span></button><button data-tool="text" title="نص (T)"><svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></svg><span>نص</span></button><button data-tool="pan" title="تحريك الشاشة (H) — أو اسحب بالزر الأوسط"><svg viewBox="0 0 24 24"><path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-6.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V14c0 4-2 7-6 7-3 0-4-1.5-6-4l-2-3a1.6 1.6 0 0 1 2.5-2L8 14"/></svg><span>تحريك</span></button><button data-tool="erase" title="ممحاة (E)"><svg viewBox="0 0 24 24"><path d="m7 21-4-4a2 2 0 0 1 0-3L14 3a2 2 0 0 1 3 0l4 4a2 2 0 0 1 0 3L11 21zM9 9l7 7"/></svg><span>ممحاة</span></button></div></details><div class="studio-rail-end"><button type="button" id="studioHelp" class="studio-link">كيف أعدّل؟</button><button type="button" id="studioPanelToggle" class="studio-panel-toggle" aria-controls="side" aria-expanded="true">التفاصيل والأدوات</button></div></nav>
 
   <section class="stage">
+    <div class="studio-stage-head"><div><span class="studio-eyebrow">مساحة التصميم</span><strong id="studioToolTitle">حدد ما تريد تعديله</strong></div><div class="studio-stage-actions"><button type="button" id="studioRoomsShortcut">الغرف</button><button type="button" id="studioReviewShortcut">فحص المخطط <span id="studioReviewBadge"></span></button></div></div>
     <div class="optbar" id="optbar" aria-live="polite"></div>
     <div class="panes">
       <div class="pane plan" id="planPane">
         <canvas id="planCanvas" aria-label="لوحة الرسم"></canvas>
         <div class="levels" id="levels" role="tablist" aria-label="الأدوار"></div>
         <div class="floaters">
-          <button class="fl" id="zoomIn" title="تكبير">+</button><button class="fl" id="zoomOut" title="تصغير">−</button><button class="fl" id="zoomFit" title="ملاءمة (F)"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-          <button class="fl toggle on" id="tgSnap" title="الالتقاط (يعطّله Alt)">⌖</button><button class="fl toggle on" id="tgGrid" title="الشبكة">▦</button><button class="fl toggle on" id="tgDims" title="القياسات">↔</button>
+          <button class="fl" id="zoomIn" title="تكبير" aria-label="تكبير المخطط">+</button><button class="fl" id="zoomOut" title="تصغير" aria-label="تصغير المخطط">−</button><button class="fl" id="zoomFit" title="ملاءمة (F)" aria-label="ملاءمة المخطط للشاشة"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+          <button class="fl toggle on" id="tgSnap" aria-label="التقاط نقاط المحاذاة" aria-pressed="true" title="الالتقاط (يعطّله Alt)">⌖</button><button class="fl toggle" id="tgGrid" title="إظهار شبكة المساعدة" aria-label="إظهار شبكة المساعدة" aria-pressed="false">▦</button><button class="fl toggle" id="tgDims" title="إظهار الأبعاد والمحاور" aria-label="إظهار الأبعاد والمحاور" aria-pressed="false">↔</button>
         </div>
         <div class="welcome" id="welcome" hidden>
-          <h2>ارسم بيتك كما تتخيله</h2>
-          <p>ابدأ بجدار، أو اسحب غرفة مستطيلة، أو افتح مثالًا جاهزًا وعدّل عليه. كل ما ترسمه يراه المساعد ويظهر لك ثلاثي الأبعاد فورًا.</p>
+          <span class="studio-eyebrow">ابدأ بخطوة بسيطة</span><h2>مساحة واضحة لتصميم بيتك</h2>
+          <p>ابدأ بجدار، أو اسحب غرفة مستطيلة، أو افتح مثالًا جاهزًا وعدّل عليه. حدد أي عنصر لتغيير أبعاده أو نقله، وشاهد النتيجة في المجسم.</p>
           <div class="row"><button class="btn primary" data-start="wall">ابدأ برسم جدار</button><button class="btn" data-start="rect">غرفة مستطيلة</button><button class="btn" data-start="example">افتح مثالًا</button><button class="btn" data-start="import">استورد مخططًا قديمًا</button></div>
           <small>اكتب طول الجدار بالأرقام أثناء الرسم ثم Enter · Shift لزاوية 45° · Alt لإيقاف الالتقاط</small>
         </div>
@@ -82,26 +54,28 @@
         <div class="three-host" id="threeHost"></div>
         <div class="three-bar" id="threeBar">
           <div class="seg sm" id="modeSeg"><button data-mode="orbit" class="on">مدار</button><button data-mode="dollhouse">بيت دمية</button><button data-mode="top">علوي</button><button data-mode="walk">تجوّل</button><button data-mode="section">مقطع</button></div>
-          <div class="seg sm" id="styleSeg"><button data-style="day" class="on">نهار</button><button data-style="dusk">غروب</button></div>
+          <details class="studio-light-settings"><summary>إعدادات الإضاءة</summary><div class="studio-light-controls"><div class="seg sm" id="styleSeg"><button data-style="day" class="on">نهار</button><button data-style="dusk">غروب</button></div>
           <label class="rng">الشمس<input type="range" id="sunAz" min="0" max="360" value="135"></label>
           <label class="rng">الارتفاع<input type="range" id="sunAlt" min="3" max="85" value="52"></label>
-          <label class="rng" id="secWrap" hidden>المقطع<input type="range" id="secH" min="0.3" max="6" step=".05" value="1.2"></label>
+          </div></details><label class="rng" id="secWrap" hidden>المقطع<input type="range" id="secH" min="0.3" max="6" step=".05" value="1.2"></label>
           <label class="chk"><input type="checkbox" id="isoLevel"> عزل الدور</label>
           <button class="btn sm" id="shot3d">التقاط صورة</button>
-          <button class="btn sm primary" id="finalCta">اعتمد ← العرض ثلاثي الأبعاد</button>
+          <button class="btn sm primary" id="finalCta">مراجعة واعتماد</button>
           <span class="tour" id="tourBox"><button class="btn sm" id="autoTour" title="دورة حول المبنى ثم داخل الغرف">▶ جولة تلقائية</button><button class="btn sm" id="recordTour">⏺ تسجيل الجولة</button><button class="btn sm warn" id="stopAutoTour" hidden>■ إيقاف</button><a class="btn sm" id="tourDownload" hidden>تنزيل الفيديو</a></span>
         </div>
         <div class="tour-status" id="autoTourStatus" role="status" aria-live="polite" hidden></div>
         <div class="three-msg" id="threeMsg" hidden></div>
       </div>
     </div>
-    <footer class="status" id="status"><span id="stCoord">—</span><span id="stSnap"></span><span class="grow" id="stHint">اضغط على أداة من الشريط الأيمن.</span><span id="stStats"></span><button class="btn sm warn" id="fixGaps" hidden>إغلاق الفجوات</button></footer>
+    <div class="room-key" id="roomKeyBox" hidden><b>ترميز الفراغات</b><ol id="roomKey"></ol></div>
+    <footer class="status" id="status"><span id="stCoord">—</span><span id="stSnap"></span><span class="grow" id="stHint">اختر أداة من الشريط لبدء الرسم.</span><span id="stStats"></span><button class="btn sm warn" id="fixGaps" hidden>إغلاق الفجوات</button></footer>
   </section>
 
-  <aside class="side" id="side">
-    <nav class="tabs" role="tablist"><button data-tab="props" class="on">الخصائص</button><button data-tab="rooms">الغرف</button><button data-tab="finish">الواجهات والمواد</button><button data-tab="review">المراجعة <em id="reviewCount" hidden>0</em></button><button data-tab="qty">الكميات</button><button data-tab="str">الإنشاء <em id="strCount" hidden>0</em></button><button data-tab="dna">البصمة</button><button data-tab="ai">المساعد</button></nav>
+  <aside class="side" id="side" aria-label="تفاصيل المشروع والتعديل"><div class="studio-inspector-head"><div><span class="studio-eyebrow">كل ما تحتاجه حسب الخطوة</span><strong id="studioInspectorTitle">تفاصيل العنصر</strong></div><button type="button" id="studioPanelClose" aria-label="إغلاق التفاصيل">×</button></div>
+    <nav class="tabs" role="tablist"><button data-tab="props" class="on">العنصر</button><button data-tab="furniture">الأثاث</button><button data-tab="rooms">الغرف</button><button data-tab="finish">الخامات</button><button data-tab="review">الفحص <em id="reviewCount" hidden>0</em></button><button data-tab="qty">الكميات</button><button data-tab="str">الإنشاء <em id="strCount" hidden>0</em></button><button data-tab="dna">البصمة</button><button data-tab="ai">المساعد</button></nav>
     <div class="tabpane on" id="tab-props"></div>
     <div class="tabpane" id="tab-rooms"></div>
+    <div class="tabpane" id="tab-furniture"></div>
     <div class="tabpane" id="tab-finish"></div>
     <div class="tabpane" id="tab-review"></div>
     <div class="tabpane" id="tab-qty"></div>

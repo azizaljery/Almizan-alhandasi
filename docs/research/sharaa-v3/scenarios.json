@@ -1,0 +1,3626 @@
+[
+ {
+  "id": "S01",
+  "name": "أسرة بلا أطفال",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 38,
+  "askedFull": 85,
+  "excludedCount": 63,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 27,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 2,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 128,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 115,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S02",
+  "name": "أطفال صغار",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 93,
+  "excludedCount": 55,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 4,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 170,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 203,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S03",
+  "name": "أبناء كبار ومراهقون",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.study",
+    "children.teenZone",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 4,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 139,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 141,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S04",
+  "name": "إقامة الوالد",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 46,
+  "askedFull": 99,
+  "excludedCount": 49,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 35,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "parents.ground",
+    "parents.independent",
+    "parents.accessible",
+    "parents.nearLiving",
+    "parents.entry",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 130,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 152,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S05",
+  "name": "إقامة الوالدة",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 45,
+  "askedFull": 98,
+  "excludedCount": 50,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 34,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "parents.ground",
+    "parents.independent",
+    "parents.accessible",
+    "parents.nearLiving",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 98,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 88,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S06",
+  "name": "إقامة الوالدين",
+  "land": {
+   "width": 20,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 46,
+  "askedFull": 99,
+  "excludedCount": 49,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 35,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "parents.ground",
+    "parents.independent",
+    "parents.accessible",
+    "parents.nearLiving",
+    "parents.entry",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 5,
+   "majlis": 0,
+   "baths": 4,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 198,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 207,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 5,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S07",
+  "name": "ضيافة متزامنة رجال ونساء",
+  "land": {
+   "width": 22,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 53,
+  "askedFull": 105,
+  "excludedCount": 43,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 41,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "privacy.womenRoute",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "baths": 6,
+   "kitchens": 2,
+   "halls": 1,
+   "dining": 2
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 992,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "MIN_AREA": 1,
+      "SWING_BLOCKED": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 903,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S08",
+  "name": "أرض ضيقة وطويلة 12x36",
+  "land": {
+   "width": 12,
+   "length": 36,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 51,
+  "askedFull": 103,
+  "excludedCount": 45,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 39,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.narrowCourt",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 58,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 33,
+   "alternatives": 2,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S09",
+  "name": "أرض عريضة 30x16",
+  "land": {
+   "width": 30,
+   "length": 16,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 53,
+  "askedFull": 105,
+  "excludedCount": 43,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 41,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.wideWings",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "baths": 5,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 132,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 84,
+   "alternatives": 3,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S10",
+  "name": "أرض زاوية شارعين",
+  "land": {
+   "width": 18,
+   "length": 24,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n",
+    "e"
+   ]
+  },
+  "asked": 51,
+  "askedFull": 103,
+  "excludedCount": 45,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 39,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.cornerEntries",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 1,
+   "baths": 4,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 115,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 119,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S11",
+  "name": "أرض غير منتظمة (مضلع)",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ],
+   "polygon": [
+    [
+     0,
+     0
+    ],
+    [
+     18,
+     0
+    ],
+    [
+     18,
+     20
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     0,
+     30
+    ]
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": "NOT_EVALUATED: المحرك لا يقبل مضلعًا غير منتظم في هذا المسار",
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 220,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 180,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S12",
+  "name": "واجهة غربية",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "w"
+   ],
+   "streets": [
+    "w"
+   ]
+  },
+  "asked": 42,
+  "askedFull": 93,
+  "excludedCount": 55,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 31,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.wideWings",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 125,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 109,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S13",
+  "name": "ساحلية رطبة",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ],
+   "climate": "humid"
+  },
+  "asked": 40,
+  "askedFull": 89,
+  "excludedCount": 59,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 29,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 56,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 96,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S14",
+  "name": "صحراوية جافة",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ],
+   "climate": "dry"
+  },
+  "asked": 40,
+  "askedFull": 90,
+  "excludedCount": 58,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 29,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 61,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 152,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S15",
+  "name": "فناء داخلي مطلوب",
+  "land": {
+   "width": 24,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": "NOT_SUPPORTED: لا يوجد نمط فناء داخلي في محرك التوليد الحالي",
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 132,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 113,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S16",
+  "name": "أجنحة متقابلة",
+  "land": {
+   "width": 26,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 123,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 97,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S17",
+  "name": "طلبات متعارضة: ضيوف الذروة أقل من المعتاد",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 32,
+  "askedFull": 46,
+  "excludedCount": 47,
+  "expect": "CONFLICT",
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "CONFLICT_REQUIRES_DECISION",
+   "support": {
+    "unmapped": 23,
+    "candidate": 9
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "daily.work",
+    "sleep.master",
+    "garden.wanted",
+    "future.expand"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 2,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 4,
+  "after": {
+   "ok": false,
+   "blocked": "CONFLICT: guest-capacity"
+  },
+  "before": {
+   "ok": true,
+   "ms": 104,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S18",
+  "name": "طلب غير قابل للتحقق: لا شمس في أي غرفة",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": "NOT_VERIFIABLE",
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 101,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 98,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S19",
+  "name": "تصميم واحد",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 61,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 116,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S20",
+  "name": "عدة بدائل",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 3,
+  "after": {
+   "ok": true,
+   "ms": 77,
+   "alternatives": 3,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 58,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S21",
+  "name": "أسرة كبيرة وضيافة وإقامة والدين",
+  "land": {
+   "width": 24,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 58,
+  "askedFull": 113,
+  "excludedCount": 35,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 46,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "parents.ground",
+    "parents.independent",
+    "parents.accessible",
+    "parents.nearLiving",
+    "parents.entry",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "privacy.womenRoute",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 6,
+   "majlis": 2,
+   "baths": 8,
+   "kitchens": 2,
+   "halls": 2,
+   "dining": 1
+  },
+  "keep": 2,
+  "after": {
+   "ok": true,
+   "ms": 1667,
+   "alternatives": 2,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 151,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 6,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S22",
+  "name": "غرفة نوم واحدة",
+  "land": {
+   "width": 12,
+   "length": 20,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 1,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 17,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 19,
+   "alternatives": 3,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 1,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S23",
+  "name": "ست غرف نوم",
+  "land": {
+   "width": 28,
+   "length": 34,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 52,
+  "askedFull": 104,
+  "excludedCount": 44,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 40,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 6,
+   "majlis": 2,
+   "baths": 7,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 644,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "SWING_BLOCKED": 2
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 211,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 6,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S24",
+  "name": "مطبخان",
+  "land": {
+   "width": 22,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 4,
+   "kitchens": 2,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 157,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 146,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S25",
+  "name": "مجلس رجال فقط",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 50,
+  "askedFull": 102,
+  "excludedCount": 46,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 38,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 71,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 98,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S26",
+  "name": "مجلس نساء فقط",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 48,
+  "askedFull": 100,
+  "excludedCount": 48,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 37,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 1,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 69,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1,
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 91,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S27",
+  "name": "بلا مجلس",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 2,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 79,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "BATH_PRIVACY": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 55,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 3,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S28",
+  "name": "صالتان",
+  "land": {
+   "width": 24,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 41,
+  "askedFull": 91,
+  "excludedCount": 57,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 30,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 3,
+   "kitchens": 1,
+   "halls": 2,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 120,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "BATH_PRIVACY": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 93,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S29",
+  "name": "حمامات كثيرة",
+  "land": {
+   "width": 22,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ]
+  },
+  "asked": 52,
+  "askedFull": 104,
+  "excludedCount": 44,
+  "expect": null,
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 40,
+    "candidate": 12
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "hospitality.simultaneous",
+    "hospitality.typical",
+    "hospitality.peak",
+    "hospitality.maleEntry",
+    "hospitality.majlisBath",
+    "hospitality.femaleEntry",
+    "hospitality.dining",
+    "hospitality.kitchenDining",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.guestRoute",
+    "privacy.sound",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 2,
+   "baths": 9,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 215,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "NO_WINDOW": 1,
+      "SWING_BLOCKED": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 123,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ },
+ {
+  "id": "S30",
+  "name": "أرض بدوّر (طابقان مطلوبان)",
+  "land": {
+   "width": 18,
+   "length": 30,
+   "entries": [
+    "n"
+   ],
+   "streets": [
+    "n"
+   ],
+   "floors": 2
+  },
+  "asked": 44,
+  "askedFull": 97,
+  "excludedCount": 51,
+  "expect": "NOT_EVALUATED: مسار الطابقين مختلف ولم يُشغّل هنا",
+  "contract": {
+   "schemaVersion": "SHARAA-BRIEF/3.0.0",
+   "readiness": "LIMITED_SUPPORT",
+   "support": {
+    "unmapped": 33,
+    "candidate": 11
+   },
+   "unmappedRequested": [
+    "household.adults",
+    "household.children",
+    "household.parents",
+    "household.staff",
+    "household.overnight",
+    "household.staffRoom",
+    "children.ages",
+    "children.play",
+    "children.sleepNear",
+    "site.neighbor",
+    "site.slope",
+    "site.parking",
+    "site.vestibule",
+    "privacy.entrySight",
+    "privacy.stairs",
+    "daily.work",
+    "services.prep",
+    "services.serviceEntry",
+    "sleep.master",
+    "sleep.quiet",
+    "living.shape",
+    "living.seating",
+    "living.passage",
+    "living.partition",
+    "environment.climate",
+    "garden.wanted",
+    "future.expand",
+    "future.extraRooms",
+    "future.elevator",
+    "architecture.concept",
+    "budget.amount",
+    "budget.priority",
+    "budget.count"
+   ]
+  },
+  "counts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 4,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  },
+  "keep": 1,
+  "after": {
+   "ok": true,
+   "ms": 72,
+   "alternatives": 1,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {
+      "WINDOW_RATIO": 1
+     },
+     "rejected": false
+    }
+   ]
+  },
+  "before": {
+   "ok": true,
+   "ms": 103,
+   "alternatives": 4,
+   "checks": [
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    },
+    {
+     "errors": 0,
+     "issues": {},
+     "rejected": false
+    }
+   ]
+  },
+  "baselineCounts": {
+   "bedrooms": 4,
+   "majlis": 0,
+   "baths": 1,
+   "kitchens": 1,
+   "halls": 1,
+   "dining": 1
+  }
+ }
+]

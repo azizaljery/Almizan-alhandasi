@@ -4,7 +4,7 @@ import {bank,siteFacts,gateMatches,createBrief,answer,conflicts,nextQuestion,rea
 const land={"widthM":18,"depthM":30,"entries":["n"],"streets":[{"side":"n"}],"floors":1};
 const ok=x=>assert.ok(x);
 const throws=fn=>assert.throws(fn);
-test('146 unique questions',()=>ok(bank.length===146&&new Set(bank.map(q=>q.id)).size===146));
+test('148 unique questions after production additions',()=>ok(bank.length===148&&new Set(bank.map(q=>q.id)).size===148));
 for(const n of [0,1,2])test('children branch '+n,()=>assert.equal(gateMatches('household.children>0',answer(createBrief(land),'household.children',n)),n>0));
 test('AI cannot overwrite confirmed',()=>throws(()=>answer(answer(createBrief(land),'household.children',2),'household.children',0,{source:'ai_inference'})));
 test('mandatory unsupported cannot waive',()=>{const b=answer(createBrief(land),'privacy.entrySight',true,{priority:'mandatory'});ok(readiness(b).hard.includes('privacy.entrySight'));throws(()=>acknowledge(b,['privacy.entrySight']))});

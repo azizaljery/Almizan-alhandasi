@@ -1,0 +1,13 @@
+
+> build
+> node scripts/build.mjs
+
+Arabic app, browser imports, D1 migration and separately bundled archive Worker verified.
+Browser import graph verified: dist/app.mjs — 163 modules.
+Browser import graph verified: dist/home.mjs — 135 modules.
+Browser import graph verified: dist/design.mjs — 149 modules.
+Browser import graph verified: dist/view3d.mjs — 30 modules.
+Browser import graph verified: dist/final.mjs — 60 modules.
+Browser import graph verified: dist/client-tools/app.mjs — 61 modules.
+Browser import graph verified: dist/delivery-verify.mjs — 5 modules.
+Browser import graph verified: dist/facade-j/facade-realism/photo/pipeline.mjs — 12 modules.
