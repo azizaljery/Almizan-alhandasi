@@ -54,6 +54,7 @@ try{
  const seen=await interview(page);check('couple has no child/parent follow-up questions',!seen.some(id=>/^(children|parents)\./.test(id)));
  check('question explains architectural purpose',(await page.locator('.sv3-why').innerText()).length>25);
  check('confirmed essentials enable generation',await page.locator('#sv3Generate').isEnabled());
+ check('past dialogue stays available without pushing the current question below it',await page.locator('#sv3History:not([open])').count()===1&&await page.locator('#sv3History .row').count()>5);
  await page.getByRole('combobox',{name:'تفاصيل المقابلة',exact:true}).selectOption('core');
  check('basic interview can end without forcing optional questions',await page.locator('.sv3-question').count()===0&&await page.locator('#sv3Generate').isEnabled());
  await page.getByRole('combobox',{name:'تفاصيل المقابلة',exact:true}).selectOption('full');
@@ -70,7 +71,7 @@ try{
  check('confirmed correction replaces count instead of adding it',await page.evaluate(()=>__mizanHome.session.counts.bedrooms)===4);
  await edit(page,'household.bedrooms',2);
  const saved=await ctx.storageState(),tab=await page.evaluate(()=>Object.fromEntries(Object.entries(sessionStorage)));
- await page.screenshot({path:OUT+'/interview-desktop.png',fullPage:true});
+ await page.screenshot({path:OUT+'/interview-desktop.png',fullPage:true,animations:'disabled',timeout:90000});
  for(const width of [820,390,360]){
   const mctx=await context({width,height:900},width<700);await mctx.addInitScript(({state,tab})=>{for(const item of state.origins.flatMap(o=>o.localStorage))localStorage.setItem(item.name,item.value);for(const[k,v]of Object.entries(tab))sessionStorage.setItem(k,v);},{state:saved,tab});
   const mp=await mctx.newPage();await mp.goto(BASE+'/home.html#shara');await mp.locator('#sharaaV3').waitFor();
@@ -80,23 +81,23 @@ try{
   await mp.locator('#sv3Generate').scrollIntoViewIfNeeded();
   check('generation button is reachable without an overlay at '+width+'px',await mp.locator('#sv3Generate').evaluate(b=>{const r=b.getBoundingClientRect();return b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
   check('saved confirmed count survives reload at '+width+'px',await mp.evaluate(()=>__mizanHome.session.counts.bedrooms)===2);
-  if(width===390)await mp.screenshot({path:OUT+'/interview-mobile.png',fullPage:true});await mctx.close();
+  if(width===390)await mp.screenshot({path:OUT+'/interview-mobile.png',fullPage:true,animations:'disabled',timeout:90000});await mctx.close();
  }
  const family=await context(),fp=await family.newPage();await begin(fp);const familySeen=await interview(fp,{'household.children':2,'household.parents':'permanent'});
  check('resident parents trigger ground-floor follow-up',familySeen.includes('parents.ground'));
  check('children trigger age follow-up',familySeen.includes('children.ages'));
- await fp.screenshot({path:OUT+'/family-interview.png',fullPage:true});await family.close();
+ await fp.screenshot({path:OUT+'/family-interview.png',fullPage:true,animations:'disabled',timeout:90000});await family.close();
  await page.locator('#sv3Generate').click();
  await page.waitForURL(/\/design(\.html)?(\?|$)/,{timeout:120000});await page.locator('#ledger').waitFor({timeout:60000});
  const design=await page.evaluate(()=>JSON.parse(localStorage.getItem('mizan.design.session.v1')));
  check('real generation worker stores current confirmed V3 facts',design.input.requirements.sharaaV3.facts['household.bedrooms'].value===2&&design.input.requirements.counts.bedrooms===2);
  check('generated plan has a current V3 geometric review',design.designs[0].review?.findings?.some(f=>f.source==='sharaa-v3')||await page.evaluate(async()=>{const {reviewDesign}=await import('./design-review.mjs');const {parseDoc}=await import('./draw/doc.mjs');const s=JSON.parse(localStorage.getItem('mizan.design.session.v1'));return reviewDesign(parseDoc(s.designs[0].doc),{requirements:s.input.requirements,land:s.input.land}).findings.some(f=>f.source==='sharaa-v3');}));
- await page.screenshot({path:OUT+'/generated-plan-desktop.png',fullPage:true});
+ await page.screenshot({path:OUT+'/generated-plan-desktop.png',fullPage:true,animations:'disabled',timeout:90000});
  await page.goto(BASE+'/home.html#shara');await page.locator('#editRequest').click();await page.locator('#sharaaV3').waitFor();
  check('existing project can reopen authoritative V3 interview',await page.evaluate(()=>__mizanHome.session.mode)==='adaptive');
  await edit(page,'household.bedrooms',3);await page.reload();await page.locator('#editRequest').click();
  check('post-design correction persists through reload',await page.evaluate(()=>__mizanHome.session.counts.bedrooms)===3);
  check('no page errors or missing application assets',errors.length===0,errors.join(' | '));await ctx.close();
-}catch(e){results.push({name:'browser journey',ok:false,detail:e.stack});console.error(e);if(page)await page.screenshot({path:OUT+'/failure.png',fullPage:true}).catch(()=>{});}
+}catch(e){results.push({name:'browser journey',ok:false,detail:e.stack});console.error(e);if(page)await page.screenshot({path:OUT+'/failure.png',fullPage:true,animations:'disabled',timeout:90000}).catch(()=>{});}
 finally{await browser.close();await writeFile(OUT+'/results.json',JSON.stringify({base:BASE,at:new Date().toISOString(),results,errors},null,2));}
 console.log(`${results.filter(r=>r.ok).length}/${results.length} passed`);process.exitCode=results.some(r=>!r.ok)?1:0;

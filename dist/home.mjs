@@ -268,6 +268,12 @@ function render(messages, { record = true } = {}) {
 function renderAll(messages) {
   for (const m of messages) {
     if (m.kind === 'adaptive') {
+      // Keep the current architectural decision in view. The complete history
+      // remains available without making a long interview a long scroll.
+      let history = chat.querySelector('#sv3History');
+      if (!history) { history = document.createElement('details'); history.id = 'sv3History'; history.className = 'sv3-history'; history.append(document.createElement('summary')); chat.prepend(history); }
+      for (const row of [...chat.children]) if (row.classList.contains('row') && !row.hasAttribute('data-control')) history.append(row);
+      history.firstElementChild.textContent = `سجل الحوار السابق (${history.children.length - 1})`;
       const frame = renderAdaptiveTurn(m, { answer: (id, value, label) => { try { const next = session.answer(id, value); clearControls(); if (label) bubble(label, 'me'); render(next); } catch (err) { fail(err); } }, onGenerate: () => { if (!session.generationReady()) return fail(Error('احسم القرارات المطلوبة أولًا.')); clearControls(); build(); } });
       control(frame); continue;
     }
