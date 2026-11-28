@@ -76,6 +76,9 @@ try{
   const mp=await mctx.newPage();await mp.goto(BASE+'/home.html#shara');await mp.locator('#sharaaV3').waitFor();
   check('no interview overflow at '+width+'px',await mp.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   check('touch buttons at least 44px at '+width+'px',await mp.locator('#sharaaV3 button:visible').evaluateAll(bs=>bs.every(b=>b.getBoundingClientRect().height>=43.5)));
+  check('motion control does not stretch across the mobile interview at '+width+'px',await mp.locator('.ambient-motion').evaluate(b=>b.getBoundingClientRect().height<=64));
+  await mp.locator('#sv3Generate').scrollIntoViewIfNeeded();
+  check('generation button is reachable without an overlay at '+width+'px',await mp.locator('#sv3Generate').evaluate(b=>{const r=b.getBoundingClientRect();return b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
   check('saved confirmed count survives reload at '+width+'px',await mp.evaluate(()=>__mizanHome.session.counts.bedrooms)===2);
   if(width===390)await mp.screenshot({path:OUT+'/interview-mobile.png',fullPage:true});await mctx.close();
  }
