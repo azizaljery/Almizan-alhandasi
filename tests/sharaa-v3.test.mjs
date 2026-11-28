@@ -15,8 +15,8 @@ import {buildProgram} from '../dist/villa-layout.mjs';
 import {generateInitialDesign} from '../dist/home-flow.mjs';
 import {reviewDesign,planVersion} from '../dist/design-review.mjs';
 import {architectVilla} from './fixtures/sharaa-v3-villa.mjs';
-import {applyCommand} from '../dist/draw/doc.mjs';
-import {redesign,createSession} from '../dist/design-session.mjs';
+import {applyCommand,serialize} from '../dist/draw/doc.mjs';
+import {redesign,createSession,approveReviewed} from '../dist/design-session.mjs';
 import {mergeRules,verifyRequest} from '../dist/rules.mjs';
 import {v3RequestPriorityResolver} from '../dist/sharaa-v3/provenance.mjs';
 import {architecturalIdeas} from '../dist/sharaa-v3/ideas.mjs';
@@ -236,4 +236,15 @@ test('V3 interview depth restores without hiding an unresolved mandatory depende
  const s=new AdaptiveSharaSession({land});s.answer('mode','adaptive');s.answer('v3.depth','full');const restored=AdaptiveSharaSession.restore(s.toJSON());assert.equal(restored.depth,'full');
  let b=complete({'household.children':2});b=set(b,'children.ages','teen');b=set(b,'children.sharedRooms',true,'mandatory');b=set(b,'household.children',3);
  assert.equal(nextQuestion(b,{depth:'core'}).id,'children.sharedRooms');assert.ok(readiness(b).pending.includes('children.sharedRooms'));
+});
+test('V3 manual approval cannot waive a confirmed hard requirement while legacy review remains advisory',()=>{
+ let b=complete({'household.bedrooms':1});b=set(b,'living.baths',1,'preferred');b=set(b,'living.shape','balanced','mandatory');const p=projectToProduction(b);
+ const s=createSession({land,counts:p.counts,requirements:p.requirements,result:{doc:architectVilla().doc}});assert.equal(approveReviewed(s).status,'approved');
+ s.designs[0].doc=serialize(architectVilla({longHall:true}).doc);
+ const rejected=approveReviewed(s,{enforce:false,decisions:['sharaa-v3:living.shape']});assert.equal(rejected.status,'refused');assert.ok(rejected.result.reasons.some(r=>r.code==='SHARAA_V3_MANDATORY_NOT_VERIFIED'));
+ const legacy=createSession({land,requirements:{},result:{doc:architectVilla({longHall:true}).doc}});assert.equal(approveReviewed(legacy).status,'approved');
+});
+test('V3 irregular plot cannot silently become its bounding rectangle',()=>{
+ const irregular={...land,engineLand:{polygon:[{x:0,y:0},{x:20,y:0},{x:16,y:30},{x:0,y:30}]}},b=complete({},irregular),r=readiness(b);
+ assert.equal(r.canGenerate,false);assert.ok(r.landIssues.length);assert.throws(()=>validateV3Generation({land,counts:projectToProduction(b).counts,requirements:projectToProduction(b).requirements}),e=>e.code==='SHARAA_V3_NOT_READY');
 });

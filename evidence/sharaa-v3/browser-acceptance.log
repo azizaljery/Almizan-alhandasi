@@ -1,0 +1,35 @@
+PASS couple has no child/parent follow-up questions
+PASS question explains architectural purpose
+PASS confirmed essentials enable generation
+PASS past dialogue stays available without pushing the current question below it
+PASS basic interview can end without forcing optional questions
+PASS expanded interview exposes applicable further questions
+PASS later description preserves pending hard acoustic wish
+PASS unconfirmed free text blocks generation
+PASS proposal has not changed confirmed bedroom count
+PASS confirmed correction replaces count instead of adding it
+PASS no interview overflow at 820px
+PASS touch buttons at least 44px at 820px
+PASS motion control does not stretch across the mobile interview at 820px
+PASS generation button is reachable without an overlay at 820px
+PASS saved confirmed count survives reload at 820px
+PASS no interview overflow at 390px
+PASS touch buttons at least 44px at 390px
+PASS motion control does not stretch across the mobile interview at 390px
+PASS generation button is reachable without an overlay at 390px
+PASS saved confirmed count survives reload at 390px
+PASS no interview overflow at 360px
+PASS touch buttons at least 44px at 360px
+PASS motion control does not stretch across the mobile interview at 360px
+PASS generation button is reachable without an overlay at 360px
+PASS saved confirmed count survives reload at 360px
+PASS resident parents trigger ground-floor follow-up
+PASS children trigger age follow-up
+PASS real generation worker stores current confirmed V3 facts
+PASS generated plan has a current V3 geometric review
+PASS real approval button refuses a manual edit that loses a mandatory V3 role
+PASS refused manual edit never becomes the approved project
+PASS existing project can reopen authoritative V3 interview
+PASS post-design correction persists through reload
+PASS no page errors or missing application assets
+34/34 passed

@@ -46,7 +46,7 @@ export function environmentalContext(land, facts = {}) {
 }
 export function factsForSite(land, facts = {}) {
   const l = normalizeV3Land(land), context = environmentalContext(l, facts), sides = context.streets;
-  const polygon = l.engineLand?.polygon || l.geo?.polygon;
+  const polygon = l.engineLand?.polygon || l.geo?.polygon || l.polygon;
   return {
     '@corner': sides.some(a => sides.some(b => ['n', 's'].includes(a) !== ['n', 's'].includes(b))),
     '@narrow': context.depthM / context.frontageM >= 1.7, '@wide': context.frontageM / context.depthM >= 1.2,

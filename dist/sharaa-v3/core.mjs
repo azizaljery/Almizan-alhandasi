@@ -102,14 +102,16 @@ export function factSupport(q,f){
  return{...c,limited,status:c.mode==='context'?'context':!execution?'not_requested':limited?'requires_review':'requested'};
 }
 export function readiness(b){
+ const polygon=b.land.engineLand?.polygon||b.land.geo?.polygon||b.land.polygon;
+ const landIssues=Array.isArray(polygon)&&polygon.length?[{code:'SITE_POLYGON_NOT_SUPPORTED',message:'حدود الأرض المضلعة تحتاج دراسة مطابقة للمساحة؛ مولّد المقابلة الحالي يعتمد أبعادًا مستطيلة، ولن يحوّل الحدود إلى مستطيل بصمت.'}]:[];
  const applies=q=>gateMatches(q.gate,b),complete=q=>b.facts[q.id]?.verification==='confirmed'&&!b.facts[q.id].recheck;
  const missing=bank.filter(q=>q.tier===1&&applies(q)&&!complete(q)).map(q=>q.id);
  const pending=bank.filter(q=>applies(q)&&b.facts[q.id]?.priority==='mandatory'&&!complete(q)).map(q=>q.id);
  const limits=Object.entries(activeFacts(b)).filter(([id,f])=>factSupport(byId.get(id),f).limited).map(([id])=>id),hard=limits.filter(id=>b.facts[id].priority==='mandatory');
  const accepted=new Set(b.acknowledged.filter(a=>a.revision===b.revision).map(a=>a.id));
  const c=conflicts(b),unaccepted=limits.filter(id=>!accepted.has(id));
- const status=c.length?'CONFLICT_REQUIRES_DECISION':missing.length||pending.length?'NEEDS_CLARIFICATION':limits.length?'LIMITED_SUPPORT':'READY_TO_GENERATE';
- return{status,missing,pending,limits,hard,conflicts:c,unaccepted,canGenerate:!c.length&&!missing.length&&!pending.length&&!hard.length&&!unaccepted.length,answered:Object.keys(activeFacts(b)).length,applicable:bank.filter(applies).length};
+ const status=c.length?'CONFLICT_REQUIRES_DECISION':landIssues.length?'SITE_REQUIRES_SPECIALIST':missing.length||pending.length?'NEEDS_CLARIFICATION':limits.length?'LIMITED_SUPPORT':'READY_TO_GENERATE';
+ return{status,missing,pending,limits,hard,conflicts:c,unaccepted,landIssues,canGenerate:!landIssues.length&&!c.length&&!missing.length&&!pending.length&&!hard.length&&!unaccepted.length,answered:Object.keys(activeFacts(b)).length,applicable:bank.filter(applies).length};
 }
 export function nextQuestion(b,{depth='standard'}={}){
  const collision=conflicts(b)[0];if(collision)return collision;

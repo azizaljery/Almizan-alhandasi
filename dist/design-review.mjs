@@ -34,7 +34,7 @@ export const SEVERITY = Object.freeze({ MANDATORY: 'mandatory', WARNING: 'warnin
 export const STATE = Object.freeze({ VIOLATED: 'violated', VERIFIED: 'verified', UNVERIFIED: 'unverified' });
 export const SEVERITY_AR = Object.freeze({ mandatory: 'إلزامي', warning: 'تحذير', info: 'معلومة' });
 export const STATE_AR = Object.freeze({ violated: 'مخالف', verified: 'متحقق', unverified: 'غير متحقق' });
-export const SOURCE_AR = Object.freeze({ geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', daily: 'الحياة اليومية', review: 'المراجعة' });
+export const SOURCE_AR = Object.freeze({ 'sharaa-v3': 'متطلبات شرعاء V3', geometry: 'سلامة الرسم', access: 'الحركة والوصول', municipal: 'اشتراطات البلدية', request: 'طلب العميل', privacy: 'الخصوصية الهندسية', drawing: 'مراجعة الرسم', stairs: 'الدرج', openings: 'الفتحات (opening-aware)', requirement: 'متطلبات العميل النصية', locks: 'الأجزاء المقفلة', aziz: 'عزيز', levels: 'العلاقات بين الأدوار', daily: 'الحياة اليومية', review: 'المراجعة' });
 /** مسارات التصميم الخمسة التي يجب أن تمرّ كلها عبر البوابة. */
 export const ROUTES = Object.freeze(['first', 'alternative', 'merge', 'manual', 'chat']);
 export const ROUTE_AR = Object.freeze({ first: 'التوليد الأول', alternative: 'بديل', merge: 'دمج', manual: 'تعديل يدوي', chat: 'تعديل بالمحادثة' });

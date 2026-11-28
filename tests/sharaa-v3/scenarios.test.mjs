@@ -13,6 +13,9 @@ test('S17 conflicting guest counts are blocked before generation', async () => {
   assert.equal(r.contract.readiness,'CONFLICT_REQUIRES_DECISION');
   assert.ok(r.after.blocked&&r.after.blocked.startsWith('CONFLICT'));
 });
+test('S11 preserves the real inherited polygon and blocks a rectangular substitute',async()=>{
+ const r=await get(SCENARIOS.find(s=>s.id==='S11'));assert.match(r.after.blocked,/UNSUPPORTED_SITE/);
+});
 test('S19 single design request and S20 up to three yield actual eligible alternatives', async () => {
   assert.equal((await get(SCENARIOS.find(s=>s.id==='S19'))).after.alternatives,1);
   const r=await get(SCENARIOS.find(s=>s.id==='S20'));assert.ok(r.after.ok);assert.ok(r.after.alternatives>=1&&r.after.alternatives<=3);

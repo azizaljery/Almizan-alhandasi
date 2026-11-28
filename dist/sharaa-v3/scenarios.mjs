@@ -41,7 +41,7 @@ export const SCENARIOS=[
 ];
 // يحاكي الجلسة بإجابات السيناريو فقط
 export function interview(sc,depth='standard'){
-  let b=C.createBrief({widthM:sc.land.width,depthM:sc.land.length,entries:sc.land.entries,streets:sc.land.streets.map(s=>({side:s})),floors:sc.land.floors||1,...(sc.land.climate?{climate:sc.land.climate}:{})});
+  let b=C.createBrief({...sc.land,widthM:sc.land.width,depthM:sc.land.length,entries:sc.land.entries,streets:sc.land.streets.map(s=>({side:s})),floors:sc.land.floors||1,...(sc.land.climate?{climate:sc.land.climate}:{})});
   const asked=[],excluded=[];
   for(let i=0;i<200;i++){const q=C.nextQuestion(b,{depth});if(!q)break;
     if(q.kind==='conflict'){excluded.push('CONFLICT:'+q.fields.join('/'));break}
@@ -61,6 +61,7 @@ export function countsFrom(b){
 // بوابة التوليد: لا توليد مع تعارض أو مع معلومة إلزامية غير مدعومة أو سؤال أساسي مفقود.
 export function generationGate(b){
   const r=C.readiness(b);
+  if(r.landIssues.length)return 'UNSUPPORTED_SITE: '+r.landIssues.map(i=>i.code).join(',');
   if(r.status==='CONFLICT_REQUIRES_DECISION')return 'CONFLICT: '+r.conflicts.map(c=>c.id).join(',');
   if(r.missing.length)return 'MISSING_CORE: '+r.missing.join(',');
   if(r.pending.length)return 'PENDING_CONFIRMATION: '+r.pending.join(',');

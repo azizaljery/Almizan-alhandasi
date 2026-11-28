@@ -1,0 +1,177 @@
+{
+  "base": "http://127.0.0.1:4319",
+  "at": "2026-11-28T00:40:57.530Z",
+  "results": [
+    {
+      "name": "couple has no child/parent follow-up questions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "question explains architectural purpose",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confirmed essentials enable generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "past dialogue stays available without pushing the current question below it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "basic interview can end without forcing optional questions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "expanded interview exposes applicable further questions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "later description preserves pending hard acoustic wish",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unconfirmed free text blocks generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "proposal has not changed confirmed bedroom count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "confirmed correction replaces count instead of adding it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no interview overflow at 820px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "touch buttons at least 44px at 820px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "motion control does not stretch across the mobile interview at 820px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "generation button is reachable without an overlay at 820px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "saved confirmed count survives reload at 820px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no interview overflow at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "touch buttons at least 44px at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "motion control does not stretch across the mobile interview at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "generation button is reachable without an overlay at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "saved confirmed count survives reload at 390px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no interview overflow at 360px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "touch buttons at least 44px at 360px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "motion control does not stretch across the mobile interview at 360px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "generation button is reachable without an overlay at 360px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "saved confirmed count survives reload at 360px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "resident parents trigger ground-floor follow-up",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "children trigger age follow-up",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "real generation worker stores current confirmed V3 facts",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "generated plan has a current V3 geometric review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "real approval button refuses a manual edit that loses a mandatory V3 role",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "refused manual edit never becomes the approved project",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "existing project can reopen authoritative V3 interview",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "post-design correction persists through reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors or missing application assets",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": []
+}

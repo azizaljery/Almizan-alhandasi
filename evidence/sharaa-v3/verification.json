@@ -1,0 +1,43 @@
+{
+  "at": "2026-11-28",
+  "productionBase": "5d3b3ca3dccc665c0307b3292cd7693319a169b5",
+  "pr": "https://github.com/azizaljery/Almizan-alhandasi/pull/29",
+  "build": "passed",
+  "targeted": {
+    "tests": 226,
+    "pass": 226,
+    "fail": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "integrationRun": {
+    "tests": 2107,
+    "pass": 2092,
+    "fail": 0,
+    "skipped": 11,
+    "todo": 4,
+    "note": "Run spans development; final exact-commit proof is the PR contracts job and deployment full-suite job."
+  },
+  "browser": {
+    "checks": 34,
+    "pass": 34,
+    "widths": [
+      1440,
+      820,
+      390,
+      360
+    ],
+    "physicalPhonePerformance": "not measured"
+  },
+  "legacyJourney": {
+    "pass": 23,
+    "skipped": 1,
+    "skipReason": "Comparison needs at least two designs at that journey step."
+  },
+  "limits": [
+    "No structural/acoustic/climate/daylight certification",
+    "No new provider key or database schema",
+    "Irregular inherited plot is blocked rather than approximated",
+    "Requested alternative count is a maximum; no duplicate padding"
+  ]
+}

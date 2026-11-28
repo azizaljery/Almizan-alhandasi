@@ -93,6 +93,14 @@ try{
  check('real generation worker stores current confirmed V3 facts',design.input.requirements.sharaaV3.facts['household.bedrooms'].value===2&&design.input.requirements.counts.bedrooms===2);
  check('generated plan has a current V3 geometric review',design.designs[0].review?.findings?.some(f=>f.source==='sharaa-v3')||await page.evaluate(async()=>{const {reviewDesign}=await import('./design-review.mjs');const {parseDoc}=await import('./draw/doc.mjs');const s=JSON.parse(localStorage.getItem('mizan.design.session.v1'));return reviewDesign(parseDoc(s.designs[0].doc),{requirements:s.input.requirements,land:s.input.land}).findings.some(f=>f.source==='sharaa-v3');}));
  await page.screenshot({path:OUT+'/generated-plan-desktop.png',fullPage:true,animations:'disabled',timeout:90000});
+ // Change a required reception role in browser storage as a manual edit, then
+ // use the real approval button. /delivery/check is read-only; never claim.
+ await page.evaluate(async()=>{const {parseDoc,serialize,applyCommand}=await import('./draw/doc.mjs');const s=JSON.parse(localStorage.getItem('mizan.design.session.v1'));const d=parseDoc(s.designs[s.current].doc),label=d.labels.find(l=>/رجال/.test(l.name));if(!label)throw Error('Missing male reception label in actual generated fixture');s.designs[s.current].doc=serialize(applyCommand(d,{type:'update',id:label.id,patch:{name:'مجلس غير مصنّف'}}).doc);s.approved=null;localStorage.setItem('mizan.design.session.v1',JSON.stringify(s));});
+ await page.reload();await page.locator('#btnApprove').waitFor();await page.locator('#btnApprove').click();
+ await page.waitForFunction(()=>[...document.querySelectorAll('.toast')].some(t=>t.textContent.includes('الاعتماد موقوف')),null,{timeout:30000});
+ check('real approval button refuses a manual edit that loses a mandatory V3 role',await page.locator('#extShara').isHidden());
+ check('refused manual edit never becomes the approved project',await page.evaluate(()=>JSON.parse(localStorage.getItem('mizan.design.session.v1')).approved)===null);
+ await page.evaluate(s=>localStorage.setItem('mizan.design.session.v1',JSON.stringify(s)),design);
  await page.goto(BASE+'/home.html#shara');await page.locator('#editRequest').click();await page.locator('#sharaaV3').waitFor();
  check('existing project can reopen authoritative V3 interview',await page.evaluate(()=>__mizanHome.session.mode)==='adaptive');
  await edit(page,'household.bedrooms',3);await page.reload();await page.locator('#editRequest').click();

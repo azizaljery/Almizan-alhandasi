@@ -575,6 +575,7 @@ function paintReview(force = false) {
     onFocus: f => { reviewFocus = f; const lv = f.location?.levelId; if (lv && lv !== levelId && model.levelById.has(lv)) { levelId = lv; view = null; document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('on', b.dataset.level === lv)); } paint(); $('plan')?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }); paintReview(); },
     onDecide: ids => { ids.forEach(id => reviewDecided.add(id)); paintReview(); } }));
   watchReviewVisibility();
+  if (session.input?.requirements?.sharaaV3) host.append(el('p', { class: 'hint' }, 'شروط مقابلة شرعاء V3 الإلزامية تمنع الاعتماد إن لم يثبتها المخطط، حتى مع الوضع الإرشادي العام. تعديلها يتم في المقابلة.'));
   if (!report && !reviewError && !reviewRunning) {
     reviewRunning = true; clearTimeout(reviewTimer);
     const snapshot = doc; // يُحسب بعد الرسم الأول كي لا يؤخر ظهور المخطط

@@ -11,6 +11,7 @@ export function renderAdaptiveTurn(packet,{answer,onGenerate}){
  const env=packet.projection.environment;
  if(env.cityName){const place=node('p',`${env.cityName} · ${packet.brief.land.widthM} × ${packet.brief.land.depthM} م · ${packet.brief.land.streets.length} جهة شارع`,'sv3-context');root.append(place);}
  const fire=(id,value,label)=>answer(id,value,label);
+ for(const issue of packet.readiness.landIssues||[]){const note=node('p',issue.message,'sv3-conflict');note.setAttribute('role','alert');root.append(note);}
  const depthLabel=node('label','تفاصيل المقابلة','sv3-priority'),depth=node('select');depth.setAttribute('aria-label','تفاصيل المقابلة');
  for(const[value,label]of [['core','القرارات الأساسية'],['standard','الاحتياجات المعتادة'],['full','تفاصيل معمارية موسعة']]){const option=node('option',label);option.value=value;option.selected=value===packet.depth;depth.append(option);}depth.addEventListener('change',()=>fire('v3.depth',depth.value));depthLabel.append(depth);root.append(depthLabel);
  if(packet.proposals.length){
