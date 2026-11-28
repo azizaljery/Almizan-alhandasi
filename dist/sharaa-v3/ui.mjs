@@ -68,8 +68,35 @@ export function renderAdaptiveTurn(packet,{answer,onGenerate}){
  const intake=node('details',null,'sv3-intake');intake.append(node('summary','أضف وصفًا أو تعديلًا بكلامك'));
  const form=node('form'),text=node('textarea');text.maxLength=4000;text.rows=3;text.setAttribute('aria-label','وصف احتياجاتك أو تعديلها');text.placeholder='مثال: أمي تسكن معنا، وعندي ولدين، وأريد أربع غرف نوم إجمالًا ومطبخًا مغلقًا';
  const send=node('button','راجعي ما فهمتِه','sv3-button');send.type='submit';form.append(text,send);form.addEventListener('submit',e=>{e.preventDefault();fire('v3.free',text.value,text.value);});intake.append(form);root.append(intake);
- const foot=node('div',null,'sv3-generate');const generate=button('توليد التصميم وفق الإجابات المؤكدة',onGenerate,'sv3-button primary');generate.id='sv3Generate';generate.disabled=!packet.readiness.canGenerate;foot.append(generate,node('p',packet.readiness.canGenerate?'الأساس جاهز. يمكنك التوليد الآن أو إكمال التفاصيل؛ النتيجة تُفحص هندسيًا قبل عرضها.':packet.readiness.missing.length?`بقي ${packet.readiness.missing.length} من القرارات الأساسية قبل التوليد.`:'احسم التعارضات والتأكيدات والنقاط الإلزامية قبل التوليد.'));root.append(foot);
+ const foot=node('div',null,'sv3-generate');const generate=button('توليد التصميم وفق الإجابات المؤكدة',onGenerate,'sv3-button primary');generate.id='sv3Generate';generate.disabled=!packet.readiness.canGenerate;foot.append(generate,node('p',packet.readiness.canGenerate?'الأساس جاهز. يمكنك التوليد الآن أو إكمال التفاصيل؛ النتيجة تُفحص هندسيًا قبل عرضها.':packet.readiness.missing.length?`بقي ${packet.readiness.missing.length} من القرارات الأساسية قبل التوليد.`:'تعذّر التوليد لأن النقاط التالية لم تُحسم؛ عالج كل بند ثم يُفعَّل الزر.'));if(!packet.readiness.canGenerate)foot.append(blockersList(packet,fire));root.append(foot);
  return root;
+}
+
+// Lists exactly what blocks generation, with a direct action per item (the footer used to say only "resolve conflicts").
+export function blockerItems(packet){
+ const r=packet.readiness,facts=packet.brief.facts,items=[],seen=new Set();
+ const text=id=>{const q=questionById(id);return q?q.text:id;};
+ const shown=id=>{const q=questionById(id),f=facts[id];return f&&q?labelValue(q,f.value):null;};
+ for(const i of r.landIssues||[])items.push({kind:'land',title:'حدود الأرض',reason:i.message});
+ for(const c of r.conflicts||[])items.push({kind:'conflict',title:'تعارض بين قرارين',reason:c.reason,fields:c.fields.map(id=>({id,label:text(id),value:shown(id)}))});
+ for(const id of r.missing){seen.add(id);items.push({kind:'missing',title:'قرار أساسي بلا إجابة مؤكدة',reason:text(id),fields:[{id,label:text(id),value:shown(id)}]});}
+ for(const id of r.pending){if(seen.has(id))continue;seen.add(id);items.push({kind:'pending',title:'شرط إلزامي غير مؤكد',reason:text(id),fields:[{id,label:text(id),value:shown(id)}]});}
+ for(const id of r.hard)items.push({kind:'hard',title:'شرط إلزامي لا يمكن إثبات تنفيذه',reason:`${text(id)} ${shown(id)??''} — لا يمكن التوليد بشرط إلزامي لا يثبته النموذج؛ غيّر أهميته إلى «تفضيل» أو أزله.`,fields:[{id,label:text(id),value:shown(id)}]});
+ for(const id of r.unaccepted){if(r.hard.includes(id))continue;items.push({kind:'unaccepted',title:'نقطة تحتاج توثيقك',reason:`${text(id)} ${shown(id)??''} — توثَّق في طلبك ولا تُعد منفذة.`,fields:[{id,label:text(id),value:shown(id)}],acknowledge:id});}
+ return items;
+}
+function blockersList(packet,fire){
+ const items=blockerItems(packet),box=node('section',null,'sv3-blockers');box.setAttribute('aria-label','ما يمنع التوليد');
+ box.append(node('h3',`ما يمنع التوليد (${items.length})`));
+ const ol=node('ol');
+ for(const it of items){
+  const li=node('li');li.dataset.blocker=it.kind;li.append(node('b',it.title),node('p',it.reason));
+  for(const f of it.fields||[])li.append(button(it.kind==='missing'||it.kind==='pending'?'أجب الآن':'عدّل: '+f.label,()=>fire('v3.focus',f.id)));
+  if(it.acknowledge)li.append(button('وثّق هذه النقطة',()=>fire('v3.acknowledge',[it.acknowledge],'قبول توثيق النقطة دون اعتبارها منفذة.')));
+  ol.append(li);
+ }
+ if(!items.length)ol.append(node('li','لا بند ظاهرًا؛ أعد فتح الملخص وراجع الإجابات.'));
+ box.append(ol);return box;
 }
 
 // Retain the previous standalone prototype for integrations that import it.
