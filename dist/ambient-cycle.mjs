@@ -24,10 +24,20 @@ export function cycleState(phase){
  const p=Number.isFinite(phase)?((phase%1)+(phase<0?1:0))%1:0;let i=0;while(i<frames.length-2&&p>=frames[i+1][0])i++;
  const a=frames[i],b=frames[i+1],v=(p-a[0])/(b[0]-a[0]),t=v*v*(3-2*v);
  const lerp=k=>a[k]+(b[k]-a[k])*t;
- const sky=mix(a[2],b[2],t),surface=mix(a[3],b[3],t),ink=mix(a[4],b[4],t);
+ const sky=mix(a[2],b[2],t),inkMix=mix(a[4],b[4],t);
+ // حبر واحد يصلح للسماء (خلفية الصفحة) وللسطح (البطاقات) في كل لحظة. أثناء الانتقال بين النهار والغروب تكون السماء فاتحة والسطح داكنًا
+ // أو العكس، فيستحيل لون نص واحد على الاثنين. نختار الحبر للسماء، ثم نقرّب السطح من السماء بأقل قدر حتى يحقق الحبر 4.5:1 عليه أيضًا.
+ const ink=readable(inkMix,sky);
+ let surface=mix(a[3],b[3],t);
+ // قرب نقطة تبدّل الحبر (سماء بسطوع ~0.18) يقترب السطح من السماء تدريجيًا من جهة الحبر الفاتح، فلا يقفز لون البطاقات لحظة التبدّل.
+ if(lum(ink)>.5){const x=Math.min(1,Math.max(0,(lum(sky)-.08)/.1));surface=mix(surface,sky,x*x*(3-2*x))}
+ if(contrast(ink,surface)<4.5){let lo=0,hi=1;for(let i=0;i<16;i++){const m=(lo+hi)/2;if(contrast(ink,mix(surface,sky,m))>=4.5)hi=m;else lo=m}surface=mix(surface,sky,hi)}
+ const both=c=>contrast(c,sky)>=4.5&&contrast(c,surface)>=4.5;
+ const mutedMix=mix(a[5],b[5],t);let muted=mutedMix;
+ if(!both(muted)){let lo=0,hi=1;for(let i=0;i<16;i++){const m=(lo+hi)/2;if(both(mix(mutedMix,ink,m)))hi=m;else lo=m}muted=mix(mutedMix,ink,hi)}
  const palette=bg=>{const fit=(c,target)=>fitInk(c,target,bg);return {ink:fit('#f4eee5','#213b3a'),soft:fit('#c9ccd6','#526864'),ink2:fit('#d6d9e2','#3f5450'),mint:fit('#8fe3cf','#0f5e52'),mint2:fit('#7fdcc6','#0f5e52'),gold:fit('#f0c878','#7a5410'),gold2:fit('#f0d9a8','#7a5410'),coral:fit('#f59a88','#a2402c'),bad:fit('#e8826f','#b03a22'),warn:fit('#e0b04a','#7d5208'),ok:fit('#5cc996','#1a7049')};};
  const fitted=palette(surface),fittedSky=palette(sky);
- return {phase:p,name:a[1],sky,surface,ink:readable(ink,surface),skyInk:readable(ink,sky),muted:readable(mix(a[5],b[5],t),surface),line:mix(a[6],b[6],t),fitted,fittedSky,hemi:lerp(7),sun:lerp(8),fill:lerp(9),sunX:lerp(10),sunY:lerp(11),night:1-Math.min(1,lerp(8)/1.4)};
+ return {phase:p,name:a[1],sky,surface,ink,skyInk:ink,muted,line:mix(a[6],b[6],t),fitted,fittedSky,hemi:lerp(7),sun:lerp(8),fill:lerp(9),sunX:lerp(10),sunY:lerp(11),night:1-Math.min(1,lerp(8)/1.4)};
 }
 let singleton;
 export function ambientCycle(){

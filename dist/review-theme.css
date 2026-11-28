@@ -50,7 +50,7 @@ body.mizan-review .scale-intro{display:none}
 body.mizan-review #home{--panel:#fff;--panel-2:#f7faf8;--ink-soft:#526864;--muted:#526864;color-scheme:light}
 body.mizan-review #stageWelcome .brand{animation:none;max-width:500px;width:48%;margin-inline-start:clamp(24px,4vw,64px);margin-inline-end:auto;padding-inline:12px}
 body.mizan-review #stageWelcome .rule{height:2px;width:100px;background:linear-gradient(90deg,transparent,#a17b4c)!important}
-body.mizan-review #stageWelcome .journey-list li .n{background:#9b754a;box-shadow:none}
+body.mizan-review #stageWelcome .journey-list li .n{background:#8a6540;box-shadow:none}
 body.mizan-review .mz-review-brand small{color:#80623e}
 body.mizan-review #stageWelcome .mark{filter:drop-shadow(0 6px 16px #9b754a2b)}
 body.mizan-review .journey-list li{animation:none!important;opacity:1!important}
@@ -123,4 +123,5 @@ body.mizan-review[data-ambient] .quiet{color:var(--ambient-ink);background:var(-
 /* mobile.css also anchors this control at the bottom. Keep one vertical
    anchor on home, otherwise top + bottom stretch it over the interview. */
 @media(max-width:780px){body.mizan-review:has(#home) .ambient-motion{top:12px;bottom:auto!important}}
+body.mizan-review[data-ambient] #home .mz-eyebrow.foot,body.mizan-review[data-ambient] #home .foot{color:var(--ambient-muted)!important;opacity:1!important}
 @media print{body.mizan-review[data-ambient]{--ambient-sky:#fff;--ambient-surface:#fff;--ambient-ink:#000;--ambient-skyInk:#000;--ambient-muted:#333;--ambient-line:#999}.ambient-motion{display:none}}
